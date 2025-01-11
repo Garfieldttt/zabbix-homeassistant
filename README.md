@@ -36,7 +36,6 @@ Modify the following macros in the template:
 | **Zigbee Link Quality**  | Monitors the signal quality of Zigbee devices. Helps identify connection issues or interference. |
 
 ## Notes
-- Ensure that the Home Assistant API is enabled and accessible from the Zabbix Agent.
 - The template is optimized for Zabbix 7.0; older versions may not support all features.
 
 
