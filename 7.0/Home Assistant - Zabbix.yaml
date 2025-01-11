@@ -5,8 +5,8 @@ zabbix_export:
       name: Templates
   templates:
     - uuid: 1d94437d4e37499bb2c5abf47fde6c00
-      template: 'Home Assistant - Zabbix Agent Active'
-      name: 'Home Assistant - Zabbix Agent Active'
+      template: 'Home Assistant - Zabbix'
+      name: 'Home Assistant - Zabbix'
       description: |
         Home Assistant-Template, erstellt von Thomas Rzen.
         
@@ -23,7 +23,7 @@ zabbix_export:
           url: '{$HA.URL}/api/states'
           headers:
             - name: Authorization
-              value: 'Bearer {$API.KEY}'
+              value: 'Bearer {$API.TOKEN}'
           output_format: JSON
       discovery_rules:
         - uuid: d6a30debaed74aa09515805c866d8b87
@@ -118,9 +118,9 @@ zabbix_export:
                   value: battery-level
               trigger_prototypes:
                 - uuid: daaafb9fae15422e9df4375d90a3fb36
-                  expression: 'last(/Home Assistant - Zabbix Agent Active/ent.bat[{#ENTITY_ID}])<20'
+                  expression: 'last(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}])<20'
                   name: 'Battery replacement at {#ENTITY_ID} is required.'
-                  priority: DISASTER
+                  priority: HIGH
           master_item:
             key: ha.raw
           lld_macro_paths:
@@ -146,7 +146,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'ha.cam.stat[{#ENTITY_ID}]'
               delay: '0'
-              value_type: TEXT
               trends: '0'
               description: |
                 unavailable = 0
@@ -420,7 +419,7 @@ zabbix_export:
                   value: zigbee-linkquality
               trigger_prototypes:
                 - uuid: bcd8ff30b0ec4ac2806732d3a9209c06
-                  expression: 'last(/Home Assistant - Zabbix Agent Active/ent.linkquality[{#ENTITY_ID}])<{$ZIGBEE.SIGNAL.MINIMUM}'
+                  expression: 'last(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}])<{$ZIGBEE.SIGNAL.MINIMUM}'
                   name: 'The ZigBee connection of {#ENTITY_ID}: {ITEM.LASTVALUE}'
                   priority: HIGH
           master_item:
@@ -465,6 +464,48 @@ zabbix_export:
               tags:
                 - tag: 'Home Assistant'
                   value: humidity
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 521c20cefdc24936b1086368fe0a9ff0
+          name: HA-atmospheric-pressure
+          type: DEPENDENT
+          key: ha.pressure
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_pressure$'
+                formulaid: A
+          item_prototypes:
+            - uuid: dcc27475843a4422be16739172c0f982
+              name: 'Atmospheric pressure of {#ENTITY_ID}'
+              type: DEPENDENT
+              key: 'ent.pressure[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '!hPa'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: atmospheric-pressure
           master_item:
             key: ha.raw
           lld_macro_paths:
@@ -561,7 +602,7 @@ zabbix_export:
                   value: update
               trigger_prototypes:
                 - uuid: 9bd597210e2a4b4b9e35ada4ab0b36fa
-                  expression: 'last(/Home Assistant - Zabbix Agent Active/ha.update[{#ENTITY_ID}])=1'
+                  expression: 'last(/Home Assistant - Zabbix/ha.update[{#ENTITY_ID}])=1'
                   name: 'Home Assistant update for {#ENTITY_ID} is available.'
                   priority: HIGH
                   manual_close: 'YES'
@@ -624,11 +665,11 @@ zabbix_export:
                   value: firmware-update
               trigger_prototypes:
                 - uuid: 2cec62c566f04555b8ccac1a128d1a1a
-                  expression: 'last(/Home Assistant - Zabbix Agent Active/ent.firmware[{#ENTITY_ID}])=1'
+                  expression: 'last(/Home Assistant - Zabbix/ent.firmware[{#ENTITY_ID}])=1'
                   name: 'Firmware update for {#ENTITY_ID} is available.'
                   priority: WARNING
                 - uuid: b84255b67cc1466e8deff251c49d2f17
-                  expression: 'last(/Home Assistant - Zabbix Agent Active/ent.firmware[{#ENTITY_ID}])=2'
+                  expression: 'last(/Home Assistant - Zabbix/ent.firmware[{#ENTITY_ID}])=2'
                   name: 'Firmware version for {#ENTITY_ID} is not available'
                   priority: WARNING
           master_item:
@@ -687,8 +728,128 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.body[*]'
+        - uuid: 89976aef185a473a8fea54c3adce8aaf
+          name: HA-Zone
+          type: DEPENDENT
+          key: ha.zone
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^zone\..*'
+                formulaid: A
+          item_prototypes:
+            - uuid: 2364f352a9a74a8cae6e1c6a605c1d69
+              name: 'Latitude of {#ENTITY_ID}'
+              type: DEPENDENT
+              key: 'ha.zone.latitude[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '!LAT'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.latitude'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: latitude
+            - uuid: 6e813687a7884d4287bccaf85a91e1f3
+              name: 'Latitude of {#ENTITY_ID}'
+              type: DEPENDENT
+              key: 'ha.zone.longitude[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '!LON'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.longitude'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: longitude
+            - uuid: ef844c8505b94a8392d74b474e7622a4
+              name: 'Zone radius {#ENTITY_ID}'
+              type: DEPENDENT
+              key: 'ha.zone.radius[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              trends: '0'
+              units: '!m'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.radius'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: radius
+            - uuid: fa03ef82db2a4820a87672d748be4c5f
+              name: 'Person zone assignment {#ENTITY_ID}'
+              type: DEPENDENT
+              key: 'ha.zone.zone-assignment[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: TEXT
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.persons'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+                - type: LTRIM
+                  parameters:
+                    - ' person.'
+                - type: STR_REPLACE
+                  parameters:
+                    - '"'
+                    - ' '
+                - type: STR_REPLACE
+                  parameters:
+                    - ' person.'
+                    - ' '
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: zone-assignment
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
       macros:
-        - macro: '{$API.KEY}'
+        - macro: '{$API.TOKEN}'
           type: SECRET_TEXT
         - macro: '{$HA.URL}'
           value: 'http://192.168.10.121:8123'
