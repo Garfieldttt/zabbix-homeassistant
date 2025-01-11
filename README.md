@@ -3,7 +3,6 @@
 ## Requirements
 - **Zabbix Server** version 7.0 or higher
 - **Home Assistant** with API enabled
-- **Zabbix Agent** on the machine communicating with Home Assistant
 
 ## Setup
 
