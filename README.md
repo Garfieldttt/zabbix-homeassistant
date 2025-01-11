@@ -26,10 +26,10 @@ Modify the following macros in the template:
 | **Automations**          | Monitors active automations in Home Assistant. Helps detect faulty or blocked automations. |
 | **Battery Status**       | Checks the battery level of battery-powered devices, such as sensors or remotes. Alerts on low battery. |
 | **Cameras**              | Monitors the status of cameras integrated with Home Assistant, including optional reachability and video streams. |
-| **Contact Sensors**      | Tracks the state of contact sensors (e.g., doors and windows). Triggers alerts for unexpected open states. |
-| **Firmware Updates**     | Checks for available firmware updates for connected devices. Sends notifications when updates are available. |
-| **Humidity Sensors**     | Monitors current humidity levels in supervised rooms. Triggers alerts for abnormal humidity levels. |
-| **Temperature Sensors**  | Tracks temperature values from Home Assistant. Sends warnings for critical temperatures (e.g., too hot or cold). |
+| **Contact Sensors**      | Tracks the state of contact sensors (e.g., doors and windows).  |
+| **Firmware Updates**     | Checks for available firmware updates for connected devices. |
+| **Humidity Sensors**     | Monitors current humidity levels in supervised rooms. |
+| **Temperature Sensors**  | Tracks temperature values from Home Assistant.  |
 | **Home Assistant Updates** | Monitors the Home Assistant version. Sends notifications when updates are available. |
 | **Power Consumption**    | Tracks the energy usage of connected devices (e.g., smart plugs). Useful for analyzing power consumption. |
 | **Weather Forecast**     | Integrates weather forecast data from Home Assistant, including temperature, rain probability, and wind speed. |
