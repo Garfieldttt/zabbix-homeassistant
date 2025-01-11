@@ -30,10 +30,16 @@ Modify the following macros in the template:
 | **Firmware Updates**     | Checks for available firmware updates for connected devices. |
 | **Humidity Sensors**     | Monitors current humidity levels in supervised rooms. |
 | **Temperature Sensors**  | Tracks temperature values from Home Assistant.  |
+| **Luftdruck (Air Pressure)** | Monitors the current air pressure readings from Home Assistant sensors. Useful for weather monitoring and trend analysis. |
+| **Person Zone Assignment** | Tracks which zone (e.g., Home, Work) a person is currently assigned to, based on GPS location. |
+| **Zone Radius**          | Monitors the radius size of configured zones in Home Assistant. Helps ensure accurate geofencing. |
+| **Längengrad (Longitude)** | Displays the longitude of a configured zone. Useful for precise geolocation settings. |
+| **Breitengrad (Latitude)** | Displays the latitude of a configured zone. Useful for precise geolocation settings. |
 | **Home Assistant Updates** | Monitors the Home Assistant version. Sends notifications when updates are available. |
 | **Power Consumption**    | Tracks the energy usage of connected devices (e.g., smart plugs). Useful for analyzing power consumption. |
 | **Weather Forecast**     | Integrates weather forecast data from Home Assistant, including temperature, rain probability, and wind speed. |
 | **Zigbee Link Quality**  | Monitors the signal quality of Zigbee devices. Helps identify connection issues or interference. |
+
 
 ## Notes
 - The template is optimized for Zabbix 7.0; older versions may not support all features.
