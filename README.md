@@ -30,7 +30,7 @@ Modify the following macros in the template:
 | **Firmware Updates**     | Checks for available firmware updates for connected devices. |
 | **Humidity Sensors**     | Monitors current humidity levels in supervised rooms. |
 | **Temperature Sensors**  | Tracks temperature values from Home Assistant.  |
-| **Luftdruck (Air Pressure)** | Monitors the current air pressure readings from Home Assistant sensors. Useful for weather monitoring and trend analysis. |
+| **Air Pressure** | Monitors the current air pressure readings from Home Assistant sensors. Useful for weather monitoring and trend analysis. |
 | **Person Zone Assignment** | Tracks which zone (e.g., Home, Work) a person is currently assigned to, based on GPS location. |
 | **Zone Radius**          | Monitors the radius size of configured zones in Home Assistant. Helps ensure accurate geofencing. |
 | **Longitude** | Displays the longitude of a configured zone. Useful for precise geolocation settings. |
