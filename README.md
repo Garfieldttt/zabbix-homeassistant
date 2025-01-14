@@ -1,5 +1,6 @@
 # zabbix-homeassistant
-![Zabbix](https://img.shields.io/badge/Zabbix-7.0%2B-blue) ![License](https://img.shields.io/badge/license-MIT-green)
+![Zabbix](https://img.shields.io/badge/Zabbix-7.0%2B-blue) ![License](https://img.shields.io/badge/License-GPLv3-blue.svg)
+
 ## Requirements
 - **Zabbix Server** version 7.0 or higher
 - **Home Assistant** with API enabled
