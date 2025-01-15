@@ -11,6 +11,8 @@ zabbix_export:
         Home Assistant-Template, erstellt von Thomas Rzen.
         
         To ensure this template operates correctly, the URL and the API key should be stored in the Macros section.
+        
+        If you need help, visit https://github.com/Garfieldttt/zabbix-homeassistant
       groups:
         - name: Templates
       items:
@@ -43,10 +45,8 @@ zabbix_export:
               key: 'ha.autot[{#ENTITY_ID}]'
               delay: '0'
               trends: '0'
-              description: |
-                enabled = 1
-                disabled = 0
-                unavailable = 2
+              valuemap:
+                name: automation
               preprocessing:
                 - type: JSONPATH
                   parameters:
@@ -147,10 +147,8 @@ zabbix_export:
               key: 'ha.cam.stat[{#ENTITY_ID}]'
               delay: '0'
               trends: '0'
-              description: |
-                unavailable = 0
-                available = 1
-                idle = 2
+              valuemap:
+                name: camera
               preprocessing:
                 - type: JSONPATH
                   parameters:
@@ -204,9 +202,8 @@ zabbix_export:
               key: 'ent.conbtact[{#ENTITY_ID}]'
               delay: '0'
               trends: '0'
-              description: |
-                Closed = 0
-                Open = 1
+              valuemap:
+                name: contact-sensot
               preprocessing:
                 - type: JSONPATH
                   parameters:
@@ -255,51 +252,9 @@ zabbix_export:
               type: DEPENDENT
               key: 'ha.forecast[{#ENTITY_ID}]'
               delay: '0'
-              description: |
-                1. clear-night
-                   Clear night sky without clouds.
-                
-                2. cloudy
-                   Cloudy, many clouds in the sky.
-                
-                3. fog
-                   Foggy, reduced visibility.
-                
-                4. hail
-                   Hail.
-                
-                5. lightning
-                   Thunderstorm with lightning and thunder.
-                
-                6. partlycloudy
-                   Partly cloudy, both clear and covered sections.
-                
-                7. pouring
-                   Heavy rain, intense precipitation.
-                
-                8. raining
-                   Rain.
-                
-                9. rainy
-                   Rainy, can vary in intensity.
-                
-                10. sleet
-                    Sleet or graupel.
-                
-                11. snowing
-                    Snowfall.
-                
-                12. snowy
-                    Snowy, can include varying intensities of snowfall.
-                
-                13. stormy
-                    Stormy weather, strong winds and possible precipitation.
-                
-                14. windy
-                    Windy, strong or persistent winds.
-                
-                15. exception
-                    A non-standard state or an error.
+              trends: '0'
+              valuemap:
+                name: weather
               preprocessing:
                 - type: JSONPATH
                   parameters:
@@ -316,7 +271,7 @@ zabbix_export:
                     - '1'
                 - type: STR_REPLACE
                   parameters:
-                    - cloudy
+                    - partlycloudy
                     - '2'
                 - type: STR_REPLACE
                   parameters:
@@ -332,7 +287,7 @@ zabbix_export:
                     - '5'
                 - type: STR_REPLACE
                   parameters:
-                    - partlycloudy
+                    - cloudy
                     - '6'
                 - type: STR_REPLACE
                   parameters:
@@ -574,9 +529,8 @@ zabbix_export:
               type: DEPENDENT
               key: 'ha.update[{#ENTITY_ID}]'
               delay: '0'
-              description: |
-                0 = Kein Update verfügbar
-                1 = Ein Update ist verfügbar
+              valuemap:
+                name: update
               preprocessing:
                 - type: JSONPATH
                   parameters:
@@ -632,10 +586,8 @@ zabbix_export:
               key: 'ent.firmware[{#ENTITY_ID}]'
               delay: '0'
               trends: '0'
-              description: |
-                0 = No update available
-                1 = An update is available
-                2 = Firmware version unavailable
+              valuemap:
+                name: firmware-update
               preprocessing:
                 - type: JSONPATH
                   parameters:
@@ -855,3 +807,78 @@ zabbix_export:
           value: 'http://192.168.10.121:8123'
         - macro: '{$ZIGBEE.SIGNAL.MINIMUM}'
           value: '90'
+      valuemaps:
+        - uuid: fc783e73a76149cb9a5cfc5e056b20d9
+          name: automation
+          mappings:
+            - value: '1'
+              newvalue: enabled
+            - value: '0'
+              newvalue: disabled
+            - value: '2'
+              newvalue: unavailable
+        - uuid: c310d795d0974bdbb5f5f4e90d84785c
+          name: camera
+          mappings:
+            - value: '0'
+              newvalue: unavailable
+            - value: '1'
+              newvalue: available
+            - value: '2'
+              newvalue: idle
+        - uuid: 899dfe59db4d44e3b192354dbbdc8855
+          name: contact-sensot
+          mappings:
+            - value: '0'
+              newvalue: closed
+            - value: '1'
+              newvalue: open
+        - uuid: 0fdd47edf8524752bb012d303c4b3cb2
+          name: firmware-update
+          mappings:
+            - value: '0'
+              newvalue: 'no update available'
+            - value: '1'
+              newvalue: 'an update is available'
+            - value: '2'
+              newvalue: 'firmware version unavailable'
+        - uuid: 5435403b67724914b2991f54d0d29bb8
+          name: update
+          mappings:
+            - value: '0'
+              newvalue: 'no update available'
+            - value: '1'
+              newvalue: 'an update is available'
+        - uuid: f3273d81438646ed8ac25ecf2e609854
+          name: weather
+          mappings:
+            - value: '1'
+              newvalue: clear-night
+            - value: '2'
+              newvalue: partlycloudy
+            - value: '3'
+              newvalue: fog
+            - value: '4'
+              newvalue: hail
+            - value: '5'
+              newvalue: lightning
+            - value: '6'
+              newvalue: cloudy
+            - value: '7'
+              newvalue: pouring
+            - value: '8'
+              newvalue: raining
+            - value: '9'
+              newvalue: rainy
+            - value: '10'
+              newvalue: sleet
+            - value: '11'
+              newvalue: snowing
+            - value: '12'
+              newvalue: snowy
+            - value: '13'
+              newvalue: stormy
+            - value: '14'
+              newvalue: windy
+            - value: '15'
+              newvalue: exception
