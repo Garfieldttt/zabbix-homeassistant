@@ -118,7 +118,7 @@ zabbix_export:
                   value: battery-level
               trigger_prototypes:
                 - uuid: daaafb9fae15422e9df4375d90a3fb36
-                  expression: 'last(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}])<20'
+                  expression: 'last(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}])<{$BATTERY.MINIMUM}'
                   name: 'Battery replacement at {#ENTITY_ID} is required.'
                   priority: HIGH
           master_item:
@@ -236,6 +236,47 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.body[*]'
+        - uuid: ca8b557897294617a9335951eb401671
+          name: HA-fine-dust
+          type: DEPENDENT
+          key: ha.fine.dust
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_pm25$'
+                formulaid: A
+          item_prototypes:
+            - uuid: 32084b6e9438468eb986038eebbf657c
+              name: 'Find dust {#ENTITY_ID}'
+              type: DEPENDENT
+              key: 'fine.dust[{#ENTITY_ID}]'
+              delay: '0'
+              units: '!PM2.5'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: fine-dust
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
         - uuid: 1f4986b135ca49d3a47930d0e43c7eac
           name: HA-Weather-forecast
           type: DEPENDENT
@@ -253,6 +294,22 @@ zabbix_export:
               key: 'ha.forecast[{#ENTITY_ID}]'
               delay: '0'
               trends: '0'
+              description: |
+                clear-night: The sky is clear during the night.
+                cloudy: There are many clouds in the sky.
+                fog: There is a thick mist or fog reducing visibility.
+                hail: Hailstones are falling.
+                lightning: Lightning/thunderstorms are occurring.
+                lightning-rainy: Lightning/thunderstorm is occurring along with rain.
+                partlycloudy: The sky is partially covered with clouds.
+                pouring: It is raining heavily.
+                rainy: It is raining.
+                snowy: It is snowing.
+                snowy-rainy: It is snowing and raining at the same time.
+                sunny: The sky is clear and the sun is shining.
+                windy: It is windy.
+                windy-variant: It is windy and cloudy.
+                exceptional: Exceptional weather conditions are occurring.
               valuemap:
                 name: weather
               preprocessing:
@@ -325,11 +382,70 @@ zabbix_export:
                   parameters:
                     - exception
                     - '15'
+                - type: STR_REPLACE
+                  parameters:
+                    - lightning-rainy
+                    - '16'
+                - type: STR_REPLACE
+                  parameters:
+                    - snowy-rainy
+                    - '17'
+                - type: STR_REPLACE
+                  parameters:
+                    - sunny
+                    - '18'
+                - type: STR_REPLACE
+                  parameters:
+                    - windy-variant
+                    - '19'
               master_item:
                 key: ha.raw
               tags:
                 - tag: 'Home Assistant'
                   value: weather-forecast
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 9a7d25208cff4c65929f670e291a4bdc
+          name: HA-Illuminance
+          type: DEPENDENT
+          key: ha.illu
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_illuminance$'
+                formulaid: A
+          item_prototypes:
+            - uuid: 910c678e05454c7bb80c3e1f72d33d3a
+              name: 'Illuminance {#ENTITY_ID}'
+              type: DEPENDENT
+              key: 'ent.illu[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              trends: '0'
+              units: '!Lux'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: illuminance
           master_item:
             key: ha.raw
           lld_macro_paths:
@@ -428,6 +544,57 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.body[*]'
+        - uuid: 47c91bbb9cc04aaf9f952bdbd6af2c12
+          name: HA-Occupancy
+          type: DEPENDENT
+          key: ha.occupancy
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_occupancy$'
+                formulaid: A
+          item_prototypes:
+            - uuid: 80af63d9c9514085a1eaef59042a95b6
+              name: 'Occupancy of {#ENTITY_ID}'
+              type: DEPENDENT
+              key: 'ha.occupancy[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              valuemap:
+                name: occupancy
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'on'
+                    - '1'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'off'
+                    - '0'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: occupancy
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
         - uuid: 521c20cefdc24936b1086368fe0a9ff0
           name: HA-atmospheric-pressure
           type: DEPENDENT
@@ -503,7 +670,7 @@ zabbix_export:
                 key: ha.raw
               tags:
                 - tag: 'Home Assistant'
-                  value: 'degrees celsius'
+                  value: degrees-celsius
           master_item:
             key: ha.raw
           lld_macro_paths:
@@ -633,6 +800,48 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.body[*]'
+        - uuid: a0b0fff3bc1d4c269cec7f463497c718
+          name: HA-VOC
+          type: DEPENDENT
+          key: ha.voc
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*voc_index$'
+                formulaid: A
+          item_prototypes:
+            - uuid: 0fbd1d0659a349bb8a5fedfeeb4c403a
+              name: 'Pollutants indoor air {#ENTITY_ID}'
+              type: DEPENDENT
+              key: 'ent.pollutants[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '!VOC'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: pollutants-indoor-air
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
         - uuid: b20727113c364d5ba4a098b050fd5663
           name: HA-Watt
           type: DEPENDENT
@@ -712,7 +921,7 @@ zabbix_export:
                 key: ha.raw
               tags:
                 - tag: 'Home Assistant'
-                  value: latitude
+                  value: zone-latitude
             - uuid: 6e813687a7884d4287bccaf85a91e1f3
               name: 'Latitude of {#ENTITY_ID}'
               type: DEPENDENT
@@ -734,7 +943,7 @@ zabbix_export:
                 key: ha.raw
               tags:
                 - tag: 'Home Assistant'
-                  value: longitude
+                  value: zone-longitude
             - uuid: ef844c8505b94a8392d74b474e7622a4
               name: 'Zone radius {#ENTITY_ID}'
               type: DEPENDENT
@@ -757,7 +966,7 @@ zabbix_export:
                 key: ha.raw
               tags:
                 - tag: 'Home Assistant'
-                  value: radius
+                  value: zone-radius
             - uuid: fa03ef82db2a4820a87672d748be4c5f
               name: 'Person zone assignment {#ENTITY_ID}'
               type: DEPENDENT
@@ -803,6 +1012,8 @@ zabbix_export:
       macros:
         - macro: '{$API.TOKEN}'
           type: SECRET_TEXT
+        - macro: '{$BATTERY.MINIMUM}'
+          value: '30'
         - macro: '{$HA.URL}'
           value: 'http://192.168.10.121:8123'
         - macro: '{$ZIGBEE.SIGNAL.MINIMUM}'
@@ -842,6 +1053,13 @@ zabbix_export:
               newvalue: 'an update is available'
             - value: '2'
               newvalue: 'firmware version unavailable'
+        - uuid: 390fdda09d75489781371f2e56aff43f
+          name: occupancy
+          mappings:
+            - value: '1'
+              newvalue: 'on'
+            - value: '0'
+              newvalue: 'off'
         - uuid: 5435403b67724914b2991f54d0d29bb8
           name: update
           mappings:
@@ -882,3 +1100,11 @@ zabbix_export:
               newvalue: windy
             - value: '15'
               newvalue: exception
+            - value: '16'
+              newvalue: lightning-rainy
+            - value: '17'
+              newvalue: snowy-rainy
+            - value: '18'
+              newvalue: sunny
+            - value: '19'
+              newvalue: windy-variant
