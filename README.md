@@ -40,6 +40,10 @@ Modify the following macros in the template:
 | **Power Consumption**    | Tracks the energy usage of connected devices (e.g., smart plugs). Useful for analyzing power consumption. |
 | **Weather Forecast**     | Integrates weather forecast data from Home Assistant, including temperature, rain probability, and wind speed. |
 | **Zigbee Link Quality**  | Monitors the signal quality of Zigbee devices. Helps identify connection issues or interference. |
+| **Occupancy** | Tracks whether a room or area is currently occupied, using motion or presence sensors. |
+| **Illuminance**    | Monitors the light level (lux) in a room or area, useful for automations like adjusting lights. |
+| **PM2.5**     | Tracks fine particulate matter (PM2.5) concentration in the air, important for air quality monitoring. |
+| **VOC**  | Monitors volatile organic compounds (VOC) levels, helping to ensure good indoor air quality. |
 
 
 ## Notes
