@@ -295,21 +295,21 @@ zabbix_export:
               delay: '0'
               trends: '0'
               description: |
-                clear-night: The sky is clear during the night.
-                cloudy: There are many clouds in the sky.
-                fog: There is a thick mist or fog reducing visibility.
-                hail: Hailstones are falling.
-                lightning: Lightning/thunderstorms are occurring.
-                lightning-rainy: Lightning/thunderstorm is occurring along with rain.
-                partlycloudy: The sky is partially covered with clouds.
-                pouring: It is raining heavily.
-                rainy: It is raining.
-                snowy: It is snowing.
-                snowy-rainy: It is snowing and raining at the same time.
-                sunny: The sky is clear and the sun is shining.
-                windy: It is windy.
-                windy-variant: It is windy and cloudy.
-                exceptional: Exceptional weather conditions are occurring.
+                1=Clear, night: The sky is clear during the night.
+                2=Cloudy: There are many clouds in the sky.
+                3=Fog: There is a thick mist or fog reducing visibility.
+                4=Hail: Hailstones are falling.
+                5=Lightning: Lightning/thunderstorms are occurring.
+                6=Lightning, rainy: Lightning/thunderstorm is occurring along with rain.
+                7=Partly cloudy: The sky is partially covered with clouds.
+                8=Pouring: It is raining heavily.
+                9=Rainy: It is raining.
+                10=Snowy: It is snowing.
+                11=Snowy, rainy: It is snowing and raining at the same time.
+                12=Sunny: The sky is clear and the sun is shining.
+                13=Windy: It is windy.
+                14=Windy, cloudy: It is windy and cloudy.
+                15=Exceptional: Exceptional weather conditions are occurring.
               valuemap:
                 name: weather
               preprocessing:
@@ -328,7 +328,7 @@ zabbix_export:
                     - '1'
                 - type: STR_REPLACE
                   parameters:
-                    - partlycloudy
+                    - cloudy
                     - '2'
                 - type: STR_REPLACE
                   parameters:
@@ -344,15 +344,15 @@ zabbix_export:
                     - '5'
                 - type: STR_REPLACE
                   parameters:
-                    - cloudy
+                    - lightning-rainy
                     - '6'
                 - type: STR_REPLACE
                   parameters:
-                    - pouring
+                    - partlycloudy
                     - '7'
                 - type: STR_REPLACE
                   parameters:
-                    - raining
+                    - pouring
                     - '8'
                 - type: STR_REPLACE
                   parameters:
@@ -360,44 +360,28 @@ zabbix_export:
                     - '9'
                 - type: STR_REPLACE
                   parameters:
-                    - sleet
+                    - snowy
                     - '10'
                 - type: STR_REPLACE
                   parameters:
-                    - snowing
+                    - snowy-rainy
                     - '11'
                 - type: STR_REPLACE
                   parameters:
-                    - snowy
+                    - sunny
                     - '12'
                 - type: STR_REPLACE
                   parameters:
-                    - stormy
+                    - windy
                     - '13'
                 - type: STR_REPLACE
                   parameters:
-                    - windy
+                    - windy-variant
                     - '14'
                 - type: STR_REPLACE
                   parameters:
-                    - exception
+                    - exceptional
                     - '15'
-                - type: STR_REPLACE
-                  parameters:
-                    - lightning-rainy
-                    - '16'
-                - type: STR_REPLACE
-                  parameters:
-                    - snowy-rainy
-                    - '17'
-                - type: STR_REPLACE
-                  parameters:
-                    - sunny
-                    - '18'
-                - type: STR_REPLACE
-                  parameters:
-                    - windy-variant
-                    - '19'
               master_item:
                 key: ha.raw
               tags:
@@ -1073,7 +1057,7 @@ zabbix_export:
             - value: '1'
               newvalue: clear-night
             - value: '2'
-              newvalue: partlycloudy
+              newvalue: cloudy
             - value: '3'
               newvalue: fog
             - value: '4'
@@ -1081,30 +1065,22 @@ zabbix_export:
             - value: '5'
               newvalue: lightning
             - value: '6'
-              newvalue: cloudy
+              newvalue: lightning-rainy
             - value: '7'
-              newvalue: pouring
+              newvalue: partlycloudy
             - value: '8'
-              newvalue: raining
+              newvalue: pouring
             - value: '9'
               newvalue: rainy
             - value: '10'
-              newvalue: sleet
-            - value: '11'
-              newvalue: snowing
-            - value: '12'
               newvalue: snowy
+            - value: '11'
+              newvalue: snowy-rainy
+            - value: '12'
+              newvalue: sunny
             - value: '13'
-              newvalue: stormy
-            - value: '14'
               newvalue: windy
+            - value: '14'
+              newvalue: windy-variant
             - value: '15'
               newvalue: exception
-            - value: '16'
-              newvalue: lightning-rainy
-            - value: '17'
-              newvalue: snowy-rainy
-            - value: '18'
-              newvalue: sunny
-            - value: '19'
-              newvalue: windy-variant
