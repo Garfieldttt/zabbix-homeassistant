@@ -430,7 +430,7 @@ zabbix_export:
               delay: '0'
               value_type: FLOAT
               trends: '0'
-              units: '!Lux'
+              units: '!lux'
               preprocessing:
                 - type: JSONPATH
                   parameters:
