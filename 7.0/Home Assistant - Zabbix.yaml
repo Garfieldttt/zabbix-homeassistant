@@ -678,6 +678,12 @@ zabbix_export:
               tags:
                 - tag: 'Home Assistant'
                   value: degrees-celsius
+              trigger_prototypes:
+                - uuid: 6f7502c07a654f1c943520fbd24c81dc
+                  expression: 'last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}])>{$TRIGGER.TEMPERATURE} and {$SWITCH.TRIGGER.TEMPERATURE}=1'
+                  name: 'The temperature of {#ENTITY_ID} has exceeded {$TRIGGER.TEMPERATURE}.'
+                  priority: AVERAGE
+                  manual_close: 'YES'
           master_item:
             key: ha.raw
           lld_macro_paths:
@@ -1026,8 +1032,10 @@ zabbix_export:
           type: SECRET_TEXT
         - macro: '{$BATTERY.MINIMUM}'
           value: '30'
+          description: 'The trigger activates when the battery drops below 30%.'
         - macro: '{$HA.URL}'
           value: 'http://192.168.10.121:8123'
+          description: 'The trigger activates when the Zigbee signal drops below 90 LQI.'
         - macro: '{$SWITCH.TRIGGER.BATTERY}'
           value: '1'
           description: '1 = enable 0 = disable'
@@ -1037,9 +1045,15 @@ zabbix_export:
         - macro: '{$SWITCH.TRIGGER.HA_UPDATE}'
           value: '1'
           description: '1 = enable 0 = disable'
+        - macro: '{$SWITCH.TRIGGER.TEMPERATURE}'
+          value: '0'
+          description: '1 = enable 0 = disable'
         - macro: '{$SWITCH.TRIGGER.ZIGBEE}'
           value: '1'
           description: '1 = enable 0 = disable'
+        - macro: '{$TRIGGER.TEMPERATURE}'
+          value: '44'
+          description: 'The trigger activates when the temperature rises above 44 degrees Celsius, meaning it reaches 45°C.'
         - macro: '{$ZIGBEE.SIGNAL.MINIMUM}'
           value: '90'
       valuemaps:
