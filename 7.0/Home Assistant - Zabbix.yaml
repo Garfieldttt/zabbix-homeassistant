@@ -119,7 +119,7 @@ zabbix_export:
                   value: battery-level
               trigger_prototypes:
                 - uuid: daaafb9fae15422e9df4375d90a3fb36
-                  expression: 'last(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}])<{$BATTERY.MINIMUM} and {$SWITCH.TRIGGER.BATTERY} = 1'
+                  expression: 'last(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}])<{$BATTERY.MINIMUM:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.BATTERY:"{#ENTITY_ID}"} = 1'
                   name: 'Battery replacement at {#ENTITY_ID} is required.'
                   priority: HIGH
           graph_prototypes:
@@ -494,7 +494,7 @@ zabbix_export:
                   value: zigbee-linkquality
               trigger_prototypes:
                 - uuid: bcd8ff30b0ec4ac2806732d3a9209c06
-                  expression: 'min(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}],5m)<{$SWITCH.TRIGGER.ZIGBEE} or last(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}]) < {$ZIGBEE.SIGNAL.MINIMUM} and {$SWITCH.TRIGGER.ZIGBEE} = 1'
+                  expression: 'min(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}],5m)<{$SWITCH.TRIGGER.ZIGBEE:"{#ENTITY_ID}"} or last(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}]) < {$ZIGBEE.SIGNAL.MINIMUM:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.ZIGBEE:"{#ENTITY_ID}"} = 1'
                   name: 'The ZigBee connection of {#ENTITY_ID}: {ITEM.LASTVALUE}'
                   priority: HIGH
           master_item:
@@ -680,7 +680,7 @@ zabbix_export:
                   value: degrees-celsius
               trigger_prototypes:
                 - uuid: 6f7502c07a654f1c943520fbd24c81dc
-                  expression: 'last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}])>{$TRIGGER.TEMPERATURE} and {$SWITCH.TRIGGER.TEMPERATURE}=1'
+                  expression: 'last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) > {$TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} = 1'
                   name: 'The temperature of {#ENTITY_ID} has exceeded {$TRIGGER.TEMPERATURE}.'
                   priority: AVERAGE
                   manual_close: 'YES'
@@ -737,7 +737,7 @@ zabbix_export:
                   value: update
               trigger_prototypes:
                 - uuid: 9bd597210e2a4b4b9e35ada4ab0b36fa
-                  expression: 'last(/Home Assistant - Zabbix/ha.update[{#ENTITY_ID}])=1 and {$SWITCH.TRIGGER.HA_UPDATE} = 1'
+                  expression: 'last(/Home Assistant - Zabbix/ha.update[{#ENTITY_ID}])=1 and {$SWITCH.TRIGGER.HA_UPDATE:"{#ENTITY_ID}"} = 1 and {$SWITCH.TRIGGER.HA_UPDATE:"{#ENTITY_ID}"}'
                   name: 'Home Assistant update for {#ENTITY_ID} is available.'
                   priority: HIGH
                   manual_close: 'YES'
@@ -805,6 +805,7 @@ zabbix_export:
                   expression: 'last(/Home Assistant - Zabbix/ent.firmware[{#ENTITY_ID}])=2 and {$SWITCH.TRIGGER.FIRMWARE} = 1'
                   name: 'Firmware version for {#ENTITY_ID} is not available'
                   priority: WARNING
+                  manual_close: 'YES'
           master_item:
             key: ha.raw
           lld_macro_paths:
