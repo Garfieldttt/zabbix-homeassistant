@@ -77,8 +77,12 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#ATTRIBUTE_MEASUREMENT}'
+              path: $.attributes.unit_of_measurement
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -136,8 +140,12 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#ATTRIBUTE_MEASUREMENT}'
+              path: $.attributes.unit_of_measurement
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -191,8 +199,12 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#ATTRIBUTE_MEASUREMENT}'
+              path: $.attributes.unit_of_measurement
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -248,8 +260,12 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#ATTRIBUTE_MEASUREMENT}'
+              path: $.attributes.unit_of_measurement
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -290,8 +306,12 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#ATTRIBUTE_MEASUREMENT}'
+              path: $.attributes.unit_of_measurement
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -409,8 +429,12 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#ATTRIBUTE_MEASUREMENT}'
+              path: $.attributes.unit_of_measurement
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -452,8 +476,12 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#ATTRIBUTE_MEASUREMENT}'
+              path: $.attributes.unit_of_measurement
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -500,8 +528,12 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#ATTRIBUTE_MEASUREMENT}'
+              path: $.attributes.unit_of_measurement
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -543,8 +575,12 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#ATTRIBUTE_MEASUREMENT}'
+              path: $.attributes.unit_of_measurement
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -595,8 +631,12 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#ATTRIBUTE_MEASUREMENT}'
+              path: $.attributes.unit_of_measurement
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -638,8 +678,12 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#ATTRIBUTE_MEASUREMENT}'
+              path: $.attributes.unit_of_measurement
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -687,8 +731,12 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#ATTRIBUTE_MEASUREMENT}'
+              path: $.attributes.unit_of_measurement
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -744,8 +792,12 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#ATTRIBUTE_MEASUREMENT}'
+              path: $.attributes.unit_of_measurement
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -809,8 +861,12 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#ATTRIBUTE_MEASUREMENT}'
+              path: $.attributes.unit_of_measurement
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -852,8 +908,12 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#ATTRIBUTE_MEASUREMENT}'
+              path: $.attributes.unit_of_measurement
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -899,8 +959,12 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#ATTRIBUTE_MEASUREMENT}'
+              path: $.attributes.unit_of_measurement
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -1022,8 +1086,12 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#ATTRIBUTE_MEASUREMENT}'
+              path: $.attributes.unit_of_measurement
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
