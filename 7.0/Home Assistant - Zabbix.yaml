@@ -96,8 +96,8 @@ zabbix_export:
           delay: '0'
           filter:
             conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_battery.*$'
+              - macro: '{#DEVICE_CLASS}'
+                value: 'battery$'
                 formulaid: A
           item_prototypes:
             - uuid: 175a65ef0f384596a0bc5177ea1b0458
