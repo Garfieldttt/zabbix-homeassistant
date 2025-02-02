@@ -40,7 +40,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: 7e37c15d52c346ed8aaf351a882e36a9
-              name: 'automation {#ENTITY_ID}'
+              name: 'Automation {#ENTITY_ID}'
               type: DEPENDENT
               key: 'ha.automation[{#ENTITY_ID}]'
               delay: '0'
@@ -271,7 +271,7 @@ zabbix_export:
               parameters:
                 - '$.body[*]'
         - uuid: ca8b557897294617a9335951eb401671
-          name: HA-fine-dust
+          name: HA-Fine-Dust
           type: DEPENDENT
           key: ha.fine.dust
           delay: '0'
@@ -642,7 +642,7 @@ zabbix_export:
               parameters:
                 - '$.body[*]'
         - uuid: 521c20cefdc24936b1086368fe0a9ff0
-          name: HA-atmospheric-pressure
+          name: HA-Atmospheric-Pressure
           type: DEPENDENT
           key: ha.pressure
           delay: '0'
@@ -1127,7 +1127,7 @@ zabbix_export:
           value: '90'
       valuemaps:
         - uuid: fc783e73a76149cb9a5cfc5e056b20d9
-          name: automation
+          name: Automation
           mappings:
             - value: '1'
               newvalue: enabled
