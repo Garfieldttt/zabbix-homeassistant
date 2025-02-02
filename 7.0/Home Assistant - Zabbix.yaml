@@ -83,6 +83,8 @@ zabbix_export:
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
               path: $.attributes.friendly_name
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -146,6 +148,8 @@ zabbix_export:
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
               path: $.attributes.friendly_name
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -205,6 +209,8 @@ zabbix_export:
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
               path: $.attributes.friendly_name
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -266,6 +272,8 @@ zabbix_export:
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
               path: $.attributes.friendly_name
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -276,10 +284,12 @@ zabbix_export:
           key: ha.fine.dust
           delay: '0'
           filter:
+            evaltype: OR
             conditions:
               - macro: '{#ENTITY_ID}'
-                value: '.*_pm25$'
-                formulaid: A
+                value: '.*_pm25.*$'
+              - macro: '{#ENTITY_ID}'
+                value: '.*_pm_2_5.*$'
           item_prototypes:
             - uuid: 32084b6e9438468eb986038eebbf657c
               name: 'Find dust {#ENTITY_ID}'
@@ -312,6 +322,8 @@ zabbix_export:
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
               path: $.attributes.friendly_name
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -435,6 +447,8 @@ zabbix_export:
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
               path: $.attributes.friendly_name
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -446,8 +460,8 @@ zabbix_export:
           delay: '0'
           filter:
             conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_illuminance$'
+              - macro: '{#DEVICE_CLASS}'
+                value: 'illuminance$'
                 formulaid: A
           item_prototypes:
             - uuid: 910c678e05454c7bb80c3e1f72d33d3a
@@ -482,6 +496,8 @@ zabbix_export:
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
               path: $.attributes.friendly_name
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -534,6 +550,8 @@ zabbix_export:
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
               path: $.attributes.friendly_name
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -545,8 +563,8 @@ zabbix_export:
           delay: '0'
           filter:
             conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_humidity$'
+              - macro: '{#DEVICE_CLASS}'
+                value: 'humidity$'
                 formulaid: A
           item_prototypes:
             - uuid: d5b546cae3cb4664b5b2675002ad5111
@@ -581,6 +599,8 @@ zabbix_export:
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
               path: $.attributes.friendly_name
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -637,23 +657,25 @@ zabbix_export:
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
               path: $.attributes.friendly_name
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
           preprocessing:
             - type: JSONPATH
               parameters:
                 - '$.body[*]'
         - uuid: 521c20cefdc24936b1086368fe0a9ff0
-          name: HA-Atmospheric-Pressure
+          name: HA-Pressure
           type: DEPENDENT
           key: ha.pressure
           delay: '0'
           filter:
             conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_pressure$'
+              - macro: '{#DEVICE_CLASS}'
+                value: 'pressure$'
                 formulaid: A
           item_prototypes:
             - uuid: dcc27475843a4422be16739172c0f982
-              name: 'Atmospheric pressure of {#ENTITY_ID}'
+              name: 'Pressure of {#ENTITY_ID}'
               type: DEPENDENT
               key: 'entity.pressure[{#ENTITY_ID}]'
               delay: '0'
@@ -684,6 +706,8 @@ zabbix_export:
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
               path: $.attributes.friendly_name
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -695,8 +719,8 @@ zabbix_export:
           delay: '0'
           filter:
             conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*temperature$'
+              - macro: '{#DEVICE_CLASS}'
+                value: 'temperature$'
                 formulaid: A
           item_prototypes:
             - uuid: 3cb17f2dc8394b51b57ace27f0547c26
@@ -737,6 +761,8 @@ zabbix_export:
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
               path: $.attributes.friendly_name
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -798,6 +824,8 @@ zabbix_export:
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
               path: $.attributes.friendly_name
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -809,8 +837,8 @@ zabbix_export:
           delay: '0'
           filter:
             conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_firmware$'
+              - macro: '{#DEVICE_CLASS}'
+                value: 'firmware$'
                 formulaid: A
           item_prototypes:
             - uuid: c03379cfab1046a5bbaea1bef589a383
@@ -867,6 +895,8 @@ zabbix_export:
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
               path: $.attributes.friendly_name
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -878,14 +908,14 @@ zabbix_export:
           delay: '0'
           filter:
             conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*voc_index$'
+              - macro: '{#DEVICE_CLASS}'
+                value: 'volatile_organic_compounds$'
                 formulaid: A
           item_prototypes:
             - uuid: 0fbd1d0659a349bb8a5fedfeeb4c403a
-              name: 'Pollutants indoor air {#ENTITY_ID}'
+              name: 'Volatile organic compounds {#ENTITY_ID}'
               type: DEPENDENT
-              key: 'entity.pollutants[{#ENTITY_ID}]'
+              key: 'entity.vocs[{#ENTITY_ID}]'
               delay: '0'
               value_type: FLOAT
               trends: 730d
@@ -914,6 +944,8 @@ zabbix_export:
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
               path: $.attributes.friendly_name
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -925,8 +957,8 @@ zabbix_export:
           delay: '0'
           filter:
             conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_power$'
+              - macro: '{#DEVICE_CLASS}'
+                value: 'power.*$'
                 formulaid: A
           item_prototypes:
             - uuid: ccd1924ee7e6456fab25344d2245430c
@@ -965,6 +997,8 @@ zabbix_export:
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
               path: $.attributes.friendly_name
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -1092,6 +1126,8 @@ zabbix_export:
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
               path: $.attributes.friendly_name
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -1127,7 +1163,7 @@ zabbix_export:
           value: '90'
       valuemaps:
         - uuid: fc783e73a76149cb9a5cfc5e056b20d9
-          name: Automation
+          name: automation
           mappings:
             - value: '1'
               newvalue: enabled
@@ -1145,7 +1181,7 @@ zabbix_export:
             - value: '2'
               newvalue: idle
         - uuid: 899dfe59db4d44e3b192354dbbdc8855
-          name: contact-sensot
+          name: contact-sensor
           mappings:
             - value: '0'
               newvalue: closed
