@@ -42,7 +42,7 @@ zabbix_export:
             - uuid: 7e37c15d52c346ed8aaf351a882e36a9
               name: 'automation {#ENTITY_ID}'
               type: DEPENDENT
-              key: 'ha.autot[{#ENTITY_ID}]'
+              key: 'ha.automation[{#ENTITY_ID}]'
               delay: '0'
               trends: 730d
               valuemap:
