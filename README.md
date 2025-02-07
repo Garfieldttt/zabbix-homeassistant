@@ -45,7 +45,7 @@ Modify the following macros in the template:
 | **PM2.5**              | Tracks fine particulate matter (PM2.5) concentration in the air, important for air quality monitoring. |
 | **VOC**                | Monitors volatile organic compounds (VOC) levels, helping to ensure good indoor air quality. |
 | **Light Status**        | Monitors the current status of lights (on/off). Useful for automation and monitoring energy usage. |
-| **Step Counter (Companion App)** | Tracks the step count from the Home Assistant Companion app. Can be used for fitness tracking or automation triggers. |
+| **Step Counter (Companion App)** | Tracks the step count from the Home Assistant Companion app. |
 | **Distance Traveled (Companion App)** | Measures the total distance traveled based on the Home Assistant Companion app data. |
 | **Floors Descended (Companion App)** | Tracks the number of floors descended, based on device motion data. |
 | **Floors Ascended (Companion App)** | Tracks the number of floors ascended, based on device motion data. |
