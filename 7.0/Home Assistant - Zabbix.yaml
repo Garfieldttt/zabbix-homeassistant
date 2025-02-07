@@ -29,7 +29,7 @@ zabbix_export:
           output_format: JSON
       discovery_rules:
         - uuid: d6a30debaed74aa09515805c866d8b87
-          name: HA-Automation
+          name: HA-automation
           type: DEPENDENT
           key: ha.automation
           delay: '0'
@@ -86,7 +86,7 @@ zabbix_export:
               parameters:
                 - '$.body[*]'
         - uuid: 041bbefc72cb4ffea38a2012e0b79cf2
-          name: HA-Batterie
+          name: HA-batterie
           type: DEPENDENT
           key: ha.batt
           delay: '0'
@@ -147,7 +147,7 @@ zabbix_export:
               parameters:
                 - '$.body[*]'
         - uuid: b21d364cbc23433ca3876572fb74b8bb
-          name: HA-Camera
+          name: HA-camera
           type: DEPENDENT
           key: ha.camera
           delay: '0'
@@ -204,7 +204,7 @@ zabbix_export:
               parameters:
                 - '$.body[*]'
         - uuid: 1311148760784d948dc433324f030bc9
-          name: HA-Contact-Sensor
+          name: HA-contact-sensor
           type: DEPENDENT
           key: ha.contact
           delay: '0'
@@ -350,7 +350,7 @@ zabbix_export:
               parameters:
                 - '$.body[*]'
         - uuid: b63728f7e0764348b0ce33f7883e4efa
-          name: HA-Floors-ascended
+          name: HA-floors-ascended
           type: DEPENDENT
           key: ha.floors.ascended
           delay: '0'
@@ -393,7 +393,7 @@ zabbix_export:
               parameters:
                 - '$.body[*]'
         - uuid: c700bd7346384021aa735ab743d12591
-          name: HA-Floors-descended
+          name: HA-floors-descended
           type: DEPENDENT
           key: ha.floors.descended
           delay: '0'
@@ -436,7 +436,7 @@ zabbix_export:
               parameters:
                 - '$.body[*]'
         - uuid: 1f4986b135ca49d3a47930d0e43c7eac
-          name: HA-Weather-forecast
+          name: HA-weather-forecast
           type: DEPENDENT
           key: ha.forecast
           delay: '0'
@@ -602,7 +602,7 @@ zabbix_export:
               parameters:
                 - '$.body[*]'
         - uuid: 04a35a2a931f489694ba3d2e17bec1ce
-          name: HA-Light
+          name: HA-light
           type: DEPENDENT
           key: ha.light
           delay: '0'
@@ -658,7 +658,7 @@ zabbix_export:
               parameters:
                 - '$.body[*]'
         - uuid: 2459164c5d1d4a0ca13f527612377f35
-          name: HA-Zigbee-linkquality
+          name: HA-zigbee-linkquality
           type: DEPENDENT
           key: ha.linkquality
           delay: '0'
@@ -708,7 +708,7 @@ zabbix_export:
               parameters:
                 - '$.body[*]'
         - uuid: 9b9c150e83af417599542bd13274a9f6
-          name: HA-Humidity
+          name: HA-humidity
           type: DEPENDENT
           key: ha.luft
           delay: '0'
@@ -753,7 +753,7 @@ zabbix_export:
               parameters:
                 - '$.body[*]'
         - uuid: 47c91bbb9cc04aaf9f952bdbd6af2c12
-          name: HA-Occupancy
+          name: HA-occupancy
           type: DEPENDENT
           key: ha.occupancy
           delay: '0'
@@ -852,7 +852,7 @@ zabbix_export:
               parameters:
                 - '$.body[*]'
         - uuid: 1f841913ee024e52a0f0b76df12dd146
-          name: HA-Steps
+          name: HA-steps
           type: DEPENDENT
           key: ha.steps
           delay: '0'
@@ -895,7 +895,7 @@ zabbix_export:
               parameters:
                 - '$.body[*]'
         - uuid: b2351deea12944c4ba9cbfd04baf8575
-          name: HA-Storage-available
+          name: HA-storage-available
           type: DEPENDENT
           key: ha.storage.available
           delay: '0'
@@ -944,7 +944,7 @@ zabbix_export:
               parameters:
                 - '$.body[*]'
         - uuid: 53a32b87ee124a02a6893561d31b23da
-          name: HA-Temperature
+          name: HA-temperature
           type: DEPENDENT
           key: ha.temp
           delay: '0'
@@ -995,7 +995,7 @@ zabbix_export:
               parameters:
                 - '$.body[*]'
         - uuid: 8922c14e83f04a738cddab0e484dfd49
-          name: HA-Update
+          name: HA-update
           type: DEPENDENT
           key: ha.update
           delay: '0'
@@ -1054,7 +1054,7 @@ zabbix_export:
               parameters:
                 - '$.body[*]'
         - uuid: 72328c6a1ac745ffbd3e11758cfac97d
-          name: HA-Firmware-Update
+          name: HA-firmware-update
           type: DEPENDENT
           key: ha.update.firmware
           delay: '0'
@@ -1166,7 +1166,7 @@ zabbix_export:
               parameters:
                 - '$.body[*]'
         - uuid: b20727113c364d5ba4a098b050fd5663
-          name: HA-Watt
+          name: HA-watt
           type: DEPENDENT
           key: ha.watt
           delay: '0'
@@ -1215,7 +1215,7 @@ zabbix_export:
               parameters:
                 - '$.body[*]'
         - uuid: 89976aef185a473a8fea54c3adce8aaf
-          name: HA-Zone
+          name: HA-zone
           type: DEPENDENT
           key: ha.zone
           delay: '0'
