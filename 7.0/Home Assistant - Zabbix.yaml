@@ -254,6 +254,47 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.body[*]'
+        - uuid: d3bcf12e6db646b28bf746dba7607433
+          name: HA-distance
+          type: DEPENDENT
+          key: ha.distance
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_distance$'
+                formulaid: A
+          item_prototypes:
+            - uuid: 657c2300e6bd4e15bb87ed4461b7f637
+              name: 'Meters moved {#ENTITY_ID}'
+              type: DEPENDENT
+              key: 'ha.meters.walked[{#ENTITY_ID}]'
+              delay: '0'
+              units: '!meters'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: meters-moved
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
         - uuid: ca8b557897294617a9335951eb401671
           name: HA-fine-dust
           type: DEPENDENT
@@ -287,6 +328,88 @@ zabbix_export:
               tags:
                 - tag: 'Home Assistant'
                   value: fine-dust
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: b63728f7e0764348b0ce33f7883e4efa
+          name: HA-Floors-ascended
+          type: DEPENDENT
+          key: ha.floors.ascended
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_ascended$'
+                formulaid: A
+          item_prototypes:
+            - uuid: 423de2cfc16e4016acbc26754fe1f0ef
+              name: 'Floors ascended {#ENTITY_ID}'
+              type: DEPENDENT
+              key: 'ha.floors.ascended[{#ENTITY_ID}]'
+              delay: '0'
+              units: '!floors'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: floors-ascended
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: c700bd7346384021aa735ab743d12591
+          name: HA-Floors-descended
+          type: DEPENDENT
+          key: ha.floors.descended
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_descended$'
+                formulaid: A
+          item_prototypes:
+            - uuid: d773f0642bdb4f4db1ef7039b13e1b76
+              name: 'Floors descended {#ENTITY_ID}'
+              type: DEPENDENT
+              key: 'ha.floors.descended[{#ENTITY_ID}]'
+              delay: '0'
+              units: '!floors'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: floors-descended
           master_item:
             key: ha.raw
           lld_macro_paths:
@@ -449,6 +572,60 @@ zabbix_export:
               tags:
                 - tag: 'Home Assistant'
                   value: illuminance
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 04a35a2a931f489694ba3d2e17bec1ce
+          name: HA-Light
+          type: DEPENDENT
+          key: ha.light
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^light\..*'
+                formulaid: A
+          item_prototypes:
+            - uuid: 529acd31fca54758ad053f02709e2671
+              name: 'light {#ENTITY_ID}'
+              type: DEPENDENT
+              key: 'ha.light[{#ENTITY_ID}]'
+              delay: '0'
+              valuemap:
+                name: light
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'on'
+                    - '1'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'off'
+                    - '0'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '2'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: light
           master_item:
             key: ha.raw
           lld_macro_paths:
@@ -635,6 +812,94 @@ zabbix_export:
               tags:
                 - tag: 'Home Assistant'
                   value: atmospheric-pressure
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 1f841913ee024e52a0f0b76df12dd146
+          name: HA-Steps
+          type: DEPENDENT
+          key: ha.steps
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_steps$'
+                formulaid: A
+          item_prototypes:
+            - uuid: abd1084ea22c4bd5a1e522c13b4662a2
+              name: 'Steps taken {#ENTITY_ID}'
+              type: DEPENDENT
+              key: 'ha.steps[{#ENTITY_ID}]'
+              delay: '0'
+              units: '!steps'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: steps-taken
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: b2351deea12944c4ba9cbfd04baf8575
+          name: HA-Storage-available
+          type: DEPENDENT
+          key: ha.storage.available
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_storage$'
+                formulaid: A
+          item_prototypes:
+            - uuid: f4f2c169eac14b8da5bce470ebc84c24
+              name: 'Storage available {#ENTITY_ID}'
+              type: DEPENDENT
+              key: 'ha.storage.available[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: storage-available
+              trigger_prototypes:
+                - uuid: a13d86cbd32c48559a9682e4dc68f872
+                  expression: 'last(/Home Assistant - Zabbix/ha.storage.available[{#ENTITY_ID}])<{$STORAGE_PERCENT:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.STORAGE:"{#ENTITY_ID}"}=1'
+                  name: '{#ENTITY_ID} Storage available: {ITEM.LASTVALUE}'
+                  priority: HIGH
           master_item:
             key: ha.raw
           lld_macro_paths:
@@ -1037,6 +1302,9 @@ zabbix_export:
         - macro: '{$HA.URL}'
           value: 'http://192.168.10.121:8123'
           description: 'The trigger activates when the Zigbee signal drops below 90 LQI.'
+        - macro: '{$STORAGE_PERCENT}'
+          value: '5'
+          description: 'the threshold from which the storage trigger is activated'
         - macro: '{$SWITCH.TRIGGER.BATTERY}'
           value: '1'
           description: '1 = enable 0 = disable'
@@ -1044,6 +1312,9 @@ zabbix_export:
           value: '1'
           description: '1 = enable 0 = disable'
         - macro: '{$SWITCH.TRIGGER.HA_UPDATE}'
+          value: '1'
+          description: '1 = enable 0 = disable'
+        - macro: '{$SWITCH.TRIGGER.STORAGE}'
           value: '1'
           description: '1 = enable 0 = disable'
         - macro: '{$SWITCH.TRIGGER.TEMPERATURE}'
@@ -1092,6 +1363,15 @@ zabbix_export:
               newvalue: 'an update is available'
             - value: '2'
               newvalue: 'firmware version unavailable'
+        - uuid: 9259c3da5a5048de9abf8632054743aa
+          name: light
+          mappings:
+            - value: '1'
+              newvalue: 'on'
+            - value: '0'
+              newvalue: 'off'
+            - value: '2'
+              newvalue: unavailable
         - uuid: 390fdda09d75489781371f2e56aff43f
           name: occupancy
           mappings:
