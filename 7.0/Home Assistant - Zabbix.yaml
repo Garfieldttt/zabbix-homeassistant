@@ -8,11 +8,11 @@ zabbix_export:
       template: 'Home Assistant - Zabbix'
       name: 'Home Assistant - Zabbix'
       description: |
-        Home Assistant-Template, erstellt von Thomas Rzen.
+        Home Assistant Template, created by Thomas Rzen.
         
-        To ensure this template operates correctly, the URL and the API key should be stored in the Macros section.
+        To ensure this template operates correctly, the URL and API key should be stored in the Macros section.
         
-        If you need help, visit https://github.com/Garfieldttt/zabbix-homeassistant
+        If you need help, visit https://github.com/Garfieldttt/zabbix-homeassistant.
       groups:
         - name: Templates
       items:
@@ -40,7 +40,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: 7e37c15d52c346ed8aaf351a882e36a9
-              name: 'automation {#ENTITY_ID}'
+              name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ha.autot[{#ENTITY_ID}]'
               delay: '0'
@@ -79,6 +79,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -95,7 +97,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: 175a65ef0f384596a0bc5177ea1b0458
-              name: 'Battery level of {#ENTITY_ID}'
+              name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ent.bat[{#ENTITY_ID}]'
               delay: '0'
@@ -138,6 +140,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -154,7 +158,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: a69e97081d10499ba67335c3cbd2a1e4
-              name: 'Camera status {#ENTITY_ID}'
+              name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ha.cam.stat[{#ENTITY_ID}]'
               delay: '0'
@@ -193,6 +197,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -215,7 +221,7 @@ zabbix_export:
                 formulaid: C
           item_prototypes:
             - uuid: c7d6d4e1266d4310ac88aec260d7e490
-              name: 'Open/Close Sensor {#ENTITY_ID}'
+              name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ent.conbtact[{#ENTITY_ID}]'
               delay: '0'
@@ -250,6 +256,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -266,7 +274,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: 657c2300e6bd4e15bb87ed4461b7f637
-              name: 'Meters moved {#ENTITY_ID}'
+              name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ha.meters.walked[{#ENTITY_ID}]'
               delay: '0'
@@ -291,6 +299,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -307,7 +317,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: 32084b6e9438468eb986038eebbf657c
-              name: 'Find dust {#ENTITY_ID}'
+              name: 'Find dust {#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'fine.dust[{#ENTITY_ID}]'
               delay: '0'
@@ -333,6 +343,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -349,7 +361,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: 423de2cfc16e4016acbc26754fe1f0ef
-              name: 'Floors ascended {#ENTITY_ID}'
+              name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ha.floors.ascended[{#ENTITY_ID}]'
               delay: '0'
@@ -374,6 +386,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -390,7 +404,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: d773f0642bdb4f4db1ef7039b13e1b76
-              name: 'Floors descended {#ENTITY_ID}'
+              name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ha.floors.descended[{#ENTITY_ID}]'
               delay: '0'
@@ -415,6 +429,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -431,7 +447,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: df0e32186224466481e2ebe7f8e9bab4
-              name: 'Weather forecast {#ENTITY_ID}'
+              name: 'Weather forecast {#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ha.forecast[{#ENTITY_ID}]'
               delay: '0'
@@ -490,7 +506,7 @@ zabbix_export:
                     - '6'
                 - type: STR_REPLACE
                   parameters:
-                    - partlycloudy
+                    - partly2
                     - '7'
                 - type: STR_REPLACE
                   parameters:
@@ -534,6 +550,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -550,7 +568,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: 910c678e05454c7bb80c3e1f72d33d3a
-              name: 'Illuminance {#ENTITY_ID}'
+              name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ent.illu[{#ENTITY_ID}]'
               delay: '0'
@@ -577,6 +595,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -593,7 +613,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: 529acd31fca54758ad053f02709e2671
-              name: 'light {#ENTITY_ID}'
+              name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ha.light[{#ENTITY_ID}]'
               delay: '0'
@@ -631,6 +651,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -647,7 +669,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: adb345f9bd2942a2a2ca378028c15eb5
-              name: 'ZigBee-Linkquality {#ENTITY_ID}'
+              name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ent.linkquality[{#ENTITY_ID}]'
               delay: '0'
@@ -679,6 +701,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -695,7 +719,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: d5b546cae3cb4664b5b2675002ad5111
-              name: 'Humidity of {#ENTITY_ID}'
+              name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ent.luft[{#ENTITY_ID}]'
               delay: '0'
@@ -722,6 +746,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -738,7 +764,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: 80af63d9c9514085a1eaef59042a95b6
-              name: 'Occupancy of {#ENTITY_ID}'
+              name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ha.occupancy[{#ENTITY_ID}]'
               delay: '0'
@@ -774,6 +800,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -790,7 +818,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: dcc27475843a4422be16739172c0f982
-              name: 'Atmospheric pressure of {#ENTITY_ID}'
+              name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ent.pressure[{#ENTITY_ID}]'
               delay: '0'
@@ -817,6 +845,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -833,7 +863,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: abd1084ea22c4bd5a1e522c13b4662a2
-              name: 'Steps taken {#ENTITY_ID}'
+              name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ha.steps[{#ENTITY_ID}]'
               delay: '0'
@@ -858,6 +888,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -874,7 +906,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: f4f2c169eac14b8da5bce470ebc84c24
-              name: 'Storage available {#ENTITY_ID}'
+              name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ha.storage.available[{#ENTITY_ID}]'
               delay: '0'
@@ -905,6 +937,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -921,7 +955,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: 3cb17f2dc8394b51b57ace27f0547c26
-              name: 'Temperatur {#ENTITY_ID}'
+              name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ent.i.d[{#ENTITY_ID}]'
               delay: '0'
@@ -954,6 +988,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -970,7 +1006,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: f721473c84cd46eeb204fa5e2c304e8b
-              name: 'Update available for {#ENTITY_ID}.'
+              name: '{#FRIENDLY_NAME}.'
               type: DEPENDENT
               key: 'ha.update[{#ENTITY_ID}]'
               delay: '0'
@@ -1011,6 +1047,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -1027,7 +1065,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: c03379cfab1046a5bbaea1bef589a383
-              name: 'Firmware-update {#ENTITY_ID}'
+              name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ent.firmware[{#ENTITY_ID}]'
               delay: '0'
@@ -1076,6 +1114,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -1092,7 +1132,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: 0fbd1d0659a349bb8a5fedfeeb4c403a
-              name: 'Pollutants indoor air {#ENTITY_ID}'
+              name: 'Pollutants indoor air {#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ent.pollutants[{#ENTITY_ID}]'
               delay: '0'
@@ -1119,6 +1159,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -1135,7 +1177,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: ccd1924ee7e6456fab25344d2245430c
-              name: 'Watt {#ENTITY_ID}'
+              name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ent.watt[{#ENTITY_ID}]'
               delay: '0'
@@ -1166,6 +1208,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -1182,7 +1226,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: 2364f352a9a74a8cae6e1c6a605c1d69
-              name: 'Latitude of {#ENTITY_ID}'
+              name: 'Latitude of {#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ha.zone.latitude[{#ENTITY_ID}]'
               delay: '0'
@@ -1205,7 +1249,7 @@ zabbix_export:
                 - tag: 'Home Assistant'
                   value: zone-latitude
             - uuid: 6e813687a7884d4287bccaf85a91e1f3
-              name: 'Latitude of {#ENTITY_ID}'
+              name: 'Latitude of {#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ha.zone.longitude[{#ENTITY_ID}]'
               delay: '0'
@@ -1228,7 +1272,7 @@ zabbix_export:
                 - tag: 'Home Assistant'
                   value: zone-longitude
             - uuid: ef844c8505b94a8392d74b474e7622a4
-              name: 'Zone radius {#ENTITY_ID}'
+              name: 'Zadius of zone {#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ha.zone.radius[{#ENTITY_ID}]'
               delay: '0'
@@ -1251,7 +1295,7 @@ zabbix_export:
                 - tag: 'Home Assistant'
                   value: zone-radius
             - uuid: fa03ef82db2a4820a87672d748be4c5f
-              name: 'Person zone assignment {#ENTITY_ID}'
+              name: 'People in the zone {#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ha.zone.zone-assignment[{#ENTITY_ID}]'
               delay: '0'
@@ -1289,6 +1333,8 @@ zabbix_export:
           lld_macro_paths:
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -1402,7 +1448,7 @@ zabbix_export:
             - value: '6'
               newvalue: lightning-rainy
             - value: '7'
-              newvalue: partlycloudy
+              newvalue: partly2
             - value: '8'
               newvalue: pouring
             - value: '9'
