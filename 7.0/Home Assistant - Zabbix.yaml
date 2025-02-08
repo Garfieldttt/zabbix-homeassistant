@@ -854,6 +854,74 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.body[*]'
+        - uuid: f5ee07c1638b4b57a04eaf2e41e8d0fd
+          name: HA-restart
+          type: DEPENDENT
+          key: ha.restart
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_restart$'
+                formulaid: A
+              - macro: '{#ENTITY_ID}'
+                value: '.*_restart_required$'
+                formulaid: B
+          item_prototypes:
+            - uuid: ec5c6e0e814a4104a0ecaff0d014fdc2
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ent.restart[{#ENTITY_ID}]'
+              delay: '0'
+              valuemap:
+                name: 'restart required'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'on'
+                    - '1'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'off'
+                    - '0'
+                - type: STR_REPLACE
+                  parameters:
+                    - unknown
+                    - '2'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '3'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: restart-required
+              trigger_prototypes:
+                - uuid: 4f0434fdb2ae45839b8077dad4211fc5
+                  expression: 'last(/Home Assistant - Zabbix/ent.restart[{#ENTITY_ID}])=1 and {$SWITCH.TRIGGER.RESTART.REQUIRED:"{#ENTITY_ID}"}=1'
+                  name: '{#FRIENDLY_NAME} needs a restart.'
+                  priority: AVERAGE
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
         - uuid: 1f841913ee024e52a0f0b76df12dd146
           name: HA-steps
           type: DEPENDENT
@@ -1363,6 +1431,9 @@ zabbix_export:
         - macro: '{$SWITCH.TRIGGER.HA_UPDATE}'
           value: '1'
           description: '1 = enable 0 = disable'
+        - macro: '{$SWITCH.TRIGGER.RESTART.REQUIRED}'
+          value: '1'
+          description: '1 = enable 0 = disable'
         - macro: '{$SWITCH.TRIGGER.STORAGE}'
           value: '1'
           description: '1 = enable 0 = disable'
@@ -1428,6 +1499,17 @@ zabbix_export:
               newvalue: 'on'
             - value: '0'
               newvalue: 'off'
+        - uuid: 2444b31dfa28445f90ca6bb2b180ca49
+          name: 'restart required'
+          mappings:
+            - value: '1'
+              newvalue: 'restart required'
+            - value: '0'
+              newvalue: 'restart not required'
+            - value: '2'
+              newvalue: 'restart status unknown'
+            - value: '3'
+              newvalue: 'not reachable'
         - uuid: 5435403b67724914b2991f54d0d29bb8
           name: update
           mappings:
