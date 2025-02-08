@@ -50,6 +50,8 @@ Modify the following macros in the template:
 | **Floors Descended (Companion App)** | Tracks the number of floors descended, based on device motion data. |
 | **Floors Ascended (Companion App)** | Tracks the number of floors ascended, based on device motion data. |
 | **Storage Available (Companion App) (%) & Trigger (≤5%)** | Monitors the available storage on the Home Assistant device and triggers an alert or automation when available storage drops below 5%. |
+| **Restart Required** | Monitors if a restart is required; triggers an alert if a restart is required. |
+
 
 
 
