@@ -95,6 +95,9 @@ zabbix_export:
               - macro: '{#ENTITY_ID}'
                 value: '.*_battery$'
                 formulaid: A
+              - macro: '{#ENTITY_ID}'
+                value: '.*_battery_level$'
+                formulaid: B
           item_prototypes:
             - uuid: 175a65ef0f384596a0bc5177ea1b0458
               name: '{#FRIENDLY_NAME}'
