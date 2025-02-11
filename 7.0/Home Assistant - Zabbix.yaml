@@ -604,6 +604,56 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.body[*]'
+        - uuid: e4b9ec1c521c49789c4cf4bf1ee025ee
+          name: HA-kWh
+          type: DEPENDENT
+          key: ha.kwh
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_energy$'
+                formulaid: A
+          item_prototypes:
+            - uuid: 71d59c9f642d40b59e2d7a463cfb3dfb
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ent.kwh[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '!kWh'
+              valuemap:
+                name: kWh
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '0'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: used-kWh
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
         - uuid: 04a35a2a931f489694ba3d2e17bec1ce
           name: HA-light
           type: DEPENDENT
@@ -1003,6 +1053,62 @@ zabbix_export:
                   expression: 'last(/Home Assistant - Zabbix/ha.storage.available[{#ENTITY_ID}])<{$STORAGE_PERCENT:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.STORAGE:"{#ENTITY_ID}"}=1'
                   name: '{#FRIENDLY_NAME} Storage available: {ITEM.LASTVALUE}'
                   priority: HIGH
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 83a8379722aa464ea6210156911f18b9
+          name: HA-switch
+          type: DEPENDENT
+          key: ha.switch
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^switch\..*'
+                formulaid: A
+          item_prototypes:
+            - uuid: 0e39d21ab2674772bc59c1ecfc674804
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ent.switch[{#ENTITY_ID}]'
+              delay: '0'
+              valuemap:
+                name: switch
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'on'
+                    - '1'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'off'
+                    - '0'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '2'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: switch
           master_item:
             key: ha.raw
           lld_macro_paths:
@@ -1483,6 +1589,11 @@ zabbix_export:
               newvalue: 'an update is available'
             - value: '2'
               newvalue: 'firmware version unavailable'
+        - uuid: adb641e8636d42c0a244f35207fe8f9e
+          name: kWh
+          mappings:
+            - value: '0'
+              newvalue: unavailable
         - uuid: 9259c3da5a5048de9abf8632054743aa
           name: light
           mappings:
@@ -1510,6 +1621,15 @@ zabbix_export:
               newvalue: 'restart status unknown'
             - value: '3'
               newvalue: 'not reachable'
+        - uuid: 0a0da62d6da74956a879957d7fb1fa7b
+          name: switch
+          mappings:
+            - value: '1'
+              newvalue: 'on'
+            - value: '0'
+              newvalue: 'off'
+            - value: '2'
+              newvalue: unavailable
         - uuid: 5435403b67724914b2991f54d0d29bb8
           name: update
           mappings:
