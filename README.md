@@ -37,7 +37,8 @@ Modify the following macros in the template:
 | **Longitude**           | Displays the longitude of a configured zone. Useful for precise geolocation settings. |
 | **Latitude**            | Displays the latitude of a configured zone. Useful for precise geolocation settings. |
 | **Home Assistant Updates** | Monitors the Home Assistant version. Sends notifications when updates are available. |
-| **Power Consumption**    | Tracks the energy usage of connected devices (e.g., smart plugs). Useful for analyzing power consumption. |
+| **Power Consumption**    | Tracks the energy usage (Watt) of connected devices (e.g., smart plugs). Useful for analyzing power consumption. |
+| **Energy Monitoring** | Tracks energy consumption (kWh) of connected devices (e.g., PC, smart plugs). |
 | **Weather Forecast**     | Integrates weather forecast data from Home Assistant, including temperature, rain probability, and wind speed. |
 | **Zigbee Link Quality**  | Monitors the signal quality of Zigbee devices. Helps identify connection issues or interference. |
 | **Occupancy**           | Tracks whether a room or area is currently occupied, using motion or presence sensors. |
