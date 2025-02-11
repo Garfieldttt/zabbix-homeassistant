@@ -18,7 +18,7 @@ Modify the following macros in the template:
   Example: `http://192.168.1.100:8123`
 
 ### 3. Link the Host
-- Link the template to the host that represents the Home Assistant instance, or create a new host and link the template.  
+- Create a new host and link the template to it, or link the template to an existing host that represents the Home Assistant instance.  
 
 ## Items Included in the Template
 
