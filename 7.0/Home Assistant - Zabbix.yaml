@@ -20,6 +20,7 @@ zabbix_export:
           name: HA-raw
           type: HTTP_AGENT
           key: ha.raw
+          history: '0'
           value_type: TEXT
           trends: '0'
           url: '{$HA.URL}/api/states'
