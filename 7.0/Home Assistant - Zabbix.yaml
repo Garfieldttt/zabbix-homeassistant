@@ -128,17 +128,6 @@ zabbix_export:
                   expression: 'last(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}])<{$BATTERY.MINIMUM:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.BATTERY:"{#ENTITY_ID}"} = 1'
                   name: 'Battery replacement at {#FRIENDLY_NAME} is required.'
                   priority: HIGH
-          graph_prototypes:
-            - uuid: a899f3a994c842dea0f26842b525b6c0
-              name: 'Battery level'
-              ymin_type_1: FIXED
-              ymax_type_1: FIXED
-              graph_items:
-                - color: FFBF00
-                  calc_fnc: ALL
-                  item:
-                    host: 'Home Assistant - Zabbix'
-                    key: 'ent.bat[{#ENTITY_ID}]'
           master_item:
             key: ha.raw
           lld_macro_paths:
@@ -771,6 +760,9 @@ zabbix_export:
               - macro: '{#ENTITY_ID}'
                 value: '.*_humidity$'
                 formulaid: A
+              - macro: '{#ENTITY_ID}'
+                value: '.*_moisture$'
+                formulaid: B
           item_prototypes:
             - uuid: d5b546cae3cb4664b5b2675002ad5111
               name: '{#FRIENDLY_NAME}'
@@ -1287,6 +1279,67 @@ zabbix_export:
                   name: 'Firmware version for {#FRIENDLY_NAME} is not available'
                   priority: WARNING
                   manual_close: 'YES'
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 7319aadba90c4c839c29d11b396c6300
+          name: HA-uptime
+          type: DEPENDENT
+          key: ha.uptime
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_uptime$'
+                formulaid: A
+          item_prototypes:
+            - uuid: 70c7d700e9bf4a2982ad9deb0796cafb
+              name: '{#FRIENDLY_NAME}.'
+              type: DEPENDENT
+              key: 'ha.uptime[{#ENTITY_ID}]'
+              delay: '0'
+              units: s
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      // ISO8601-Zeitstempel aus dem Log extrahieren
+                      var regex = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+\d{2}:\d{2})/;
+                      var match = value.match(regex);
+                      
+                      if (match && match[1]) {
+                          var logTime = Date.parse(match[1]); // ergibt Millisekunden
+                          var now = Date.now(); // aktuelle Zeit in Millisekunden
+                          if (!isNaN(logTime)) {
+                              var diffSeconds = Math.floor((now - logTime) / 1000);
+                              return diffSeconds;
+                          }
+                      }
+                      
+                      return 0;
+                      
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: uptime
           master_item:
             key: ha.raw
           lld_macro_paths:
