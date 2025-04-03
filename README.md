@@ -30,31 +30,31 @@ Modify the following macros in the template:
 | **Contact Sensors**      | Tracks the state of contact sensors (e.g., doors and windows).  |
 | **Firmware Updates**     | Checks for available firmware updates for connected devices. |
 | **Humidity Sensors**     | Monitors current humidity levels in supervised rooms. |
+| **Additional Humidity Sensors** | Detects and includes more types of humidity sensors for improved coverage. |
 | **Temperature Sensors**  | Tracks temperature values from Home Assistant.  |
 | **Air Pressure**         | Monitors the current air pressure readings from Home Assistant sensors. Useful for weather monitoring and trend analysis. |
 | **Person Zone Assignment** | Tracks which zone (e.g., Home, Work) a person is currently assigned to, based on GPS location. |
 | **Zone Radius**          | Monitors the radius size of configured zones in Home Assistant. Helps ensure accurate geofencing. |
-| **Longitude**           | Displays the longitude of a configured zone. Useful for precise geolocation settings. |
-| **Latitude**            | Displays the latitude of a configured zone. Useful for precise geolocation settings. |
+| **Longitude**            | Displays the longitude of a configured zone. Useful for precise geolocation settings. |
+| **Latitude**             | Displays the latitude of a configured zone. Useful for precise geolocation settings. |
 | **Home Assistant Updates** | Monitors the Home Assistant version. Sends notifications when updates are available. |
 | **Power Consumption**    | Tracks the energy usage (Watt) of connected devices (e.g., smart plugs). Useful for analyzing power consumption. |
-| **Energy Monitoring** | Tracks energy consumption (kWh) of connected devices (e.g., PC, smart plugs). |
+| **Energy Monitoring**    | Tracks energy consumption (kWh) of connected devices (e.g., PC, smart plugs). |
 | **Weather Forecast**     | Integrates weather forecast data from Home Assistant, including temperature, rain probability, and wind speed. |
 | **Zigbee Link Quality**  | Monitors the signal quality of Zigbee devices. Helps identify connection issues or interference. |
-| **Occupancy**           | Tracks whether a room or area is currently occupied, using motion or presence sensors. |
-| **Illuminance**         | Monitors the light level (lux) in a room or area, useful for automations like adjusting lights. |
-| **PM2.5**              | Tracks fine particulate matter (PM2.5) concentration in the air, important for air quality monitoring. |
-| **VOC**                | Monitors volatile organic compounds (VOC) levels, helping to ensure good indoor air quality. |
-| **Light Status**        | Monitors the current status of lights (on/off). Useful for automation and monitoring energy usage. |
+| **Occupancy**            | Tracks whether a room or area is currently occupied, using motion or presence sensors. |
+| **Illuminance**          | Monitors the light level (lux) in a room or area, useful for automations like adjusting lights. |
+| **PM2.5**                | Tracks fine particulate matter (PM2.5) concentration in the air, important for air quality monitoring. |
+| **VOC**                  | Monitors volatile organic compounds (VOC) levels, helping to ensure good indoor air quality. |
+| **Light Status**         | Monitors the current status of lights (on/off). Useful for automation and monitoring energy usage. |
 | **Step Counter (Companion App)** | Tracks the step count from the Home Assistant Companion app. |
 | **Distance Traveled (Companion App)** | Measures the total distance traveled based on the Home Assistant Companion app data. |
 | **Floors Descended (Companion App)** | Tracks the number of floors descended, based on device motion data. |
 | **Floors Ascended (Companion App)** | Tracks the number of floors ascended, based on device motion data. |
 | **Storage Available (Companion App) (%) & Trigger (≤5%)** | Monitors the available storage on the Home Assistant device and triggers an alert or automation when available storage drops below 5%. |
-| **Restart Required** | Monitors if a restart is required; triggers an alert if a restart is required. |
-| **Switch Status** | Monitors the state (on/off) of Home Assistant switches. |
-
-
+| **Restart Required**     | Monitors if a restart is required; triggers an alert if a restart is required. |
+| **Switch Status**        | Monitors the state (on/off) of Home Assistant switches. |
+| **Device Uptime**        | Monitors the uptime of devices integrated with Home Assistant. |
 
 
 
