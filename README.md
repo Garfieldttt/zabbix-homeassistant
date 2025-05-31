@@ -56,11 +56,24 @@ Modify the following macros in the template:
 | **Switch Status**        | Monitors the state (on/off) of Home Assistant switches. |
 | **Device Uptime**        | Monitors the uptime of devices integrated with Home Assistant. |
 
+### 🖥️ Host System Monitoring (System Monitor Integration Required)
+> ⚠️ This section requires the use of the **System Monitor Integration** in Home Assistant.
 
-
+| Item                          | Description                                          |
+|-------------------------------|------------------------------------------------------|
+| **CPU Utilization (%)**       | Shows the current CPU usage as a percentage.         |
+| **Swap Free (MiB)**           | Amount of unused swap space in MiB.                 |
+| **Swap Used (MiB)**           | Amount of swap space currently used in MiB.         |
+| **Swap Utilization (%)**      | Percentage of swap usage.                           |
+| **Network In (MB/s)**         | Incoming network traffic in megabytes per second.   |
+| **Network Out (MB/s)**        | Outgoing network traffic in megabytes per second.   |
+| **Network Packets In**        | Count of incoming network packets.                  |
+| **Network Packets Out**       | Count of outgoing network packets.                  |
+| **Memory Utilization (%)**    | Shows the current memory usage as a percentage.     |
+| **Memory Used (MiB)**         | RAM currently in use in MiB.                        |
+| **Memory Free (MiB)**         | Available RAM in MiB.                               |
+| **Disk Used (GiB)**           | Disk space currently in use in GiB.                 |
+| **Disk Free (GiB)**           | Available disk space in GiB.                        |
 
 ## Notes
 - The template is optimized for Zabbix 7.0; older versions may not support all features.
-
-
-
