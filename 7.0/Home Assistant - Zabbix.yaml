@@ -255,6 +255,100 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.body[*]'
+        - uuid: d1c84360be9c40af8d42a014f504b55f
+          name: HA-disk.free
+          type: DEPENDENT
+          key: ha.disk.free
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: ^sensor\.systemmonitor_disk_free$
+                formulaid: A
+              - macro: '{#ENTITY_ID}'
+                value: ^sensor\.system_monitor_freier_massenspeicher$
+                formulaid: B
+          item_prototypes:
+            - uuid: cf70957f842d4b869274cc3ab6ba6cf0
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'disk.free.mb[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '!GiB'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: disk-free
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 9a41d3531a3d40d8947ea732e902e204
+          name: HA-disk.used
+          type: DEPENDENT
+          key: ha.disk.used
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: ^sensor\.systemmonitor_disk_use$
+                formulaid: A
+              - macro: '{#ENTITY_ID}'
+                value: ^sensor\.system_monitor_belegter_massenspeicher$
+                formulaid: B
+          item_prototypes:
+            - uuid: 622ebc54540d4315af40dca081a22d6a
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'disk.used.mb[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '!GiB'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: disk-used
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
         - uuid: d3bcf12e6db646b28bf746dba7607433
           name: HA-distance
           type: DEPENDENT
@@ -798,6 +892,146 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.body[*]'
+        - uuid: 7d6236e76d2a48718e3908bc68530925
+          name: HA-memory-free-mb
+          type: DEPENDENT
+          key: ha.memory.free.mb
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_freier_arbeitsspeicher$'
+                formulaid: A
+              - macro: '{#ENTITY_ID}'
+                value: '.*_memory_free$'
+                formulaid: B
+          item_prototypes:
+            - uuid: 24a111e6fee64024975cf6658ab7722d
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'memory.free.mb[{#ENTITY_ID}]'
+              delay: '0'
+              units: '!MiB'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: memory-free
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: b486d9284dec47d9be84707d32a6ab3d
+          name: HA-memory-use
+          type: DEPENDENT
+          key: ha.memory.use
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_arbeitsspeicherauslastung$'
+                formulaid: A
+              - macro: '{#ENTITY_ID}'
+                value: '.*_memory_use_percent$'
+                formulaid: B
+          item_prototypes:
+            - uuid: 1d21ec5918be47b78c6e187cc45a2055
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'memory.used.p[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: memory-utilization
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 4801eb2c43a74b8fb99edf0f1119142c
+          name: HA-memory-used-mb
+          type: DEPENDENT
+          key: ha.memory.used.mb
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_belegter_arbeitsspeicher$'
+                formulaid: A
+              - macro: '{#ENTITY_ID}'
+                value: '.*_memory_use$'
+                formulaid: B
+          item_prototypes:
+            - uuid: a7a1f9f8215547248e65c4ab67e60dc4
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'memory.used.mb[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '!MiB'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: memory-used
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
         - uuid: 47c91bbb9cc04aaf9f952bdbd6af2c12
           name: HA-occupancy
           type: DEPENDENT
@@ -886,6 +1120,53 @@ zabbix_export:
               tags:
                 - tag: 'Home Assistant'
                   value: atmospheric-pressure
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: c47b7577f37949e4babb2847fe768a56
+          name: HA-processor-use
+          type: DEPENDENT
+          key: ha.processor.use
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_processor_use$'
+                formulaid: A
+              - macro: '{#ENTITY_ID}'
+                value: '.*_prozessornutzung$'
+                formulaid: B
+          item_prototypes:
+            - uuid: ad1f4237714045b48dcf52c6ae089ed7
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'cpu.utilization[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: cpu-utilization
           master_item:
             key: ha.raw
           lld_macro_paths:
@@ -1046,6 +1327,99 @@ zabbix_export:
                   expression: 'last(/Home Assistant - Zabbix/ha.storage.available[{#ENTITY_ID}])<{$STORAGE_PERCENT:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.STORAGE:"{#ENTITY_ID}"}=1'
                   name: '{#FRIENDLY_NAME} Storage available: {ITEM.LASTVALUE}'
                   priority: HIGH
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: a3661e09a4ed4b16b7fbf8828797453c
+          name: HA-swap-free
+          type: DEPENDENT
+          key: ha.swap.free
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_freier_swap$'
+                formulaid: A
+              - macro: '{#ENTITY_ID}'
+                value: '.*_swap_free$'
+                formulaid: B
+          item_prototypes:
+            - uuid: acd79dce51e146f5bc3672917ead5959
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'swap.free[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '!MiB'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: swap-free
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: df9b35ac55394021953c70c72c5861f4
+          name: HA-swap-use
+          type: DEPENDENT
+          key: ha.swap.use
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_belegter_swap$'
+                formulaid: A
+              - macro: '{#ENTITY_ID}'
+                value: '.*_swap_use$'
+                formulaid: B
+          item_prototypes:
+            - uuid: f551aaf367f04fd8aead3f5a95e0471e
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'swap.use[{#ENTITY_ID}]'
+              delay: '0'
+              units: '!MiB'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: swap-used
           master_item:
             key: ha.raw
           lld_macro_paths:
@@ -1570,6 +1944,257 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.body[*]'
+        - uuid: 730ad969aaf2416a907ac4595f152a48
+          name: HA-swap-use-percent
+          type: DEPENDENT
+          key: swap.use.percent
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '.*_swap_auslastung$'
+                formulaid: A
+              - macro: '{#ENTITY_ID}'
+                value: '.*_swap_use_percent$'
+                formulaid: B
+          item_prototypes:
+            - uuid: 4a2473e1efaa498bbdaa389f7b56924a
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'swap.use.percent[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: swap-utilization
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 9b5fa42242c24f609ba24d1e576b79ab
+          name: HA-network.in
+          type: DEPENDENT
+          key: systemmonitor.network.in
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\.systemmonitor_network_in_.*$'
+                formulaid: A
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\.system_monitor_eingehender_netzwerkdurchsatz_.*$'
+                formulaid: B
+          item_prototypes:
+            - uuid: ed87cc0f281f443b8dbf6a5719327d42
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'network.in[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '!MB/s'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+                - type: STR_REPLACE
+                  parameters:
+                    - unknown
+                    - '0'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: network-in
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 698f93784d9341af95de216ebd337fd0
+          name: HA-network.out
+          type: DEPENDENT
+          key: systemmonitor.network.out
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\.systemmonitor_network_out_.*$'
+                formulaid: A
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\.system_monitor_ausgehender_netzwerkdurchsatz_.*$'
+                formulaid: B
+          item_prototypes:
+            - uuid: 2167fbf4826b4fa6ab0c1f743292398e
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'network.out[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '!MB/s'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+                - type: STR_REPLACE
+                  parameters:
+                    - unknown
+                    - '0'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: network-out
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 9968149224fd4e3fbd16fe947649507e
+          name: HA-network.packages.in
+          type: DEPENDENT
+          key: systemmonitor.network.packages.in
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\.systemmonitor_network_in_packets_.*$'
+                formulaid: A
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\.system_monitor_eingehende_pakete_.*$'
+                formulaid: B
+          item_prototypes:
+            - uuid: 2d1dff6062a14b779e557d6816fe2aae
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'network.packages.in[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '!Pkts'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+                - type: STR_REPLACE
+                  parameters:
+                    - unknown
+                    - '0'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: network-packages-out
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 194e8282b10e4d58be65b506fe2acad5
+          name: HA-network.packages.out
+          type: DEPENDENT
+          key: systemmonitor.network.packages.out
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\.systemmonitor_network_out_packets_.*$'
+                formulaid: A
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\.system_monitor_ausgehende_pakete_.*$'
+                formulaid: B
+          item_prototypes:
+            - uuid: 689d11f00f854e9484765ee97495ce10
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'network.packages.out[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '!Pkts'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+                - type: STR_REPLACE
+                  parameters:
+                    - unknown
+                    - '0'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: network-packages-in
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
       macros:
         - macro: '{$API.TOKEN}'
           type: SECRET_TEXT
@@ -1657,6 +2282,11 @@ zabbix_export:
               newvalue: 'off'
             - value: '2'
               newvalue: unavailable
+        - uuid: e490d69fc57440dda2ed08ce07f5040c
+          name: network
+          mappings:
+            - value: '0'
+              newvalue: unknown
         - uuid: 390fdda09d75489781371f2e56aff43f
           name: occupancy
           mappings:
