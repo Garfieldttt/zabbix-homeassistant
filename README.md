@@ -59,21 +59,25 @@ Modify the following macros in the template:
 ### 🖥️ Host System Monitoring (System Monitor Integration Required)
 > ⚠️ This section requires the use of the **System Monitor Integration** in Home Assistant.
 
-| Item                          | Description                                          |
-|-------------------------------|------------------------------------------------------|
-| **CPU Utilization (%)**       | Shows the current CPU usage as a percentage.         |
-| **Swap Free (MiB)**           | Amount of unused swap space in MiB.                 |
-| **Swap Used (MiB)**           | Amount of swap space currently used in MiB.         |
-| **Swap Utilization (%)**      | Percentage of swap usage.                           |
-| **Network In (MB/s)**         | Incoming network traffic in megabytes per second.   |
-| **Network Out (MB/s)**        | Outgoing network traffic in megabytes per second.   |
-| **Network Packets In**        | Count of incoming network packets.                  |
-| **Network Packets Out**       | Count of outgoing network packets.                  |
-| **Memory Utilization (%)**    | Shows the current memory usage as a percentage.     |
-| **Memory Used (MiB)**         | RAM currently in use in MiB.                        |
-| **Memory Free (MiB)**         | Available RAM in MiB.                               |
-| **Disk Used (GiB)**           | Disk space currently in use in GiB.                 |
-| **Disk Free (GiB)**           | Available disk space in GiB.                        |
+| Item                          | Description                                               |
+|-------------------------------|-----------------------------------------------------------|
+| **CPU Utilization (%)**       | Shows the current CPU usage as a percentage.              |
+| **Load (1m)**                 | Average system load over the last 1 minute.               |
+| **Load (5m)**                 | Average system load over the last 5 minutes.              |
+| **Load (15m)**                | Average system load over the last 15 minutes.             |
+| **Memory Utilization (%)**    | Shows the current memory usage as a percentage.          |
+| **Memory Used (MiB)**         | RAM currently in use in MiB.                             |
+| **Memory Free (MiB)**         | Available RAM in MiB.                                    |
+| **Swap Free (MiB)**           | Amount of unused swap space in MiB.                      |
+| **Swap Used (MiB)**           | Amount of swap space currently used in MiB.              |
+| **Swap Utilization (%)**      | Percentage of swap usage.                                |
+| **Disk Used (GiB)**           | Disk space currently in use in GiB.                      |
+| **Disk Free (GiB)**           | Available disk space in GiB.                             |
+| **Network In (MB/s)**         | Incoming network traffic in megabytes per second.        |
+| **Network Out (MB/s)**        | Outgoing network traffic in megabytes per second.        |
+| **Network Packets In**        | Count of incoming network packets.                       |
+| **Network Packets Out**       | Count of outgoing network packets.                       |
+
 
 ## Notes
 - The template is optimized for Zabbix 7.0; older versions may not support all features.
