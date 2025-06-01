@@ -291,6 +291,13 @@ zabbix_export:
               tags:
                 - tag: 'Home Assistant'
                   value: disk-free
+              trigger_prototypes:
+                - uuid: 1e0741c1d8e248e48fbff5d82859f940
+                  expression: 'min(/Home Assistant - Zabbix/disk.free.mb[{#ENTITY_ID}],5m)<{$DISK.PFREE.MIN.WARN.GIB}'
+                  name: '{#FRIENDLY_NAME}: Running out of space'
+                  opdata: 'Free space:  {ITEM.LASTVALUE}'
+                  priority: HIGH
+                  manual_close: 'YES'
           master_item:
             key: ha.raw
           lld_macro_paths:
@@ -974,6 +981,18 @@ zabbix_export:
               tags:
                 - tag: 'Home Assistant'
                   value: memory-utilization
+              trigger_prototypes:
+                - uuid: ece6e1d58b7d446096de41f194e067ab
+                  expression: 'min(/Home Assistant - Zabbix/memory.used.p[{#ENTITY_ID}],5m)>{$MEMORY.UTIL.MAX.PERCENT}'
+                  name: 'High memory utilization (>{$MEMORY.UTIL.MAX.PERCENT}% for 5m)'
+                  opdata: 'Current memory usage: {ITEM.LASTVALUE}'
+                  priority: AVERAGE
+                  manual_close: 'YES'
+                  tags:
+                    - tag: scope
+                      value: capacity
+                    - tag: scope
+                      value: performance
           master_item:
             key: ha.raw
           lld_macro_paths:
@@ -1167,6 +1186,15 @@ zabbix_export:
               tags:
                 - tag: 'Home Assistant'
                   value: cpu-utilization
+              trigger_prototypes:
+                - uuid: d327545b23d74cda9ab06b3922aaa5b1
+                  expression: 'min(/Home Assistant - Zabbix/cpu.utilization[{#ENTITY_ID}],5m)>{$CPU.UTIL.MAX.PERCENT}'
+                  name: 'High CPU utilization (over {$CPU.UTIL.MAX.PERCENT}% for 5m)'
+                  opdata: 'Current CPU utilization: {ITEM.LASTVALUE}'
+                  priority: AVERAGE
+                  tags:
+                    - tag: scope
+                      value: performance
           master_item:
             key: ha.raw
           lld_macro_paths:
@@ -1980,6 +2008,12 @@ zabbix_export:
               tags:
                 - tag: 'Home Assistant'
                   value: swap-utilization
+              trigger_prototypes:
+                - uuid: d581f6a0b2fb41fca34d6079834ee436
+                  expression: 'min(/Home Assistant - Zabbix/swap.use.percent[{#ENTITY_ID}],5m)>{$SWAP.PFREE.MIN.WARN.PERCENT}'
+                  name: 'High swap utilization (over {$SWAP.PFREE.MIN.WARN.PERCENT}% for 5m)'
+                  opdata: 'Swap utilization: {ITEM.LASTVALUE}%'
+                  priority: WARNING
           master_item:
             key: ha.raw
           lld_macro_paths:
@@ -2201,12 +2235,23 @@ zabbix_export:
         - macro: '{$BATTERY.MINIMUM}'
           value: '30'
           description: 'The trigger activates when the battery drops below 30%.'
+        - macro: '{$CPU.UTIL.MAX.PERCENT}'
+          value: '90'
+          description: 'Maximum CPU utilization'
+        - macro: '{$DISK.PFREE.MIN.WARN.GIB}'
+          value: '2'
+          description: 'Minimum disk space free'
         - macro: '{$HA.URL}'
           value: 'http://192.168.10.121:8123'
           description: 'The trigger activates when the Zigbee signal drops below 90 LQI.'
+        - macro: '{$MEMORY.UTIL.MAX.PERCENT}'
+          value: '95'
+          description: 'Maximum memory load'
         - macro: '{$STORAGE_PERCENT}'
           value: '5'
           description: 'the threshold from which the storage trigger is activated'
+        - macro: '{$SWAP.PFREE.MIN.WARN.PERCENT}'
+          value: '50'
         - macro: '{$SWITCH.TRIGGER.BATTERY}'
           value: '1'
           description: '1 = enable 0 = disable'
@@ -2232,7 +2277,7 @@ zabbix_export:
           value: '44'
           description: 'The trigger activates when the temperature rises above 44 degrees Celsius, meaning it reaches 45°C.'
         - macro: '{$ZIGBEE.SIGNAL.MINIMUM}'
-          value: '90'
+          value: '20'
       valuemaps:
         - uuid: fc783e73a76149cb9a5cfc5e056b20d9
           name: automation
