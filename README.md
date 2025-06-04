@@ -56,8 +56,9 @@ Modify the following macros in the template:
 | **Switch Status**        | Monitors the state (on/off) of Home Assistant switches. |
 | **Device Uptime**        | Monitors the uptime of devices integrated with Home Assistant. |
 
-### 🖥️ Host System Monitoring (System Monitor Integration Required)
-> ⚠️ This section requires the use of the **System Monitor Integration** in Home Assistant.
+### 🖥️ Host System Monitoring ([System Monitor Integration](https://www.home-assistant.io/integrations/systemmonitor/) Required)
+>  This section requires the **System Monitor Integration** in Home Assistant.  
+>  **Note:** Make sure **all desired entities are enabled** in Home Assistant exposes them and Zabbix can query them correctly.
 
 | Item                             | Description                                                                                       |
 |----------------------------------|---------------------------------------------------------------------------------------------------|
