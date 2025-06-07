@@ -111,6 +111,8 @@ zabbix_export:
               value_type: FLOAT
               trends: 730d
               units: '!%'
+              valuemap:
+                name: battery
               preprocessing:
                 - type: JSONPATH
                   parameters:
@@ -121,6 +123,14 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
+                - type: STR_REPLACE
+                  parameters:
+                    - Unavailable
+                    - '-1'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '-1'
                 - type: DISCARD_UNCHANGED_HEARTBEAT
                   parameters:
                     - '300'
@@ -135,8 +145,8 @@ zabbix_export:
                   name: 'Battery replacement at {#FRIENDLY_NAME} is required.'
                   priority: HIGH
                 - uuid: afcc007a51cc4d12ad4300eec03ab583
-                  expression: 'nodata(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}],4h)=1'
-                  name: 'Battery status of {#FRIENDLY_NAME} unavailable > 4 h'
+                  expression: 'last(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}])=-1'
+                  name: 'Battery status unavailable on {#FRIENDLY_NAME}'
                   priority: HIGH
           master_item:
             key: ha.raw
@@ -2566,6 +2576,11 @@ zabbix_export:
             - value: '0'
               newvalue: disabled
             - value: '2'
+              newvalue: unavailable
+        - uuid: 6aea8103a50d4c5c8b2800a006c8e250
+          name: battery
+          mappings:
+            - value: '-1'
               newvalue: unavailable
         - uuid: c310d795d0974bdbb5f5f4e90d84785c
           name: camera
