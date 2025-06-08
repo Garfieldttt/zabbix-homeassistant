@@ -70,9 +70,6 @@ zabbix_export:
                   parameters:
                     - unavailable
                     - '2'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -131,9 +128,6 @@ zabbix_export:
                   parameters:
                     - unavailable
                     - '-1'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -200,9 +194,6 @@ zabbix_export:
                   parameters:
                     - idle
                     - '2'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -262,9 +253,6 @@ zabbix_export:
                   parameters:
                     - 'on'
                     - '1'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -312,9 +300,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -369,9 +354,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -415,9 +397,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -462,9 +441,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -508,9 +484,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -554,9 +527,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -678,9 +648,6 @@ zabbix_export:
                   parameters:
                     - exceptional
                     - '15'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -726,9 +693,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -779,9 +743,6 @@ zabbix_export:
                   parameters:
                     - unavailable
                     - '0'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -838,9 +799,6 @@ zabbix_export:
                   parameters:
                     - unavailable
                     - '2'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -886,9 +844,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -942,9 +897,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -991,9 +943,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -1041,9 +990,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -1103,9 +1049,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -1160,9 +1103,6 @@ zabbix_export:
                   parameters:
                     - 'off'
                     - '0'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -1208,9 +1148,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -1258,9 +1195,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -1333,9 +1267,6 @@ zabbix_export:
                   parameters:
                     - unavailable
                     - '3'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -1384,9 +1315,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -1431,9 +1359,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -1486,9 +1411,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -1535,9 +1457,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -1594,9 +1513,6 @@ zabbix_export:
                   parameters:
                     - unavailable
                     - '2'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -1642,9 +1558,6 @@ zabbix_export:
                 - type: LTRIM
                   parameters:
                     - '["'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -1704,9 +1617,6 @@ zabbix_export:
                   parameters:
                     - 'off'
                     - '0'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -1770,9 +1680,6 @@ zabbix_export:
                   parameters:
                     - unavailable
                     - '2'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -1843,9 +1750,6 @@ zabbix_export:
                       }
                       
                       return 0;
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -1891,9 +1795,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -1943,9 +1844,6 @@ zabbix_export:
                   parameters:
                     - unavailable
                     - '0'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -1991,9 +1889,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -2017,9 +1912,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -2043,9 +1935,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -2080,9 +1969,6 @@ zabbix_export:
                   parameters:
                     - ' person.'
                     - ' '
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -2130,9 +2016,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -2185,9 +2068,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -2234,9 +2114,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -2283,9 +2160,6 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -2337,9 +2211,6 @@ zabbix_export:
                   parameters:
                     - unknown
                     - '0'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -2391,9 +2262,6 @@ zabbix_export:
                   parameters:
                     - unknown
                     - '0'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -2445,9 +2313,6 @@ zabbix_export:
                   parameters:
                     - unknown
                     - '0'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
@@ -2499,9 +2364,6 @@ zabbix_export:
                   parameters:
                     - unknown
                     - '0'
-                - type: DISCARD_UNCHANGED_HEARTBEAT
-                  parameters:
-                    - '300'
               master_item:
                 key: ha.raw
               tags:
