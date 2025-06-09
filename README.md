@@ -1,86 +1,252 @@
-# zabbix-homeassistant
-![Zabbix](https://img.shields.io/badge/Zabbix-7.0%2B-blue) ![License](https://img.shields.io/badge/License-GPLv3-blue.svg)
+# Zabbix Integration: Home Assistant Monitoring
 
-## Requirements
-- **Zabbix Server** version 7.0 or higher
-- **Home Assistant** with API enabled
+**Template:** `Home Assistant - Zabbix`  
+**Zabbix Version:** 7.0+  
 
-## Setup
+---
 
-### 1. Import the Template
-- Upload the `.yaml` file to Zabbix by navigating to **Configuration** -> **Templates** and clicking **Import**.
+## 💡 Overview
 
-### 2. Adjust Macros
-Modify the following macros in the template:
-- `{$API.TOKEN}`: API token used for authentication with the Home Assistant API.  
-  This token can be generated in the Home Assistant settings under **Profile > Token**.
-- `{$HA.URL}`: The URL of the Home Assistant instance, including the protocol (e.g., `http://`) and optional port.  
-  Example: `http://192.168.1.100:8123`
+Agentless monitoring of Home Assistant entities via the REST API:  
+- Fetches all `entity` states from Home Assistant (`{$HA.URL}/api/states`)  
+- Discovers entities (automations, sensors, switches, cameras, zones, etc.) via Low-Level Discovery (LLD)  
+- Extracts state, values, and attributes (e.g., battery level, temperature, disk usage)  
+- Applies JSON preprocessing and value mappings to normalize data  
+- Generates dependent items and trigger prototypes for various entity types
 
-### 3. Link the Host
-- Create a new host and link the template to it, or link the template to an existing host that represents the Home Assistant instance.  
+---
 
-## Items Included in the Template
+## 🔍 Requirements
 
-| Item                     | Description                                                                 |
-|--------------------------|-----------------------------------------------------------------------------|
-| **Automations**          | Monitors active automations in Home Assistant. Helps detect faulty or blocked automations. |
-| **Battery Status**       | Checks the battery level of battery-powered devices, such as sensors or remotes. Alerts on low battery. |
-| **Cameras**              | Monitors the status of cameras integrated with Home Assistant, including optional reachability and video streams. |
-| **Contact Sensors**      | Tracks the state of contact sensors (e.g., doors and windows).  |
-| **Firmware Updates**     | Checks for available firmware updates for connected devices. |
-| **Humidity Sensors**     | Monitors current humidity levels in supervised rooms. |
-| **Additional Humidity Sensors** | Detects and includes more types of humidity sensors for improved coverage. |
-| **Temperature Sensors**  | Tracks temperature values from Home Assistant.  |
-| **Air Pressure**         | Monitors the current air pressure readings from Home Assistant sensors. Useful for weather monitoring and trend analysis. |
-| **Person Zone Assignment** | Tracks which zone (e.g., Home, Work) a person is currently assigned to, based on GPS location. |
-| **Zone Radius**          | Monitors the radius size of configured zones in Home Assistant. Helps ensure accurate geofencing. |
-| **Longitude**            | Displays the longitude of a configured zone. Useful for precise geolocation settings. |
-| **Latitude**             | Displays the latitude of a configured zone. Useful for precise geolocation settings. |
-| **Home Assistant Updates** | Monitors the Home Assistant version. Sends notifications when updates are available. |
-| **Power Consumption**    | Tracks the energy usage (Watt) of connected devices (e.g., smart plugs). Useful for analyzing power consumption. |
-| **Energy Monitoring**    | Tracks energy consumption (kWh) of connected devices (e.g., PC, smart plugs). |
-| **Weather Forecast**     | Integrates weather forecast data from Home Assistant, including temperature, rain probability, and wind speed. |
-| **Zigbee Link Quality**  | Monitors the signal quality of Zigbee devices. Helps identify connection issues or interference. |
-| **Occupancy**            | Tracks whether a room or area is currently occupied, using motion or presence sensors. |
-| **Illuminance**          | Monitors the light level (lux) in a room or area, useful for automations like adjusting lights. |
-| **PM2.5**                | Tracks fine particulate matter (PM2.5) concentration in the air, important for air quality monitoring. |
-| **VOC**                  | Monitors volatile organic compounds (VOC) levels, helping to ensure good indoor air quality. |
-| **Light Status**         | Monitors the current status of lights (on/off). Useful for automation and monitoring energy usage. |
-| **Step Counter (Companion App)** | Tracks the step count from the Home Assistant Companion app. |
-| **Distance Traveled (Companion App)** | Measures the total distance traveled based on the Home Assistant Companion app data. |
-| **Floors Descended (Companion App)** | Tracks the number of floors descended, based on device motion data. |
-| **Floors Ascended (Companion App)** | Tracks the number of floors ascended, based on device motion data. |
-| **Storage Available (Companion App) (%) & Trigger (≤5%)** | Monitors the available storage on the Home Assistant device and triggers an alert or automation when available storage drops below 5%. |
-| **Restart Required**     | Monitors if a restart is required; triggers an alert if a restart is required. |
-| **Switch Status**        | Monitors the state (on/off) of Home Assistant switches. |
-| **Device Uptime**        | Monitors the uptime of devices integrated with Home Assistant. |
+- Home Assistant instance with REST API enabled  
+- Long-Lived Access Token stored in macro `{$API.TOKEN}`  
+- Accessible URL `{$HA.URL}` (e.g., `http://192.168.10.121:8123`)  
+- Template applied to a Zabbix host with network access to HA  
 
-### 🖥️ Host System Monitoring ([System Monitor Integration](https://www.home-assistant.io/integrations/systemmonitor/) Required)
->  This section requires the **System Monitor Integration** in Home Assistant.  
->  **Note:** Make sure **all desired entities are enabled** in Home Assistant exposes them and Zabbix can query them correctly.
+---
 
-| Item                             | Description                                                                                       |
-|----------------------------------|---------------------------------------------------------------------------------------------------|
-| **CPU Utilization (%)**          | Shows the current CPU usage as a percentage.                                                     |
-| **Load (1m)**                    | Average system load over the last 1 minute.                                                      |
-| **Load (5m)**                    | Average system load over the last 5 minutes.                                                     |
-| **Load (15m)**                   | Average system load over the last 15 minutes.                                                    |
-| **Memory Utilization (%) & Trigger** | Shows the current memory usage as a percentage. Triggers an alert when utilization is high.      |
-| **Memory Used (MiB) & Trigger**      | RAM currently in use in MiB. Triggers an alert when memory usage is high.                        |
-| **Memory Free (MiB) & Trigger**      | Available RAM in MiB. Triggers an alert when free memory is low.                                  |
-| **Swap Free (MiB)**              | Amount of unused swap space in MiB.                                                               |
-| **Swap Used (MiB)**              | Amount of swap space currently used in MiB.                                                       |
-| **Swap Utilization (%)**         | Percentage of swap usage.                                                                        |
-| **Disk Used (GiB) & Trigger**       | Disk space currently in use in GiB. Triggers an alert when disk usage is high.                   |
-| **Disk Free (GiB) & Trigger**        | Available disk space in GiB. Triggers an alert when free disk space is low.                      |
-| **Network In (MB/s)**            | Incoming network traffic in megabytes per second.                                                 |
-| **Network Out (MB/s)**           | Outgoing network traffic in megabytes per second.                                                 |
-| **Network Packets In**           | Count of incoming network packets.                                                                |
-| **Network Packets Out**          | Count of outgoing network packets.                                                                |
+## ⚙️ Macros
 
+| Macro                                | Default Value                                | Description                                                            |
+|--------------------------------------|----------------------------------------------|------------------------------------------------------------------------|
+| `{$API.TOKEN}`                       | _(secret)_                                   | Home Assistant Long-Lived Access Token                                 |
+| `{$HA.URL}`                          | `http://192.168.10.121:8123`                 | Base URL of the Home Assistant API                                     |
+| `{$BATTERY.MINIMUM}`                 | `30`                                         | Battery low threshold (%)                                              |
+| `{$ZIGBEE.SIGNAL.MINIMUM}`           | `20`                                         | Minimum Zigbee link quality (LQI)                                      |
+| `{$DISK.PFREE.MIN.WARN.GIB}`         | `2`                                          | Minimum free disk space (GiB)                                          |
+| `{$MEMORY.UTIL.MAX.PERCENT}`         | `95`                                         | Maximum memory utilization (%)                                         |
+| `{$CPU.UTIL.MAX.PERCENT}`            | `90`                                         | Maximum CPU utilization (%)                                            |
+| `{$STORAGE_PERCENT}`                 | `5`                                          | Storage free percentage threshold                                      |
+| `{$SWAP.PFREE.MIN.WARN.PERCENT}`     | `50`                                         | Minimum free swap percentage                                            |
+| `{$TRIGGER.TEMPERATURE}`             | `44`                                         | Temperature threshold (°C)                                             |
+| `{$SWITCH.TRIGGER.BATTERY}`          | `1`                                          | Enable battery triggers (1 = on, 0 = off)                              |
+| `{$SWITCH.TRIGGER.FIRMWARE}`         | `1`                                          | Enable firmware update triggers                                        |
+| `{$SWITCH.TRIGGER.HA_UPDATE}`        | `1`                                          | Enable Home Assistant update triggers                                  |
+| `{$SWITCH.TRIGGER.RESTART.REQUIRED}` | `1`                                          | Enable restart required triggers                                       |
+| `{$SWITCH.TRIGGER.STORAGE}`          | `1`                                          | Enable storage available triggers                                      |
+| `{$SWITCH.TRIGGER.TEMPERATURE}`      | `0`                                          | Enable temperature triggers                                            |
+| `{$SWITCH.TRIGGER.ZIGBEE}`           | `1`                                          | Enable Zigbee link quality triggers                                    |
 
+---
 
+## 📦 Value Maps
 
-## Notes
-- The template is optimized for Zabbix 7.0; older versions may not support all features.
+### automation
+
+| Value | Meaning      |
+|-------|--------------|
+| `1`   | enabled      |
+| `0`   | disabled     |
+| `2`   | unavailable  |
+
+### battery
+
+| Value  | Meaning      |
+|--------|--------------|
+| `-1`   | unavailable  |
+
+### camera
+
+| Value  | Meaning      |
+|--------|--------------|
+| `0`    | unavailable  |
+| `1`    | available    |
+| `2`    | idle         |
+
+### contact-sensot
+
+| Value | Meaning  |
+|-------|----------|
+| `0`   | closed   |
+| `1`   | open     |
+
+### firmware-update
+
+| Value | Meaning                     |
+|-------|-----------------------------|
+| `0`   | no update available         |
+| `1`   | an update is available      |
+| `2`   | firmware version unavailable|
+
+### kWh
+
+| Value | Meaning      |
+|-------|--------------|
+| `0`   | unavailable  |
+
+### light
+
+| Value | Meaning      |
+|-------|--------------|
+| `1`   | on           |
+| `0`   | off          |
+| `2`   | unavailable  |
+
+### network
+
+| Value | Meaning  |
+|-------|----------|
+| `0`   | unknown  |
+
+### occupancy
+
+| Value | Meaning  |
+|-------|----------|
+| `1`   | on       |
+| `0`   | off      |
+
+### restart required
+
+| Value | Meaning                   |
+|-------|---------------------------|
+| `1`   | restart required          |
+| `0`   | restart not required      |
+| `2`   | restart status unknown    |
+| `3`   | not reachable             |
+
+### switch
+
+| Value | Meaning      |
+|-------|--------------|
+| `1`   | on           |
+| `0`   | off          |
+| `2`   | unavailable  |
+
+### update
+
+| Value | Meaning                  |
+|-------|--------------------------|
+| `0`   | no update available      |
+| `1`   | an update is available   |
+
+### weather
+
+| Value | Meaning        |
+|-------|----------------|
+| `1`   | clear-night    |
+| `2`   | cloudy         |
+| `3`   | fog            |
+| `4`   | hail           |
+| `5`   | lightning      |
+| `6`   | lightning-rainy|
+| `7`   | partly2        |
+| `8`   | pouring        |
+| `9`   | rainy          |
+| `10`  | snowy          |
+| `11`  | snowy-rainy    |
+| `12`  | sunny          |
+| `13`  | windy          |
+| `14`  | windy-variant  |
+| `15`  | exception      |
+
+---
+
+## 📋 Items
+
+### Active Items
+
+- **HA-raw**  
+  - UUID: `2c4ed5c0c5be4840ac89801834efae58`  
+  - Key: `ha.raw`  
+  - Type: HTTP_AGENT  
+  - URL: `{$HA.URL}/api/states`  
+  - Header: `Authorization: Bearer {$API.TOKEN}`  
+  - Output Format: JSON  
+  - Purpose: Master item fetching all HA states
+
+### Dependent Items (via LLD)
+
+Each discovery rule extracts entities and creates dependent items:
+
+- **HA-automation** (UUID: d6a30debaed74aa09515805c866d8b87)  
+  - Filter: `^{automation\.}.*$`  
+  - Item Prototype: `ha.autot[{#ENTITY_ID}]` (stats, trends 730d, valuemap=automation)
+
+- **HA-batterie** (UUID: 041bbefc72cb4ffea38a2012e0b79cf2)  
+  - Filters: `.*_battery$`, `.*_battery_level$`  
+  - Prototype: `ent.bat[{#ENTITY_ID}]` (FLOAT, units=%, valuemap=battery)  
+  - Triggers: battery low, status unavailable
+
+- **HA-camera** (UUID: b21d364cbc23433ca3876572fb74b8bb)  
+  - Filter: `^camera\..*`  
+  - Prototype: `ha.cam.stat[{#ENTITY_ID}]` (trends 730d, valuemap=camera)
+
+- **HA-contact-sensor** (UUID: 1311148760784d948dc433324f030bc9)  
+  - Filters: `.*_ajto$`, `.*_contact$`, `.*_door$`  
+  - Prototype: `ent.conbtact[{#ENTITY_ID}]` (valuemap=contact-sensot)
+
+- **HA-disk.free** & **HA-disk.used**  
+  - Filters: `sensor.systemmonitor_disk_free`, `sensor.systemmonitor_disk_use` variants  
+  - Prototypes: `disk.free.mb[{#ENTITY_ID}]` & `disk.used.mb[{#ENTITY_ID}]` (FLOAT, units=GiB)  
+  - Trigger Prototype: low disk free
+
+- (…and many more: HA-distance, HA-fine-dust, HA-floors-ascended/descended, HA-weather-forecast, HA-Illuminance, HA-kWh, HA-light, HA-zigbee-linkquality, HA-humidity, HA-memory-free/use, HA-memory-used-mb, HA-occupancy, HA-atmospheric-pressure, HA-processor-use, HA-restart, HA-steps, HA-storage-available, HA-swap-free/use, HA-switch, HA-temperature, HA-update, HA-firmware-update, HA-uptime, HA-VOC, HA-watt, HA-zone…)
+
+---
+
+## 🔔 Triggers
+
+Representative trigger prototypes include:
+
+- **Battery Low**:  
+  `last(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}]) < {$BATTERY.MINIMUM}`  
+
+- **Temperature Exceeded**:  
+  `last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) > {$TRIGGER.TEMPERATURE}`  
+
+- **Firmware Update Available**:  
+  `last(/Home Assistant - Zabbix/ent.firmware[{#ENTITY_ID}]) = 1`  
+
+- **HA Update Available**:  
+  `last(/Home Assistant - Zabbix/ha.update[{#ENTITY_ID}]) = 1`  
+
+- **Disk Space Low**:  
+  `min(/Home Assistant - Zabbix/disk.free.mb[{#ENTITY_ID}],5m) < {$DISK.PFREE.MIN.WARN.GIB}`  
+
+- **Memory Utilization High**:  
+  `min(/Home Assistant - Zabbix/memory.used.p[{#ENTITY_ID}],5m) > {$MEMORY.UTIL.MAX.PERCENT}`  
+
+- **CPU Utilization High**:  
+  `min(/Home Assistant - Zabbix/cpu.utilization[{#ENTITY_ID}],5m) > {$CPU.UTIL.MAX.PERCENT}`  
+
+- **Zigbee Signal Low**:  
+  `min(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}],5m) < {$ZIGBEE.SIGNAL.MINIMUM}`  
+
+(…and others within each LLD rule)
+
+---
+
+## 🔧 Customization & Operation
+
+- Adjust macros (`{$HA.URL}`, `{$API.TOKEN}`, thresholds) to your environment  
+- Ensure Home Assistant API returns JSON states at `/api/states`  
+- Fine‑tune LLD filters for custom entity patterns  
+- Extend item and trigger prototypes as needed  
+- Monitor performance: HTTP agent interval, preprocessing overhead  
+
+---
+
+## ✅ Conclusion
+
+A comprehensive Zabbix template for Home Assistant, leveraging HTTP Agent, JSON preprocessing, LLD, dependent items, value maps, and trigger prototypes.  
+Ideal for unified state tracking of your smart home in Zabbix.
