@@ -178,7 +178,7 @@ Agentless monitoring of Home Assistant entities via the REST API:
 
 Each discovery rule extracts entities and creates dependent items:
 
-- **HA-automation** (UUID: d6a30debaed74aa09515805c866d8b87)  
+- **HA-automation**
   - Filter: `^{automation\.}.*$`  
   - Item Prototype: `ha.autot[{#ENTITY_ID}]` (stats, trends 730d, valuemap=automation)
 
