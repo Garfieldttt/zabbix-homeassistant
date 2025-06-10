@@ -2378,7 +2378,7 @@ zabbix_export:
               key: 'network.packages.in[{#ENTITY_ID}]'
               delay: '0'
               value_type: FLOAT
-              units: '{#UNITS}'
+              units: '!Pkts'
               preprocessing:
                 - type: JSONPATH
                   parameters:
@@ -2431,7 +2431,7 @@ zabbix_export:
               key: 'network.packages.out[{#ENTITY_ID}]'
               delay: '0'
               value_type: FLOAT
-              units: '!{#UNITS}'
+              units: '!Pkts'
               preprocessing:
                 - type: JSONPATH
                   parameters:
