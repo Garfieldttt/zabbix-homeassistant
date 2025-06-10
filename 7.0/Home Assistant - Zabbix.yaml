@@ -964,7 +964,7 @@ zabbix_export:
               type: DEPENDENT
               key: 'memory.free.mb[{#ENTITY_ID}]'
               delay: '0'
-              units: '{#UNITS}'
+              units: '!{#UNITS}'
               preprocessing:
                 - type: JSONPATH
                   parameters:
