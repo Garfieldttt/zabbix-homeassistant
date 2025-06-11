@@ -79,7 +79,7 @@ Agentless monitoring of Home Assistant entities via the REST API:
 | **Restart Required**                           | Alerts when a restart is required for HA or integrated devices.                                                     |
 | **Switch Status**                              | Monitors state (on/off) of switch entities.                                                                         |
 | **Device Uptime**                              | Monitors uptime of devices connected to Home Assistant.                                                             |
-| **Backup**                                     | Monitors timestamp of last HA backup, alerts if no backup within configured threshold.                              |
+| **Backup**                                     | Monitors the last backup status.                              |
 
 ### 🖥️ Host System Monitoring ([System Monitor Integration](https://www.home-assistant.io/integrations/systemmonitor/) Required)
 >  This section requires the **System Monitor Integration** in Home Assistant.  
