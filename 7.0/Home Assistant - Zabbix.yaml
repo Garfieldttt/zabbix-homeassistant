@@ -29,6 +29,81 @@ zabbix_export:
               value: 'Bearer {$API.TOKEN}'
           output_format: JSON
       discovery_rules:
+        - uuid: 4a40f645dc4d49218ff7460cb4704a96
+          name: HA-backup.manager.state
+          type: DEPENDENT
+          key: backup.manager.state
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: ^sensor\.backup_backup_manager_.+$
+                formulaid: A
+          item_prototypes:
+            - uuid: 1ea35f8966a8415bb8838017e28c1439
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'backup.manager.state[{#ENTITY_ID}]'
+              delay: '0'
+              trends: '0'
+              description: |
+                | Number | State Key        | Description     |
+                | ---: | :--------------- | :--------------- |
+                |    0 | `idle`           | Idle             |
+                |    1 | `create_backup`  | Creating backup  |
+                |    2 | `receive_backup` | Receiving backup |
+                |    3 | `restore_backup` | Restoring backup |
+                |    4 | `blocked`        | Backup blocked   |
+              valuemap:
+                name: backup_manager
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+                - type: STR_REPLACE
+                  parameters:
+                    - idle
+                    - '0'
+                - type: STR_REPLACE
+                  parameters:
+                    - create_backup
+                    - '1'
+                - type: STR_REPLACE
+                  parameters:
+                    - receive_backup
+                    - '2'
+                - type: STR_REPLACE
+                  parameters:
+                    - restore_backup
+                    - '3'
+                - type: STR_REPLACE
+                  parameters:
+                    - blocked
+                    - '4'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: backup-manager-state
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
         - uuid: d6a30debaed74aa09515805c866d8b87
           name: HA-automation
           type: DEPENDENT
@@ -263,7 +338,7 @@ zabbix_export:
                 key: ha.raw
               tags:
                 - tag: 'Home Assistant'
-                  value: contact-sensor-status
+                  value: contact-sensor-state
           master_item:
             key: ha.raw
           lld_macro_paths:
@@ -2523,6 +2598,19 @@ zabbix_export:
               newvalue: disabled
             - value: '2'
               newvalue: unavailable
+        - uuid: 36c2adb1c59240e6bb81e13292f1c949
+          name: backup_manager
+          mappings:
+            - value: '0'
+              newvalue: Idle
+            - value: '1'
+              newvalue: 'Creating a backup'
+            - value: '2'
+              newvalue: 'Receiving a backup'
+            - value: '3'
+              newvalue: 'Restoring a backup'
+            - value: '4'
+              newvalue: Blocked
         - uuid: 6aea8103a50d4c5c8b2800a006c8e250
           name: battery
           mappings:
