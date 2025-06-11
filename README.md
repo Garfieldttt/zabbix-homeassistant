@@ -81,4 +81,27 @@ Agentless monitoring of Home Assistant entities via the REST API:
 | **Device Uptime**                              | Monitors uptime of devices connected to Home Assistant.                                                             |
 | **Backup**                                     | Monitors timestamp of last HA backup, alerts if no backup within configured threshold.                              |
 
+### 🖥️ Host System Monitoring ([System Monitor Integration](https://www.home-assistant.io/integrations/systemmonitor/) Required)
+>  This section requires the **System Monitor Integration** in Home Assistant.  
+>  **Note:** Make sure **all desired entities are enabled** in Home Assistant exposes them and Zabbix can query them correctly.
+
+| Item                             | Description                                                                                       |
+|----------------------------------|---------------------------------------------------------------------------------------------------|
+| **CPU Utilization (%)**          | Shows the current CPU usage as a percentage.                                                     |
+| **Load (1m)**                    | Average system load over the last 1 minute.                                                      |
+| **Load (5m)**                    | Average system load over the last 5 minutes.                                                     |
+| **Load (15m)**                   | Average system load over the last 15 minutes.                                                    |
+| **Memory Utilization (%) & Trigger** | Shows the current memory usage as a percentage. Triggers an alert when utilization is high.      |
+| **Memory Used (MiB) & Trigger**      | RAM currently in use in MiB. Triggers an alert when memory usage is high.                        |
+| **Memory Free (MiB) & Trigger**      | Available RAM in MiB. Triggers an alert when free memory is low.                                  |
+| **Swap Free (MiB)**              | Amount of unused swap space in MiB.                                                               |
+| **Swap Used (MiB)**              | Amount of swap space currently used in MiB.                                                       |
+| **Swap Utilization (%)**         | Percentage of swap usage.                                                                        |
+| **Disk Used (GiB) & Trigger**       | Disk space currently in use in GiB. Triggers an alert when disk usage is high.                   |
+| **Disk Free (GiB) & Trigger**        | Available disk space in GiB. Triggers an alert when free disk space is low.                      |
+| **Network In (MB/s)**            | Incoming network traffic in megabytes per second.                                                 |
+| **Network Out (MB/s)**           | Outgoing network traffic in megabytes per second.                                                 |
+| **Network Packets In**           | Count of incoming network packets.                                                                |
+| **Network Packets Out**          | Count of outgoing network packets.                                                                |
+
 ---
