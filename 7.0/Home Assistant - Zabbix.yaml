@@ -28,6 +28,86 @@ zabbix_export:
             - name: Authorization
               value: 'Bearer {$API.TOKEN}'
           output_format: JSON
+        - uuid: f77762bbd6df4dde9b5dbbf49160487e
+          name: 'Home Assistant Core Update'
+          type: DEPENDENT
+          key: update.home.assistant.core.update
+          delay: '0'
+          trends: '0'
+          valuemap:
+            name: update
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''update.home_assistant_core_update'')].state'
+            - type: LTRIM
+              parameters:
+                - '["'
+            - type: RTRIM
+              parameters:
+                - '"]'
+            - type: STR_REPLACE
+              parameters:
+                - 'on'
+                - '1'
+            - type: STR_REPLACE
+              parameters:
+                - 'off'
+                - '0'
+            - type: STR_REPLACE
+              parameters:
+                - unavailable
+                - '2'
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: update-core
+          triggers:
+            - uuid: 2ce6c84c011e49c18efe116d031c26b2
+              expression: 'last(/Home Assistant - Zabbix/update.home.assistant.core.update)=1'
+              name: 'Home Assistant update for Home Assistant Core Update is available.'
+              priority: AVERAGE
+        - uuid: 352a320642644f3d9364d3d15759d517
+          name: 'Home Assistant Supervisor Update'
+          type: DEPENDENT
+          key: update.home.assistant.supervisor.update
+          delay: '0'
+          trends: '0'
+          valuemap:
+            name: update
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''update.home_assistant_supervisor_update'')].state'
+            - type: LTRIM
+              parameters:
+                - '["'
+            - type: RTRIM
+              parameters:
+                - '"]'
+            - type: STR_REPLACE
+              parameters:
+                - 'on'
+                - '1'
+            - type: STR_REPLACE
+              parameters:
+                - 'off'
+                - '0'
+            - type: STR_REPLACE
+              parameters:
+                - unavailable
+                - '2'
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: update-supervisor
+          triggers:
+            - uuid: 19e42eea3cd2478a9af66c8cfe1e427a
+              expression: 'last(/Home Assistant - Zabbix/update.home.assistant.supervisor.update)=1'
+              name: 'Home Assistant update for Home Assistant supervisor Update is available.'
+              priority: AVERAGE
       discovery_rules:
         - uuid: 4a40f645dc4d49218ff7460cb4704a96
           name: HA-backup.manager.state
@@ -184,7 +264,7 @@ zabbix_export:
               delay: '0'
               value_type: FLOAT
               trends: 730d
-              units: '{#UNITS}'
+              units: '!{#UNITS}'
               valuemap:
                 name: battery
               preprocessing:
@@ -216,7 +296,7 @@ zabbix_export:
                   name: 'Battery replacement at {#FRIENDLY_NAME} is required.'
                   priority: HIGH
                 - uuid: afcc007a51cc4d12ad4300eec03ab583
-                  expression: 'last(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}])=-1 and {$SWITCH.TRIGGER.BATTERY:"{#ENTITY_ID}"}=1 and nodata(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}],1h)=0'
+                  expression: 'max(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}],900)=-1'
                   name: 'Battery status unavailable on {#FRIENDLY_NAME}'
                   priority: HIGH
           master_item:
@@ -1719,13 +1799,22 @@ zabbix_export:
           key: ha.update
           delay: '0'
           filter:
+            evaltype: AND
             conditions:
               - macro: '{#ENTITY_ID}'
                 value: '.*_update$'
                 formulaid: A
+              - macro: '{#ENTITY_ID}'
+                value: ^update.home_assistant_core_update$
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+              - macro: '{#ENTITY_ID}'
+                value: ^update.home_assistant_supervisor_update$
+                operator: NOT_MATCHES_REGEX
+                formulaid: C
           item_prototypes:
             - uuid: f721473c84cd46eeb204fa5e2c304e8b
-              name: '{#FRIENDLY_NAME}.'
+              name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ha.update[{#ENTITY_ID}]'
               delay: '0'
@@ -1750,16 +1839,20 @@ zabbix_export:
                   parameters:
                     - 'off'
                     - '0'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '2'
               master_item:
                 key: ha.raw
               tags:
                 - tag: 'Home Assistant'
-                  value: update
+                  value: update-integration
               trigger_prototypes:
                 - uuid: 9bd597210e2a4b4b9e35ada4ab0b36fa
-                  expression: 'last(/Home Assistant - Zabbix/ha.update[{#ENTITY_ID}])=1 and {$SWITCH.TRIGGER.HA_UPDATE:"{#ENTITY_ID}"} = 1 and {$SWITCH.TRIGGER.HA_UPDATE:"{#ENTITY_ID}"}'
+                  expression: 'last(/Home Assistant - Zabbix/ha.update[{#ENTITY_ID}])=1 and {$SWITCH.TRIGGER.HA_UPDATE:"{#ENTITY_ID}"} = 1'
                   name: 'Home Assistant update for {#FRIENDLY_NAME} is available.'
-                  priority: HIGH
+                  priority: WARNING
                   manual_close: 'YES'
           master_item:
             key: ha.raw
@@ -1819,7 +1912,7 @@ zabbix_export:
                 key: ha.raw
               tags:
                 - tag: 'Home Assistant'
-                  value: firmware-update
+                  value: update-firmware
               trigger_prototypes:
                 - uuid: 2cec62c566f04555b8ccac1a128d1a1a
                   expression: 'last(/Home Assistant - Zabbix/ent.firmware[{#ENTITY_ID}])=1 and {$SWITCH.TRIGGER.FIRMWARE} = 1'
@@ -2059,13 +2152,12 @@ zabbix_export:
                 - tag: 'Home Assistant'
                   value: zone-longitude
             - uuid: ef844c8505b94a8392d74b474e7622a4
-              name: 'Zadius of zone {#FRIENDLY_NAME}'
+              name: 'Radius of zone {#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ha.zone.radius[{#ENTITY_ID}]'
               delay: '0'
               value_type: FLOAT
               trends: 730d
-              units: '{#UNITS}'
               preprocessing:
                 - type: JSONPATH
                   parameters:
@@ -2694,6 +2786,8 @@ zabbix_export:
               newvalue: 'no update available'
             - value: '1'
               newvalue: 'an update is available'
+            - value: '2'
+              newvalue: 'update state unavailable (not HAOS)'
         - uuid: f3273d81438646ed8ac25ecf2e609854
           name: weather
           mappings:
