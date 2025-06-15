@@ -1,2826 +1,2290 @@
 zabbix_export:
   version: '7.0'
   template_groups:
-    - uuid: 7df96b18c230490a9a0a9e2307226338
-      name: Templates
+    - uuid: eae98694e7cc44079a33938e08bc84bf
+      name: 01-LINUX-SERVER
   templates:
-    - uuid: 1d94437d4e37499bb2c5abf47fde6c00
-      template: 'Home Assistant - Zabbix'
-      name: 'Home Assistant - Zabbix'
+    - uuid: e2307c94f1744af7a8f1f458a67af424
+      template: 'Linux by Zabbix agent active'
+      name: 'Linux by Zabbix agent active'
       description: |
-        Home Assistant Template, created by Thomas Rzen.
+        Official Linux template. Requires agent of Zabbix 3.0.14, 3.4.5 and 4.0.0 or newer.
         
-        To ensure this template operates correctly, the URL and API key should be stored in the Macros section.
+        Known Issues:
         
-        If you need help, visit https://github.com/Garfieldttt/zabbix-homeassistant.
+          Description: Network discovery. Zabbix agent as of 4.2 doesn't support items such as net.if.status, net.if.speed.
+        
+        You can discuss this template or leave feedback on our forum https://www.zabbix.com/forum/zabbix-suggestions-and-feedback/387225-discussion-thread-for-official-zabbix-template-for-linux
+        
+        Template tooling version used: 0.41
+      templates:
+        - name: 'Linux Firewall nftables'
+        - name: 'LT_SMART by Zabbix agent 2 active'
       groups:
-        - name: Templates
+        - name: 01-LINUX-SERVER
       items:
-        - uuid: 2c4ed5c0c5be4840ac89801834efae58
-          name: HA-raw
-          type: HTTP_AGENT
-          key: ha.raw
-          history: '0'
+        - uuid: a31cfdf92de04535adb957e0c72f54bd
+          name: 'Host name of Zabbix agent running'
+          type: ZABBIX_ACTIVE
+          key: agent.hostname
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+        - uuid: 7c266646bfa843dabfe4ba5a3fd9026e
+          name: 'Zabbix agent ping'
+          type: ZABBIX_ACTIVE
+          key: agent.ping
+          description: 'The agent always returns 1 for this item. It could be used in combination with nodata() for availability check.'
+          valuemap:
+            name: 'Zabbix agent ping status'
+          preprocessing:
+            - type: STR_REPLACE
+              parameters:
+                - unavailable
+                - '0'
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 87743d366aa54ac98160753719f7f3b3
+              expression: 'nodata(/Linux by Zabbix agent active/agent.ping,900)=1 and (time()>={$AVAILABLE_STARTTIME} or time()<{$AVAILABLE_ENDTIME}) and {$HOST.REACHABLE}=1'
+              name: 'The host is not reachable!'
+              priority: DISASTER
+              manual_close: 'YES'
+              tags:
+                - tag: unavailable
+                  value: host
+            - uuid: c1b9fdbe6a584d2cb25ff7077c667af1
+              expression: 'nodata(/Linux by Zabbix agent active/agent.ping,{$AGENT.NODATA_TIMEOUT})=1'
+              name: 'Zabbix agent is not available (or nodata for {$AGENT.NODATA_TIMEOUT})'
+              priority: INFO
+              description: 'For active agents, nodata() with agent.ping is used with {$AGENT.NODATA_TIMEOUT} as time threshold.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: 91dbe302bd8e4954b91e9ce3a795b4eb
+          name: 'Version of Zabbix agent running'
+          type: ZABBIX_ACTIVE
+          key: agent.version
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: application
+        - uuid: 66ed2ffc888c40c6b80dcc259c087d08
+          name: 'Maximum number of open file descriptors'
+          type: ZABBIX_ACTIVE
+          key: kernel.maxfiles
+          delay: 1h
+          description: 'It could be increased by using sysctl utility or modifying file /etc/sysctl.conf.'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: a7716b62422243b991a2697752d7cb1f
+              expression: 'last(/Linux by Zabbix agent active/kernel.maxfiles)<{$KERNEL.MAXFILES.MIN}'
+              name: 'Configured max number of open filedescriptors is too low (< {$KERNEL.MAXFILES.MIN})'
+              priority: INFO
+              tags:
+                - tag: scope
+                  value: performance
+        - uuid: d60cc4367893424d9671b1f05ba83599
+          name: 'Maximum number of processes'
+          type: ZABBIX_ACTIVE
+          key: kernel.maxproc
+          delay: 1h
+          description: 'It could be increased by using sysctl utility or modifying file /etc/sysctl.conf.'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 740ed348fb1d41dca7c410123b668a48
+              expression: 'last(/Linux by Zabbix agent active/kernel.maxproc)<{$KERNEL.MAXPROC.MIN}'
+              name: 'Configured max number of processes is too low (< {$KERNEL.MAXPROC.MIN})'
+              priority: INFO
+              dependencies:
+                - name: 'Getting closer to process limit (over 80% used)'
+                  expression: 'last(/Linux by Zabbix agent active/proc.num)/last(/Linux by Zabbix agent active/kernel.maxproc)*100>80'
+              tags:
+                - tag: scope
+                  value: performance
+        - uuid: ccb6fdbe1267475780e978c0c5de986c
+          name: 'Number of processes'
+          type: ZABBIX_ACTIVE
+          key: proc.num
+          tags:
+            - tag: component
+              value: system
+        - uuid: 436bf5615731425a97fdcdbaac5f4000
+          name: 'Number of running processes'
+          type: ZABBIX_ACTIVE
+          key: 'proc.num[,,run]'
+          tags:
+            - tag: component
+              value: system
+        - uuid: 42bb6cbed08a4884a99328b38e4c1654
+          name: 'System boot time'
+          type: ZABBIX_ACTIVE
+          key: system.boottime
+          delay: 15m
+          units: unixtime
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            - tag: component
+              value: system
+        - uuid: 0a2218b9d9124c7284962f84bdefaab8
+          name: 'Interrupts per second'
+          type: ZABBIX_ACTIVE
+          key: system.cpu.intr
+          value_type: FLOAT
+          preprocessing:
+            - type: CHANGE_PER_SECOND
+              parameters:
+                - ''
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: c692df07acc44b4ea1f4f88cd4ee64eb
+          name: 'Load average (1m avg)'
+          type: ZABBIX_ACTIVE
+          key: 'system.cpu.load[all,avg1]'
+          value_type: FLOAT
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 18862acd219e4259a9b9665c32550fa5
+          name: 'Load average (5m avg)'
+          type: ZABBIX_ACTIVE
+          key: 'system.cpu.load[all,avg5]'
+          value_type: FLOAT
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 61040b6d85df4a2087e562f0216e723d
+          name: 'Load average (15m avg)'
+          type: ZABBIX_ACTIVE
+          key: 'system.cpu.load[all,avg15]'
+          value_type: FLOAT
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 6e98a6a53c1a44c09b5e3c19971b834c
+          name: 'Number of CPUs'
+          type: ZABBIX_ACTIVE
+          key: system.cpu.num
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 47e3a1d3955d4bccb07a0e32f768273d
+          name: 'Context switches per second'
+          type: ZABBIX_ACTIVE
+          key: system.cpu.switches
+          value_type: FLOAT
+          preprocessing:
+            - type: CHANGE_PER_SECOND
+              parameters:
+                - ''
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 9cb786aec7de4f749f33c6e5adfbaf75
+          name: 'CPU utilization'
+          type: DEPENDENT
+          key: system.cpu.util
+          delay: '0'
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU utilization in %'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  //Calculate utilization
+                  return (100 - value)
+          master_item:
+            key: 'system.cpu.util[,idle]'
+          tags:
+            - tag: component
+              value: cpu
+          triggers:
+            - uuid: e299778a6fcc4805bd5806f3b2ffe1c2
+              expression: 'min(/Linux by Zabbix agent active/system.cpu.util,5m)>{$CPU.UTIL.CRIT}'
+              name: 'High CPU utilization (over {$CPU.UTIL.CRIT}% for 5m)'
+              opdata: 'Current utilization: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              description: 'CPU utilization is too high. The system might be slow to respond.'
+              dependencies:
+                - name: 'Load average is too high (per CPU load over {$LOAD_AVG_PER_CPU.MAX.WARN} for 5m)'
+                  expression: 'min(/Linux by Zabbix agent active/system.cpu.load[all,avg1],5m)/last(/Linux by Zabbix agent active/system.cpu.num)>{$LOAD_AVG_PER_CPU.MAX.WARN}'
+              tags:
+                - tag: scope
+                  value: performance
+        - uuid: 4ef463cc12da45e6b5a97cee93fd5ba0
+          name: 'CPU guest time'
+          type: ZABBIX_ACTIVE
+          key: 'system.cpu.util[,guest]'
+          value_type: FLOAT
+          units: '%'
+          description: 'Guest  time (time  spent  running  a  virtual  CPU  for  a  guest  operating  system)'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 0cb7f1c9774241968208724ab56f4d86
+          name: 'CPU guest nice time'
+          type: ZABBIX_ACTIVE
+          key: 'system.cpu.util[,guest_nice]'
+          value_type: FLOAT
+          units: '%'
+          description: 'Time spent running a niced guest (virtual CPU for guest operating systems under the control of the Linux kernel)'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 8a20c7edef6d449e8771ff57cebb87d8
+          name: 'CPU idle time'
+          type: ZABBIX_ACTIVE
+          key: 'system.cpu.util[,idle]'
+          value_type: FLOAT
+          units: '%'
+          description: 'The time the CPU has spent doing nothing.'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 9329b55874bb4de7a52f941f382ba9ce
+          name: 'CPU interrupt time'
+          type: ZABBIX_ACTIVE
+          key: 'system.cpu.util[,interrupt]'
+          value_type: FLOAT
+          units: '%'
+          description: 'The amount of time the CPU has been servicing hardware interrupts.'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 4859bb1b6e21469a917aa56fbfbe1698
+          name: 'CPU iowait time'
+          type: ZABBIX_ACTIVE
+          key: 'system.cpu.util[,iowait]'
+          value_type: FLOAT
+          units: '%'
+          description: 'Amount of time the CPU has been waiting for I/O to complete.'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: d965fa68eea3454e83179116c5483322
+          name: 'CPU nice time'
+          type: ZABBIX_ACTIVE
+          key: 'system.cpu.util[,nice]'
+          value_type: FLOAT
+          units: '%'
+          description: 'The time the CPU has spent running users'' processes that have been niced.'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 2ff77e25f0fe45238c64a6532735cdd5
+          name: 'CPU softirq time'
+          type: ZABBIX_ACTIVE
+          key: 'system.cpu.util[,softirq]'
+          value_type: FLOAT
+          units: '%'
+          description: 'The amount of time the CPU has been servicing software interrupts.'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 434c154ba392476f9ad8a94968840e19
+          name: 'CPU steal time'
+          type: ZABBIX_ACTIVE
+          key: 'system.cpu.util[,steal]'
+          value_type: FLOAT
+          units: '%'
+          description: 'The amount of CPU ''stolen'' from this virtual machine by the hypervisor for other tasks (such as running another virtual machine).'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: 75622323ae4447e8a21a04ef191fdc2d
+          name: 'CPU system time'
+          type: ZABBIX_ACTIVE
+          key: 'system.cpu.util[,system]'
+          value_type: FLOAT
+          units: '%'
+          description: 'The time the CPU has spent running the kernel and its processes.'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: c74b64926aae4a8e8c2299d8bfe2e188
+          name: 'CPU user time'
+          type: ZABBIX_ACTIVE
+          key: 'system.cpu.util[,user]'
+          value_type: FLOAT
+          units: '%'
+          description: 'The time the CPU has spent running users'' processes that are not niced.'
+          tags:
+            - tag: component
+              value: cpu
+        - uuid: fdf4eb1b98d04b229a1c9a3c0b5837ba
+          name: 'System name'
+          type: ZABBIX_ACTIVE
+          key: system.hostname
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: 'System host name.'
+          inventory_link: NAME
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: c2fc80044fa94f0d97c72bd1d749b731
+              expression: 'last(/Linux by Zabbix agent active/system.hostname,#1)<>last(/Linux by Zabbix agent active/system.hostname,#2) and length(last(/Linux by Zabbix agent active/system.hostname))>0'
+              name: 'System name has changed (new name: {ITEM.VALUE})'
+              priority: INFO
+              description: 'System name has changed. Ack to close.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+                - tag: scope
+                  value: security
+        - uuid: c8fa467600ab48ce8cec353bab6c3a54
+          name: 'System local time'
+          type: ZABBIX_ACTIVE
+          key: system.localtime
+          units: unixtime
+          description: 'System local time of the host.'
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 10f29c3898cf41a0a2551349cd052413
+              expression: 'fuzzytime(/Linux by Zabbix agent active/system.localtime,{$SYSTEM.FUZZYTIME.MAX})=0'
+              name: 'System time is out of sync (diff with Zabbix server > {$SYSTEM.FUZZYTIME.MAX}s)'
+              priority: WARNING
+              description: 'The host system time is different from the Zabbix server time.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+        - uuid: 627cbcb2432a4aeda6e90363d9b0c1db
+          name: 'Operating system architecture'
+          type: ZABBIX_ACTIVE
+          key: system.sw.arch
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          description: 'Operating system architecture of the host.'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: os
+        - uuid: d8c633f2fd1947028079a5939835dcd8
+          name: 'Operating system'
+          type: ZABBIX_ACTIVE
+          key: system.sw.os
+          delay: 1h
+          value_type: CHAR
+          trends: '0'
+          inventory_link: OS
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: os
+          triggers:
+            - uuid: e27cb7063ca841a2b78aa547ec0d001c
+              expression: 'last(/Linux by Zabbix agent active/system.sw.os,#1)<>last(/Linux by Zabbix agent active/system.sw.os,#2) and length(last(/Linux by Zabbix agent active/system.sw.os))>0'
+              name: 'Operating system description has changed'
+              priority: INFO
+              description: 'Operating system description has changed. Possible reasons that system has been updated or replaced. Ack to close.'
+              manual_close: 'YES'
+              dependencies:
+                - name: 'System name has changed (new name: {ITEM.VALUE})'
+                  expression: 'last(/Linux by Zabbix agent active/system.hostname,#1)<>last(/Linux by Zabbix agent active/system.hostname,#2) and length(last(/Linux by Zabbix agent active/system.hostname))>0'
+              tags:
+                - tag: scope
+                  value: notice
+            - uuid: 14436b757f0e43fca6c1b31938f20cec
+              expression: 'last(/Linux by Zabbix agent active/system.sw.os)<>last(/Linux by Zabbix agent active/system.sw.os)'
+              name: 'OS Upgrade to Kernel {ITEM.LASTVALUE}'
+              priority: AVERAGE
+        - uuid: 16b1e5ab950040ef8c29139e0649d622
+          name: 'Software installed'
+          type: ZABBIX_ACTIVE
+          key: system.sw.packages
+          delay: 1h
           value_type: TEXT
           trends: '0'
-          url: '{$HA.URL}/api/states'
-          headers:
-            - name: Authorization
-              value: 'Bearer {$API.TOKEN}'
-          output_format: JSON
-        - uuid: f77762bbd6df4dde9b5dbbf49160487e
-          name: 'Home Assistant Core Update'
-          type: DEPENDENT
-          key: update.home.assistant.core.update
-          delay: '0'
-          trends: '0'
-          valuemap:
-            name: update
           preprocessing:
-            - type: JSONPATH
+            - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - '$.body[?(@.entity_id==''update.home_assistant_core_update'')].state'
-            - type: LTRIM
-              parameters:
-                - '["'
-            - type: RTRIM
-              parameters:
-                - '"]'
-            - type: STR_REPLACE
-              parameters:
-                - 'on'
-                - '1'
-            - type: STR_REPLACE
-              parameters:
-                - 'off'
-                - '0'
-            - type: STR_REPLACE
-              parameters:
-                - unavailable
-                - '2'
-          master_item:
-            key: ha.raw
+                - 1d
           tags:
-            - tag: 'Home Assistant'
-              value: update-core
-          triggers:
-            - uuid: 2ce6c84c011e49c18efe116d031c26b2
-              expression: 'last(/Home Assistant - Zabbix/update.home.assistant.core.update)=1'
-              name: 'Home Assistant update for Home Assistant Core Update is available.'
-              priority: AVERAGE
-        - uuid: 352a320642644f3d9364d3d15759d517
-          name: 'Home Assistant Supervisor Update'
-          type: DEPENDENT
-          key: update.home.assistant.supervisor.update
-          delay: '0'
+            - tag: component
+              value: os
+        - uuid: f08e1de57cbd4b08b9fd3294d0d95906
+          name: 'Free swap space'
+          type: ZABBIX_ACTIVE
+          key: 'system.swap.size[,free]'
+          units: B
+          description: 'The free space of swap volume/file in bytes.'
+          tags:
+            - tag: component
+              value: memory
+            - tag: component
+              value: storage
+        - uuid: 56b8f84d22264b92b70a6ab0c3c70f19
+          name: 'Free swap space in %'
+          type: ZABBIX_ACTIVE
+          key: 'system.swap.size[,pfree]'
+          value_type: FLOAT
+          units: '%'
+          description: 'The free space of swap volume/file in percent.'
+          tags:
+            - tag: component
+              value: memory
+            - tag: component
+              value: storage
+        - uuid: 3a9fb924ab1d47168ffcab9d237d808a
+          name: 'Total swap space'
+          type: ZABBIX_ACTIVE
+          key: 'system.swap.size[,total]'
+          units: B
+          description: 'The total space of swap volume/file in bytes.'
+          tags:
+            - tag: component
+              value: memory
+            - tag: component
+              value: storage
+        - uuid: d3d73dcc92b34511971eddf956dc4c0f
+          name: 'System description'
+          type: ZABBIX_ACTIVE
+          key: system.uname
+          delay: 15m
+          value_type: CHAR
           trends: '0'
-          valuemap:
-            name: update
+          description: 'The information as normally returned by ''uname -a''.'
           preprocessing:
-            - type: JSONPATH
+            - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
-                - '$.body[?(@.entity_id==''update.home_assistant_supervisor_update'')].state'
-            - type: LTRIM
-              parameters:
-                - '["'
-            - type: RTRIM
-              parameters:
-                - '"]'
-            - type: STR_REPLACE
-              parameters:
-                - 'on'
-                - '1'
-            - type: STR_REPLACE
-              parameters:
-                - 'off'
-                - '0'
-            - type: STR_REPLACE
-              parameters:
-                - unavailable
-                - '2'
-          master_item:
-            key: ha.raw
+                - 12h
           tags:
-            - tag: 'Home Assistant'
-              value: update-supervisor
+            - tag: component
+              value: system
+        - uuid: 51bdea745e0547ad92a74fefaea54e39
+          name: 'System uptime'
+          type: ZABBIX_ACTIVE
+          key: system.uptime
+          delay: 30s
+          units: uptime
+          description: 'System uptime in ''N days, hh:mm:ss'' format.'
+          tags:
+            - tag: component
+              value: system
           triggers:
-            - uuid: 19e42eea3cd2478a9af66c8cfe1e427a
-              expression: 'last(/Home Assistant - Zabbix/update.home.assistant.supervisor.update)=1'
-              name: 'Home Assistant update for Home Assistant supervisor Update is available.'
+            - uuid: 64dbab85caf749f59f3da0c374746bc2
+              expression: 'last(/Linux by Zabbix agent active/system.uptime)<10m'
+              name: '{HOST.NAME} has been restarted (uptime < 10m)'
+              priority: INFO
+              description: 'The host uptime is less than 10 minutes'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: 4ea1cfb5813a422b98caebcd870959ef
+          name: 'Number of logged in users'
+          type: ZABBIX_ACTIVE
+          key: system.users.num
+          description: 'Number of users who are currently logged in.'
+          tags:
+            - tag: component
+              value: environment
+        - uuid: 87f35de24ba74a8d8f70430c8da85261
+          name: 'Checksum of /etc/passwd'
+          type: ZABBIX_ACTIVE
+          key: 'vfs.file.cksum[/etc/passwd,sha256]'
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            - tag: component
+              value: environment
+          triggers:
+            - uuid: c5a76894508c4f0e9dcc9f70e6f39f49
+              expression: 'last(/Linux by Zabbix agent active/vfs.file.cksum[/etc/passwd,sha256],#1)<>last(/Linux by Zabbix agent active/vfs.file.cksum[/etc/passwd,sha256],#2)'
+              name: '/etc/passwd has been changed  {ITEM.VALUE}'
               priority: AVERAGE
+              manual_close: 'YES'
+              dependencies:
+                - name: 'Operating system description has changed'
+                  expression: 'last(/Linux by Zabbix agent active/system.sw.os,#1)<>last(/Linux by Zabbix agent active/system.sw.os,#2) and length(last(/Linux by Zabbix agent active/system.sw.os))>0'
+                - name: 'System name has changed (new name: {ITEM.VALUE})'
+                  expression: 'last(/Linux by Zabbix agent active/system.hostname,#1)<>last(/Linux by Zabbix agent active/system.hostname,#2) and length(last(/Linux by Zabbix agent active/system.hostname))>0'
+              tags:
+                - tag: scope
+                  value: security
+        - uuid: 50d2dff842df4f5fa9469f17b160fbbd
+          name: 'Cached memory'
+          type: ZABBIX_ACTIVE
+          key: 'vm.memory.size[cached]'
+          units: B
+          description: 'Available memory, in Linux, available = free + buffers + cache. On other platforms calculation may vary. See also Appendixes in Zabbix Documentation about parameters of the vm.memory.size item.'
+          tags:
+            - tag: component
+              value: memory
+        - uuid: ab69adfe7e3b424db5741351af52d11c
+          name: 'Free memory'
+          type: ZABBIX_ACTIVE
+          key: 'vm.memory.size[free]'
+          units: B
+          description: 'Available memory, in Linux, available = free + buffers + cache. On other platforms calculation may vary. See also Appendixes in Zabbix Documentation about parameters of the vm.memory.size item.'
+          tags:
+            - tag: component
+              value: memory
+          triggers:
+            - uuid: f3469ba10fe74cf58796be2996a32b54
+              expression: 'last(/Linux by Zabbix agent active/vm.memory.size[free],#2592000)>17179869184'
+              name: 'Seit 30 Tagen sind mehr als 2 GB RAM verfügbar'
+              priority: WARNING
+        - uuid: 99efd95a41b34457a2ec0d8c96324e7c
+          name: 'Available memory in %'
+          type: ZABBIX_ACTIVE
+          key: 'vm.memory.size[pavailable]'
+          value_type: FLOAT
+          units: '%'
+          description: 'Available memory as percentage of total. See also Appendixes in Zabbix Documentation about parameters of the vm.memory.size item.'
+          tags:
+            - tag: component
+              value: memory
+        - uuid: 127c85c3b45b45d2a62aefcb3a809b56
+          name: 'Used memory in %'
+          type: ZABBIX_ACTIVE
+          key: 'vm.memory.size[pused]'
+          value_type: FLOAT
+          units: '%'
+          description: 'Used memory as percentage of total. See also Appendixes in Zabbix Documentation about parameters of the vm.memory.size item.'
+          tags:
+            - tag: component
+              value: memory
+        - uuid: 013fe8b15c86442eadc10763706ec594
+          name: 'Total memory'
+          type: ZABBIX_ACTIVE
+          key: 'vm.memory.size[total]'
+          units: B
+          description: 'Total memory in Bytes'
+          tags:
+            - tag: component
+              value: memory
+        - uuid: 5bf94ec3debc459fa3e13449199052ee
+          name: 'Used memory'
+          type: ZABBIX_ACTIVE
+          key: 'vm.memory.size[used]'
+          units: B
+          description: 'Available memory, in Linux, available = free + buffers + cache. On other platforms calculation may vary. See also Appendixes in Zabbix Documentation about parameters of the vm.memory.size item.'
+          tags:
+            - tag: component
+              value: memory
+        - uuid: 07e60e812d32443ba8e8b0eb27166b98
+          name: 'Memory utilization'
+          type: DEPENDENT
+          key: vm.memory.utilization
+          delay: '0'
+          value_type: FLOAT
+          units: '%'
+          description: 'Memory used percentage is calculated as (100-pavailable)'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - 'return (100-value);'
+          master_item:
+            key: 'vm.memory.size[pavailable]'
+          tags:
+            - tag: component
+              value: memory
+          triggers:
+            - uuid: fb368aa704064a44b9a4ed8c129cf3e8
+              expression: 'min(/Linux by Zabbix agent active/vm.memory.utilization,5m)>{$MEMORY.UTIL.MAX}'
+              name: 'High memory utilization (>{$MEMORY.UTIL.MAX}% for 5m)'
+              opdata: 'Last: {ITEM.LASTVALUE}'
+              priority: AVERAGE
+              description: 'The system is running out of free memory.'
+              manual_close: 'YES'
+              dependencies:
+                - name: 'Lack of available memory (<{$MEMORY.AVAILABLE.MIN} of {ITEM.VALUE2})'
+                  expression: 'max(/Linux by Zabbix agent active/vm.memory.size[used],5m)<{$MEMORY.AVAILABLE.MIN} and last(/Linux by Zabbix agent active/vm.memory.size[total])>0'
+              tags:
+                - tag: scope
+                  value: capacity
+                - tag: scope
+                  value: performance
       discovery_rules:
-        - uuid: 4a40f645dc4d49218ff7460cb4704a96
-          name: HA-backup.manager.state
-          type: DEPENDENT
-          key: backup.manager.state
-          delay: '0'
+        - uuid: 0b47631fb1334f78a7fe5207194a5476
+          name: 'Network interface discovery'
+          type: ZABBIX_ACTIVE
+          key: net.if.discovery
           filter:
+            evaltype: AND
             conditions:
-              - macro: '{#ENTITY_ID}'
-                value: ^sensor\.backup_backup_manager_.+$
+              - macro: '{#IFNAME}'
+                value: '{$NET.IF.IFNAME.MATCHES}'
                 formulaid: A
-          item_prototypes:
-            - uuid: 1ea35f8966a8415bb8838017e28c1439
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'backup.manager.state[{#ENTITY_ID}]'
-              delay: '0'
-              trends: '0'
-              description: |
-                | Number | State Key        | Description     |
-                | ---: | :--------------- | :--------------- |
-                |    0 | `idle`           | Idle             |
-                |    1 | `create_backup`  | Creating backup  |
-                |    2 | `receive_backup` | Receiving backup |
-                |    3 | `restore_backup` | Restoring backup |
-                |    4 | `blocked`        | Backup blocked   |
-              valuemap:
-                name: backup_manager
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: STR_REPLACE
-                  parameters:
-                    - idle
-                    - '0'
-                - type: STR_REPLACE
-                  parameters:
-                    - create_backup
-                    - '1'
-                - type: STR_REPLACE
-                  parameters:
-                    - receive_backup
-                    - '2'
-                - type: STR_REPLACE
-                  parameters:
-                    - restore_backup
-                    - '3'
-                - type: STR_REPLACE
-                  parameters:
-                    - blocked
-                    - '4'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: backup-manager-state
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: d6a30debaed74aa09515805c866d8b87
-          name: HA-automation
-          type: DEPENDENT
-          key: ha.automation
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '^automation\..*'
-                formulaid: A
-          item_prototypes:
-            - uuid: 7e37c15d52c346ed8aaf351a882e36a9
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ha.autot[{#ENTITY_ID}]'
-              delay: '0'
-              trends: 730d
-              valuemap:
-                name: automation
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: STR_REPLACE
-                  parameters:
-                    - 'on'
-                    - '1'
-                - type: STR_REPLACE
-                  parameters:
-                    - 'off'
-                    - '0'
-                - type: STR_REPLACE
-                  parameters:
-                    - unavailable
-                    - '2'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: automations
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 041bbefc72cb4ffea38a2012e0b79cf2
-          name: HA-batterie
-          type: DEPENDENT
-          key: ha.batt
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_battery$'
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: '.*_battery_level$'
+              - macro: '{#IFNAME}'
+                value: '{$NET.IF.IFNAME.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
                 formulaid: B
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Discovery of network interfaces.'
           item_prototypes:
-            - uuid: 175a65ef0f384596a0bc5177ea1b0458
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ent.bat[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              trends: 730d
-              units: '!{#UNITS}'
-              valuemap:
-                name: battery
+            - uuid: f1a4f18b78754e669d1ddc593765f2e4
+              name: 'Interface {#IFNAME}: Inbound packets discarded'
+              type: ZABBIX_ACTIVE
+              key: 'net.if.in["{#IFNAME}",dropped]'
+              delay: 3m
+              history: 7d
               preprocessing:
-                - type: JSONPATH
+                - type: CHANGE_PER_SECOND
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: STR_REPLACE
-                  parameters:
-                    - Unavailable
-                    - '-1'
-                - type: STR_REPLACE
-                  parameters:
-                    - unavailable
-                    - '-1'
-              master_item:
-                key: ha.raw
+                    - ''
               tags:
-                - tag: 'Home Assistant'
-                  value: battery-level
-              trigger_prototypes:
-                - uuid: c00c1ebc288448daa088e54432c80596
-                  expression: 'last(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}])<{$BATTERY.MINIMUM:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}])>=0 and {$SWITCH.TRIGGER.BATTERY:"{#ENTITY_ID}"}=1'
-                  name: 'Battery replacement at {#FRIENDLY_NAME} is required.'
-                  priority: HIGH
-                - uuid: afcc007a51cc4d12ad4300eec03ab583
-                  expression: 'max(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}],900)=-1 and {$SWITCH.TRIGGER.BATTERY.UNAVAILABLE:"{#ENTITY_ID}"}=1'
-                  name: 'Battery status unavailable on {#FRIENDLY_NAME}'
-                  priority: HIGH
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: b21d364cbc23433ca3876572fb74b8bb
-          name: HA-camera
-          type: DEPENDENT
-          key: ha.camera
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '^camera\..*'
-                formulaid: A
-          item_prototypes:
-            - uuid: a69e97081d10499ba67335c3cbd2a1e4
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ha.cam.stat[{#ENTITY_ID}]'
-              delay: '0'
-              trends: 730d
-              valuemap:
-                name: camera
+                - tag: component
+                  value: network
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: f0eb218780ce44128117d73d65d412a9
+              name: 'Interface {#IFNAME}: Inbound packets with errors'
+              type: ZABBIX_ACTIVE
+              key: 'net.if.in["{#IFNAME}",errors]'
+              delay: 3m
+              history: 7d
               preprocessing:
-                - type: JSONPATH
+                - type: CHANGE_PER_SECOND
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: STR_REPLACE
-                  parameters:
-                    - unavailable
-                    - '0'
-                - type: STR_REPLACE
-                  parameters:
-                    - available
-                    - '1'
-                - type: STR_REPLACE
-                  parameters:
-                    - idle
-                    - '2'
-              master_item:
-                key: ha.raw
+                    - ''
               tags:
-                - tag: 'Home Assistant'
-                  value: camera
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 1311148760784d948dc433324f030bc9
-          name: HA-contact-sensor
-          type: DEPENDENT
-          key: ha.contact
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_ajto$'
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: '.*_contact$'
-                formulaid: B
-              - macro: '{#ENTITY_ID}'
-                value: '.*_door$'
-                formulaid: C
-          item_prototypes:
-            - uuid: c7d6d4e1266d4310ac88aec260d7e490
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ent.conbtact[{#ENTITY_ID}]'
-              delay: '0'
-              trends: 730d
-              valuemap:
-                name: contact-sensot
+                - tag: component
+                  value: network
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 37dd13afa2b84b0e906a80016b9b2bf5
+              name: 'Interface {#IFNAME}: Bits received'
+              type: ZABBIX_ACTIVE
+              key: 'net.if.in["{#IFNAME}"]'
+              delay: 3m
+              history: 7d
+              units: bps
               preprocessing:
-                - type: JSONPATH
+                - type: CHANGE_PER_SECOND
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
+                    - ''
+                - type: MULTIPLIER
                   parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: STR_REPLACE
-                  parameters:
-                    - 'off'
-                    - '0'
-                - type: STR_REPLACE
-                  parameters:
-                    - 'on'
-                    - '1'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: contact-sensor-state
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: d1c84360be9c40af8d42a014f504b55f
-          name: HA-disk.free
-          type: DEPENDENT
-          key: ha.disk.free
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '^sensor\.systemmonitor_disk_free.*$'
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: '^sensor\.system_monitor_freier_massenspeicher.*$'
-                formulaid: B
-          item_prototypes:
-            - uuid: cf70957f842d4b869274cc3ab6ba6cf0
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'disk.free.mb[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              units: '{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: disk-free
-              trigger_prototypes:
-                - uuid: 1e0741c1d8e248e48fbff5d82859f940
-                  expression: 'min(/Home Assistant - Zabbix/disk.free.mb[{#ENTITY_ID}],5m)<{$DISK.PFREE.MIN.WARN.GIB}'
-                  name: '{#FRIENDLY_NAME}: Running out of space'
-                  opdata: 'Free space:  {ITEM.LASTVALUE}'
-                  priority: HIGH
-                  manual_close: 'YES'
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 9a41d3531a3d40d8947ea732e902e204
-          name: HA-disk.used
-          type: DEPENDENT
-          key: ha.disk.used
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '^sensor\.systemmonitor_disk_use.*$'
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: '^sensor\.system_monitor_belegter_massenspeicher.*$'
-                formulaid: B
-          item_prototypes:
-            - uuid: 622ebc54540d4315af40dca081a22d6a
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'disk.used.mb[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              units: '{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: disk-used
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: d3bcf12e6db646b28bf746dba7607433
-          name: HA-distance
-          type: DEPENDENT
-          key: ha.distance
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_distance$'
-                formulaid: A
-          item_prototypes:
-            - uuid: 657c2300e6bd4e15bb87ed4461b7f637
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ha.meters.walked[{#ENTITY_ID}]'
-              delay: '0'
-              units: '{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: meters-moved
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: ca8b557897294617a9335951eb401671
-          name: HA-fine-dust
-          type: DEPENDENT
-          key: ha.fine.dust
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_pm25$'
-                formulaid: A
-          item_prototypes:
-            - uuid: 32084b6e9438468eb986038eebbf657c
-              name: 'Find dust {#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'fine.dust[{#ENTITY_ID}]'
-              delay: '0'
-              trends: 730d
-              units: '{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: fine-dust
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: b63728f7e0764348b0ce33f7883e4efa
-          name: HA-floors-ascended
-          type: DEPENDENT
-          key: ha.floors.ascended
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_ascended$'
-                formulaid: A
-          item_prototypes:
-            - uuid: 423de2cfc16e4016acbc26754fe1f0ef
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ha.floors.ascended[{#ENTITY_ID}]'
-              delay: '0'
-              units: '{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: floors-ascended
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: c700bd7346384021aa735ab743d12591
-          name: HA-floors-descended
-          type: DEPENDENT
-          key: ha.floors.descended
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_descended$'
-                formulaid: A
-          item_prototypes:
-            - uuid: d773f0642bdb4f4db1ef7039b13e1b76
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ha.floors.descended[{#ENTITY_ID}]'
-              delay: '0'
-              units: '{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: floors-descended
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 1f4986b135ca49d3a47930d0e43c7eac
-          name: HA-weather-forecast
-          type: DEPENDENT
-          key: ha.forecast
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*forecast_home$'
-                formulaid: A
-          item_prototypes:
-            - uuid: df0e32186224466481e2ebe7f8e9bab4
-              name: 'Weather forecast {#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ha.forecast[{#ENTITY_ID}]'
-              delay: '0'
-              trends: 730d
-              description: |
-                1=Clear, night: The sky is clear during the night.
-                2=Cloudy: There are many clouds in the sky.
-                3=Fog: There is a thick mist or fog reducing visibility.
-                4=Hail: Hailstones are falling.
-                5=Lightning: Lightning/thunderstorms are occurring.
-                6=Lightning, rainy: Lightning/thunderstorm is occurring along with rain.
-                7=Partly cloudy: The sky is partially covered with clouds.
-                8=Pouring: It is raining heavily.
-                9=Rainy: It is raining.
-                10=Snowy: It is snowing.
-                11=Snowy, rainy: It is snowing and raining at the same time.
-                12=Sunny: The sky is clear and the sun is shining.
-                13=Windy: It is windy.
-                14=Windy, cloudy: It is windy and cloudy.
-                15=Exceptional: Exceptional weather conditions are occurring.
-              valuemap:
-                name: weather
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: STR_REPLACE
-                  parameters:
-                    - clear-night
-                    - '1'
-                - type: STR_REPLACE
-                  parameters:
-                    - cloudy
-                    - '2'
-                - type: STR_REPLACE
-                  parameters:
-                    - fog
-                    - '3'
-                - type: STR_REPLACE
-                  parameters:
-                    - hail
-                    - '4'
-                - type: STR_REPLACE
-                  parameters:
-                    - lightning
-                    - '5'
-                - type: STR_REPLACE
-                  parameters:
-                    - lightning-rainy
-                    - '6'
-                - type: STR_REPLACE
-                  parameters:
-                    - partly2
-                    - '7'
-                - type: STR_REPLACE
-                  parameters:
-                    - pouring
                     - '8'
-                - type: STR_REPLACE
-                  parameters:
-                    - rainy
-                    - '9'
-                - type: STR_REPLACE
-                  parameters:
-                    - snowy
-                    - '10'
-                - type: STR_REPLACE
-                  parameters:
-                    - snowy-rainy
-                    - '11'
-                - type: STR_REPLACE
-                  parameters:
-                    - sunny
-                    - '12'
-                - type: STR_REPLACE
-                  parameters:
-                    - windy
-                    - '13'
-                - type: STR_REPLACE
-                  parameters:
-                    - windy-variant
-                    - '14'
-                - type: STR_REPLACE
-                  parameters:
-                    - exceptional
-                    - '15'
-              master_item:
-                key: ha.raw
               tags:
-                - tag: 'Home Assistant'
-                  value: weather-forecast
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 9a7d25208cff4c65929f670e291a4bdc
-          name: HA-Illuminance
-          type: DEPENDENT
-          key: ha.illu
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_illuminance$'
-                formulaid: A
-          item_prototypes:
-            - uuid: 910c678e05454c7bb80c3e1f72d33d3a
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ent.illu[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              trends: 730d
-              units: '{#UNITS}'
+                - tag: component
+                  value: network
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 90362d020e82429d87b0b1688355831d
+              name: 'Interface {#IFNAME}: Outbound packets with errors'
+              type: ZABBIX_ACTIVE
+              key: 'net.if.out["{#IFNAME}",errors]'
+              delay: 3m
+              history: 7d
               preprocessing:
-                - type: JSONPATH
+                - type: CHANGE_PER_SECOND
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
+                    - ''
               tags:
-                - tag: 'Home Assistant'
-                  value: illuminance
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: e4b9ec1c521c49789c4cf4bf1ee025ee
-          name: HA-kWh
-          type: DEPENDENT
-          key: ha.kwh
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_energy$'
-                formulaid: A
-          item_prototypes:
-            - uuid: 71d59c9f642d40b59e2d7a463cfb3dfb
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ent.kwh[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              units: '{#UNITS}'
+                - tag: component
+                  value: network
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 63616a66fb5e4fd7a725c5186b47e516
+              name: 'Interface {#IFNAME}: Bits sent'
+              type: ZABBIX_ACTIVE
+              key: 'net.if.out["{#IFNAME}"]'
+              delay: 3m
+              history: 7d
+              units: bps
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                - tag: component
+                  value: network
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: 83b33479fd774915b100b69c527519c8
+              name: 'Interface {#IFNAME}: Operational status'
+              type: ZABBIX_ACTIVE
+              key: 'vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"]'
+              history: 7d
+              trends: '0'
+              description: 'Reference: https://www.kernel.org/doc/Documentation/networking/operstates.txt'
               valuemap:
-                name: kWh
+                name: ifOperStatus
               preprocessing:
-                - type: JSONPATH
+                - type: JAVASCRIPT
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: STR_REPLACE
-                  parameters:
-                    - unavailable
-                    - '0'
-              master_item:
-                key: ha.raw
+                    - |
+                      var newvalue;
+                      switch(value) {
+                        case "unknown":
+                          newvalue = 0;
+                          break;
+                        case "notpresent":
+                          newvalue = 1;
+                          break;
+                        case "down":
+                          newvalue = 2;
+                          break;
+                        case "lowerlayerdown":
+                          newvalue = 3;
+                          break;
+                        case "testing":
+                          newvalue = 4;
+                          break;
+                        case "dormant":
+                          newvalue = 5;
+                          break;
+                        case "up":
+                          newvalue = 6;
+                          break;  default:
+                          newvalue = "Problem parsing interface operstate in JS";
+                      }
+                      return newvalue;
               tags:
-                - tag: 'Home Assistant'
-                  value: used-kWh
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 04a35a2a931f489694ba3d2e17bec1ce
-          name: HA-light
-          type: DEPENDENT
-          key: ha.light
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '^light\..*'
-                formulaid: A
-          item_prototypes:
-            - uuid: 529acd31fca54758ad053f02709e2671
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ha.light[{#ENTITY_ID}]'
-              delay: '0'
-              valuemap:
-                name: light
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: STR_REPLACE
-                  parameters:
-                    - 'on'
-                    - '1'
-                - type: STR_REPLACE
-                  parameters:
-                    - 'off'
-                    - '0'
-                - type: STR_REPLACE
-                  parameters:
-                    - unavailable
-                    - '2'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: light
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 2459164c5d1d4a0ca13f527612377f35
-          name: HA-zigbee-linkquality
-          type: DEPENDENT
-          key: ha.linkquality
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_linkquality$'
-                formulaid: A
-          item_prototypes:
-            - uuid: adb345f9bd2942a2a2ca378028c15eb5
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ent.linkquality[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              trends: 730d
-              units: '{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: zigbee-linkquality
+                - tag: component
+                  value: network
+                - tag: interface
+                  value: '{#IFNAME}'
               trigger_prototypes:
-                - uuid: bcd8ff30b0ec4ac2806732d3a9209c06
-                  expression: 'min(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}],5m)<{$SWITCH.TRIGGER.ZIGBEE:"{#ENTITY_ID}"} or last(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}]) < {$ZIGBEE.SIGNAL.MINIMUM:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.ZIGBEE:"{#ENTITY_ID}"} = 1'
-                  name: 'The ZigBee connection of {#FRIENDLY_NAME}: {ITEM.LASTVALUE}'
+                - uuid: 1b8e42925e1b48969f35d91800fe5229
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2 and (last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#1)<>last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#2))'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2 or {$IFCONTROL:"{#IFNAME}"}=0'
+                  name: 'Interface {#IFNAME}: Link down'
+                  opdata: 'Current state: {ITEM.LASTVALUE1}'
+                  description: |
+                    This trigger expression works as follows:
+                    1. Can be triggered if operations status is down.
+                    2. {$IFCONTROL:"{#IFNAME}"}=1 - user can redefine Context macro to value - 0. That marks this interface as not important. No new trigger will be fired if this interface is down.
+                    3. {TEMPLATE_NAME:METRIC.diff()}=1) - trigger fires only if operational status was up(1) sometime before. (So, do not fire 'ethernal off' interfaces.)
+                    
+                    WARNING: if closed manually - won't fire again on next poll, because of .diff.
+                  manual_close: 'YES'
+                  tags:
+                    - tag: scope
+                      value: availability
+            - uuid: 86dd61015ecc43428803b309bdfa9691
+              name: 'Interface {#IFNAME}: Speed'
+              type: ZABBIX_ACTIVE
+              key: 'vfs.file.contents["/sys/class/net/{#IFNAME}/speed"]'
+              delay: 5m
+              history: 7d
+              trends: 0d
+              units: bps
+              description: |
+                Indicates the interface latest or current speed value. Value is an integer representing the link speed in bits/sec.
+                This attribute is only valid for interfaces that implement the ethtool get_link_ksettings method (mostly Ethernet).
+                
+                Reference: https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-class-net
+              preprocessing:
+                - type: MULTIPLIER
+                  parameters:
+                    - '1000000'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              tags:
+                - tag: component
+                  value: network
+                - tag: interface
+                  value: '{#IFNAME}'
+            - uuid: e675114e23414b9dbc2d19d00f32bc70
+              name: 'Interface {#IFNAME}: Interface type'
+              type: ZABBIX_ACTIVE
+              key: 'vfs.file.contents["/sys/class/net/{#IFNAME}/type"]'
+              delay: 1h
+              history: 7d
+              trends: 0d
+              description: |
+                Indicates the interface protocol type as a decimal value.
+                See include/uapi/linux/if_arp.h for all possible values.
+                Reference: https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-class-net
+              valuemap:
+                name: 'Linux::Interface protocol types'
+              preprocessing:
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              tags:
+                - tag: component
+                  value: network
+                - tag: interface
+                  value: '{#IFNAME}'
+          trigger_prototypes:
+            - uuid: c0fd4630351f424aa6c8b7f2e85f0f9e
+              expression: |
+                change(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])<0 and last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])>0
+                and
+                (last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/type"])=6 or last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/type"])=1)
+                and
+                (last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2)
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: |
+                (change(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])>0 and last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"],#2)>0) or
+                (last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2)
+              name: 'Interface {#IFNAME}: Ethernet has changed to lower speed than it was before'
+              opdata: 'Current reported speed: {ITEM.LASTVALUE1}'
+              priority: INFO
+              description: 'This Ethernet connection has transitioned down from its known maximum speed. This might be a sign of autonegotiation issues. Ack to close.'
+              manual_close: 'YES'
+              dependencies:
+                - name: 'Interface {#IFNAME}: Link down'
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2 and (last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#1)<>last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#2))'
+                  recovery_expression: 'last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2 or {$IFCONTROL:"{#IFNAME}"}=0'
+              tags:
+                - tag: scope
+                  value: performance
+            - uuid: 5370cb085c454077a2dd6c39890f706a
+              expression: |
+                (avg(/Linux by Zabbix agent active/net.if.in["{#IFNAME}"],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"]) or
+                avg(/Linux by Zabbix agent active/net.if.out["{#IFNAME}"],15m)>({$IF.UTIL.MAX:"{#IFNAME}"}/100)*last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])) and
+                last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])>0
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: |
+                avg(/Linux by Zabbix agent active/net.if.in["{#IFNAME}"],15m)<(({$IF.UTIL.MAX:"{#IFNAME}"}-3)/100)*last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"]) and
+                avg(/Linux by Zabbix agent active/net.if.out["{#IFNAME}"],15m)<(({$IF.UTIL.MAX:"{#IFNAME}"}-3)/100)*last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/speed"])
+              name: 'Interface {#IFNAME}: High bandwidth usage (>{$IF.UTIL.MAX:"{#IFNAME}"}%)'
+              opdata: 'In: {ITEM.LASTVALUE1}, out: {ITEM.LASTVALUE3}, speed: {ITEM.LASTVALUE2}'
+              priority: WARNING
+              description: 'The network interface utilization is close to its estimated maximum bandwidth.'
+              manual_close: 'YES'
+              dependencies:
+                - name: 'Interface {#IFNAME}: Link down'
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2 and (last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#1)<>last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#2))'
+                  recovery_expression: 'last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2 or {$IFCONTROL:"{#IFNAME}"}=0'
+              tags:
+                - tag: scope
+                  value: performance
+            - uuid: 58f4ba4b2795407896752da57462629d
+              expression: |
+                min(/Linux by Zabbix agent active/net.if.in["{#IFNAME}",errors],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
+                or min(/Linux by Zabbix agent active/net.if.out["{#IFNAME}",errors],5m)>{$IF.ERRORS.WARN:"{#IFNAME}"}
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: |
+                max(/Linux by Zabbix agent active/net.if.in["{#IFNAME}",errors],5m)<{$IF.ERRORS.WARN:"{#IFNAME}"}*0.8
+                and max(/Linux by Zabbix agent active/net.if.out["{#IFNAME}",errors],5m)<{$IF.ERRORS.WARN:"{#IFNAME}"}*0.8
+              name: 'Interface {#IFNAME}: High error rate (>{$IF.ERRORS.WARN:"{#IFNAME}"} for 5m)'
+              opdata: 'errors in: {ITEM.LASTVALUE1}, errors out: {ITEM.LASTVALUE2}'
+              priority: INFO
+              description: 'Recovers when below 80% of {$IF.ERRORS.WARN:"{#IFNAME}"} threshold'
+              manual_close: 'YES'
+              dependencies:
+                - name: 'Interface {#IFNAME}: Link down'
+                  expression: '{$IFCONTROL:"{#IFNAME}"}=1 and last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])=2 and (last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#1)<>last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"],#2))'
+                  recovery_expression: 'last(/Linux by Zabbix agent active/vfs.file.contents["/sys/class/net/{#IFNAME}/operstate"])<>2 or {$IFCONTROL:"{#IFNAME}"}=0'
+              tags:
+                - tag: scope
+                  value: availability
+                - tag: scope
+                  value: performance
+          graph_prototypes:
+            - uuid: 0f40b5d999704db6b305b116aa691e4d
+              name: 'Interface {#IFNAME}: bits eingehend/ausgehend'
+              graph_items:
+                - color: 199C0D
+                  calc_fnc: ALL
+                  item:
+                    host: 'Linux by Zabbix agent active'
+                    key: 'net.if.in["{#IFNAME}"]'
+                - sortorder: '1'
+                  color: 0040FF
+                  calc_fnc: ALL
+                  item:
+                    host: 'Linux by Zabbix agent active'
+                    key: 'net.if.out["{#IFNAME}"]'
+                - sortorder: '2'
+                  color: FF8000
+                  calc_fnc: ALL
+                  item:
+                    host: 'Linux by Zabbix agent active'
+                    key: 'net.if.in["{#IFNAME}",errors]'
+                - sortorder: '3'
+                  color: F63100
+                  calc_fnc: ALL
+                  item:
+                    host: 'Linux by Zabbix agent active'
+                    key: 'net.if.out["{#IFNAME}",errors]'
+            - uuid: 6e2814a0ef824df7b418bbd86b260181
+              name: 'Interface {#IFNAME}: Network traffic'
+              graph_items:
+                - drawtype: GRADIENT_LINE
+                  color: 1A7C11
+                  item:
+                    host: 'Linux by Zabbix agent active'
+                    key: 'net.if.in["{#IFNAME}"]'
+                - sortorder: '1'
+                  drawtype: BOLD_LINE
+                  color: 2774A4
+                  item:
+                    host: 'Linux by Zabbix agent active'
+                    key: 'net.if.out["{#IFNAME}"]'
+        - uuid: 89fb6430cdfa44fc963e0ea4bbda29fa
+          name: 'CPU discovery'
+          type: ZABBIX_ACTIVE
+          key: system.cpu.discovery
+          delay: 10m
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          item_prototypes:
+            - uuid: 037202140b8744889544232ae261b50a
+              name: 'CPU utilization for CPU {#CPU.NUMBER}'
+              type: ZABBIX_ACTIVE
+              key: 'system.cpu.util[{#CPU.NUMBER}]'
+              delay: 10s
+              history: 90d
+              value_type: FLOAT
+              units: '%'
+              valuemap:
+                name: cpu-discovery
+              preprocessing:
+                - type: CHECK_NOT_SUPPORTED
+                  parameters:
+                    - '-1'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              tags:
+                - tag: CPU
+                  value: CORE
+        - uuid: ff825e7028c24138a7ea6625353a1790
+          name: 'Block devices discovery'
+          type: ZABBIX_ACTIVE
+          key: vfs.dev.discovery
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#DEVNAME}'
+                value: '{$VFS.DEV.DEVNAME.MATCHES}'
+                formulaid: A
+              - macro: '{#DEVNAME}'
+                value: '{$VFS.DEV.DEVNAME.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+              - macro: '{#DEVTYPE}'
+                value: disk
+                formulaid: C
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          item_prototypes:
+            - uuid: 9a0448cf8a184d52a7872df410f25d6b
+              name: '{#DEVNAME}: Disk average queue size (avgqu-sz)'
+              type: DEPENDENT
+              key: 'vfs.dev.queue_size[{#DEVNAME}]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              description: 'Current average disk queue, the number of requests outstanding on the disk at the time the performance data is collected.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$[10]'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.001'
+              master_item:
+                key: 'vfs.file.contents[/sys/block/{#DEVNAME}/stat]'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: disk
+                  value: '{#DEVNAME}'
+            - uuid: 1b3559f0d90948f0a72c2fdfdc80930b
+              name: '{#DEVNAME}: Disk read request avg waiting time (r_await)'
+              type: CALCULATED
+              key: 'vfs.dev.read.await[{#DEVNAME}]'
+              history: 7d
+              value_type: FLOAT
+              units: '!ms'
+              params: '(last(//vfs.dev.read.time.rate[{#DEVNAME}])/(last(//vfs.dev.read.rate[{#DEVNAME}])+(last(//vfs.dev.read.rate[{#DEVNAME}])=0)))*1000*(last(//vfs.dev.read.rate[{#DEVNAME}]) > 0)'
+              description: 'This formula contains two boolean expressions that evaluates to 1 or 0 in order to set calculated metric to zero and to avoid division by zero exception.'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: disk
+                  value: '{#DEVNAME}'
+            - uuid: 3bb5f84b2e954c28843fa1fb3898c034
+              name: '{#DEVNAME}: Disk read rate'
+              type: DEPENDENT
+              key: 'vfs.dev.read.rate[{#DEVNAME}]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              units: '!r/s'
+              description: 'r/s. The number (after merges) of read requests completed per second for the device.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$[0]'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'vfs.file.contents[/sys/block/{#DEVNAME}/stat]'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: disk
+                  value: '{#DEVNAME}'
+            - uuid: df02934521b54864b2538b764c5d549b
+              name: '{#DEVNAME}: Disk read time (rate)'
+              type: DEPENDENT
+              key: 'vfs.dev.read.time.rate[{#DEVNAME}]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              description: 'Rate of total read time counter. Used in r_await calculation'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$[3]'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.001'
+              master_item:
+                key: 'vfs.file.contents[/sys/block/{#DEVNAME}/stat]'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: disk
+                  value: '{#DEVNAME}'
+            - uuid: 72546bd5eefb4ac7a0b2992a25e5f0c5
+              name: '{#DEVNAME}: Disk utilization'
+              type: DEPENDENT
+              key: 'vfs.dev.util[{#DEVNAME}]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              units: '%'
+              description: 'This item is the percentage of elapsed time that the selected disk drive was busy servicing read or writes requests.'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$[9]'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.1'
+              master_item:
+                key: 'vfs.file.contents[/sys/block/{#DEVNAME}/stat]'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: disk
+                  value: '{#DEVNAME}'
+              trigger_prototypes:
+                - uuid: 9115e3ca7e2a45e7ae5afe3e10170f05
+                  expression: 'last(/Linux by Zabbix agent active/vfs.dev.util[{#DEVNAME}])>{$DISK.UTIL.90:"{#DEVNAME}"}'
+                  name: 'High disk utilization on {#DEVNAME}'
+                  opdata: 'Dist utilization: ({ITEM.LASTVALUE})'
                   priority: HIGH
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 9b9c150e83af417599542bd13274a9f6
-          name: HA-humidity
-          type: DEPENDENT
-          key: ha.luft
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_humidity$'
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: '.*_moisture$'
-                formulaid: B
-          item_prototypes:
-            - uuid: d5b546cae3cb4664b5b2675002ad5111
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ent.luft[{#ENTITY_ID}]'
-              delay: '0'
+            - uuid: 8422c37735774134996be62580e7bf0f
+              name: '{#DEVNAME}: Disk write request avg waiting time (w_await)'
+              type: CALCULATED
+              key: 'vfs.dev.write.await[{#DEVNAME}]'
+              history: 7d
               value_type: FLOAT
-              trends: 730d
-              units: '{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
+              units: '!ms'
+              params: '(last(//vfs.dev.write.time.rate[{#DEVNAME}])/(last(//vfs.dev.write.rate[{#DEVNAME}])+(last(//vfs.dev.write.rate[{#DEVNAME}])=0)))*1000*(last(//vfs.dev.write.rate[{#DEVNAME}]) > 0)'
+              description: 'This formula contains two boolean expressions that evaluates to 1 or 0 in order to set calculated metric to zero and to avoid division by zero exception.'
               tags:
-                - tag: 'Home Assistant'
-                  value: humidity
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 7d6236e76d2a48718e3908bc68530925
-          name: HA-memory-free-mb
-          type: DEPENDENT
-          key: ha.memory.free.mb
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_freier_arbeitsspeicher$'
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: '.*_memory_free$'
-                formulaid: B
-          item_prototypes:
-            - uuid: 24a111e6fee64024975cf6658ab7722d
-              name: '{#FRIENDLY_NAME}'
+                - tag: component
+                  value: storage
+                - tag: disk
+                  value: '{#DEVNAME}'
+            - uuid: 4ba78909402d4bb8ab32f12c679ea3db
+              name: '{#DEVNAME}: Disk write rate'
               type: DEPENDENT
-              key: 'memory.free.mb[{#ENTITY_ID}]'
+              key: 'vfs.dev.write.rate[{#DEVNAME}]'
               delay: '0'
-              units: '!{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: memory-free
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: b486d9284dec47d9be84707d32a6ab3d
-          name: HA-memory-use
-          type: DEPENDENT
-          key: ha.memory.use
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_arbeitsspeicherauslastung$'
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: '.*_memory_use_percent$'
-                formulaid: B
-          item_prototypes:
-            - uuid: 1d21ec5918be47b78c6e187cc45a2055
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'memory.used.p[{#ENTITY_ID}]'
-              delay: '0'
+              history: 7d
               value_type: FLOAT
-              units: '{#UNITS}'
+              units: '!w/s'
+              description: 'w/s. The number (after merges) of write requests completed per second for the device.'
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
+                    - '$[4]'
+                - type: CHANGE_PER_SECOND
                   parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - ''
               master_item:
-                key: ha.raw
+                key: 'vfs.file.contents[/sys/block/{#DEVNAME}/stat]'
               tags:
-                - tag: 'Home Assistant'
-                  value: memory-utilization
+                - tag: component
+                  value: storage
+                - tag: disk
+                  value: '{#DEVNAME}'
+            - uuid: 7717dd9841004fa08b35b0e9f42bffaf
+              name: '{#DEVNAME}: Disk write time (rate)'
+              type: DEPENDENT
+              key: 'vfs.dev.write.time.rate[{#DEVNAME}]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              description: 'Rate of total write time counter. Used in w_await calculation'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$[7]'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '0.001'
+              master_item:
+                key: 'vfs.file.contents[/sys/block/{#DEVNAME}/stat]'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: disk
+                  value: '{#DEVNAME}'
+            - uuid: 39877664726f4886aa88f3d1592bbcb1
+              name: '{#DEVNAME}: Get stats'
+              type: ZABBIX_ACTIVE
+              key: 'vfs.file.contents[/sys/block/{#DEVNAME}/stat]'
+              history: '0'
+              value_type: TEXT
+              trends: '0'
+              description: 'Get contents of /sys/block/{#DEVNAME}/stat for disk stats.'
+              preprocessing:
+                - type: JAVASCRIPT
+                  parameters:
+                    - 'return JSON.stringify(value.trim().split(/ +/));'
+              tags:
+                - tag: component
+                  value: raw
+          trigger_prototypes:
+            - uuid: d0b4ecf2d9344866b3a20a901d3a3202
+              expression: 'min(/Linux by Zabbix agent active/vfs.dev.read.await[{#DEVNAME}],15m) > {$VFS.DEV.READ.AWAIT.WARN:"{#DEVNAME}"} or min(/Linux by Zabbix agent active/vfs.dev.write.await[{#DEVNAME}],15m) > {$VFS.DEV.WRITE.AWAIT.WARN:"{#DEVNAME}"}'
+              name: '{#DEVNAME}: Disk read/write request responses are too high (read > {$VFS.DEV.READ.AWAIT.WARN:"{#DEVNAME}"} ms for 15m or write > {$VFS.DEV.WRITE.AWAIT.WARN:"{#DEVNAME}"} ms for 15m)'
+              priority: INFO
+              description: 'This trigger might indicate disk {#DEVNAME} saturation.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: performance
+          graph_prototypes:
+            - uuid: feca6a365b8d49d2a66ff4bfac089fc8
+              name: '{#DEVNAME}: Disk average waiting time'
+              graph_items:
+                - color: 1A7C11
+                  item:
+                    host: 'Linux by Zabbix agent active'
+                    key: 'vfs.dev.read.await[{#DEVNAME}]'
+                - sortorder: '1'
+                  drawtype: GRADIENT_LINE
+                  color: 2774A4
+                  item:
+                    host: 'Linux by Zabbix agent active'
+                    key: 'vfs.dev.write.await[{#DEVNAME}]'
+            - uuid: b136583f822a4d48a52a17f4bb0d07d9
+              name: '{#DEVNAME}: Disk read/write rates'
+              graph_items:
+                - color: 1A7C11
+                  item:
+                    host: 'Linux by Zabbix agent active'
+                    key: 'vfs.dev.read.rate[{#DEVNAME}]'
+                - sortorder: '1'
+                  drawtype: GRADIENT_LINE
+                  color: 2774A4
+                  item:
+                    host: 'Linux by Zabbix agent active'
+                    key: 'vfs.dev.write.rate[{#DEVNAME}]'
+            - uuid: 8863772fb82b49a891ea50cbec5cdd05
+              name: '{#DEVNAME}: Disk utilization and queue'
+              graph_items:
+                - color: 1A7C11
+                  yaxisside: RIGHT
+                  item:
+                    host: 'Linux by Zabbix agent active'
+                    key: 'vfs.dev.queue_size[{#DEVNAME}]'
+                - sortorder: '1'
+                  drawtype: GRADIENT_LINE
+                  color: 2774A4
+                  item:
+                    host: 'Linux by Zabbix agent active'
+                    key: 'vfs.dev.util[{#DEVNAME}]'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+        - uuid: 5c9b5dbed44c4af0957ff9316f8fb761
+          name: 'Mounted filesystem discovery'
+          type: ZABBIX_ACTIVE
+          key: vfs.fs.discovery
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#FSNAME}'
+                value: '{$VFS.FS.FSNAME.MATCHES}'
+                formulaid: A
+              - macro: '{#FSNAME}'
+                value: '{$VFS.FS.FSNAME.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+              - macro: '{#FSTYPE}'
+                value: '{$VFS.FS.FSTYPE.MATCHES}'
+                formulaid: C
+              - macro: '{#FSTYPE}'
+                value: '{$VFS.FS.FSTYPE.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: D
+          lifetime: 30d
+          enabled_lifetime_type: DISABLE_NEVER
+          description: 'Discovery of file systems of different types.'
+          item_prototypes:
+            - uuid: 5cc9099851ee4f4498fd74ec2c377eb4
+              name: '{#FSNAME}: Free inodes in %'
+              type: ZABBIX_ACTIVE
+              key: 'vfs.fs.inode[{#FSNAME},pfree]'
+              history: 7d
+              value_type: FLOAT
+              trends: 720d
+              units: '%'
+              tags:
+                - tag: component
+                  value: storage
+                - tag: filesystem
+                  value: '{#FSNAME}'
               trigger_prototypes:
-                - uuid: ece6e1d58b7d446096de41f194e067ab
-                  expression: 'min(/Home Assistant - Zabbix/memory.used.p[{#ENTITY_ID}],5m)>{$MEMORY.UTIL.MAX.PERCENT}'
-                  name: 'High memory utilization (>{$MEMORY.UTIL.MAX.PERCENT}% for 5m)'
-                  opdata: 'Current memory usage: {ITEM.LASTVALUE}'
+                - uuid: 98e196ffb6f0422baf007fcff5f45b60
+                  expression: 'min(/Linux by Zabbix agent active/vfs.fs.inode[{#FSNAME},pfree],5m)<{$VFS.FS.INODE.PFREE.MIN.CRIT:"{#FSNAME}"}'
+                  name: '{#FSNAME}: Running out of free inodes (free < {$VFS.FS.INODE.PFREE.MIN.CRIT:"{#FSNAME}"}%)'
+                  opdata: 'Free inodes: {ITEM.LASTVALUE1}'
                   priority: AVERAGE
+                  description: |
+                    It may become impossible to write to disk if there are no index nodes left.
+                    As symptoms, 'No space left on device' or 'Disk is full' errors may be seen even though free space is available.
                   manual_close: 'YES'
                   tags:
                     - tag: scope
                       value: capacity
                     - tag: scope
                       value: performance
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 4801eb2c43a74b8fb99edf0f1119142c
-          name: HA-memory-used-mb
-          type: DEPENDENT
-          key: ha.memory.used.mb
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_belegter_arbeitsspeicher$'
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: '.*_memory_use$'
-                formulaid: B
-          item_prototypes:
-            - uuid: a7a1f9f8215547248e65c4ab67e60dc4
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'memory.used.mb[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              units: '!{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: memory-used
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 47c91bbb9cc04aaf9f952bdbd6af2c12
-          name: HA-occupancy
-          type: DEPENDENT
-          key: ha.occupancy
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_occupancy$'
-                formulaid: A
-          item_prototypes:
-            - uuid: 80af63d9c9514085a1eaef59042a95b6
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ha.occupancy[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              trends: 730d
-              valuemap:
-                name: occupancy
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: STR_REPLACE
-                  parameters:
-                    - 'on'
-                    - '1'
-                - type: STR_REPLACE
-                  parameters:
-                    - 'off'
-                    - '0'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: occupancy
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 521c20cefdc24936b1086368fe0a9ff0
-          name: HA-atmospheric-pressure
-          type: DEPENDENT
-          key: ha.pressure
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_pressure$'
-                formulaid: A
-          item_prototypes:
-            - uuid: dcc27475843a4422be16739172c0f982
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ent.pressure[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              trends: 730d
-              units: '{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: atmospheric-pressure
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: c47b7577f37949e4babb2847fe768a56
-          name: HA-processor-use
-          type: DEPENDENT
-          key: ha.processor.use
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_processor_use$'
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: '.*_prozessornutzung$'
-                formulaid: B
-          item_prototypes:
-            - uuid: ad1f4237714045b48dcf52c6ae089ed7
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'cpu.utilization[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              units: '{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: cpu-utilization
-              trigger_prototypes:
-                - uuid: d327545b23d74cda9ab06b3922aaa5b1
-                  expression: 'min(/Home Assistant - Zabbix/cpu.utilization[{#ENTITY_ID}],5m)>{$CPU.UTIL.MAX.PERCENT}'
-                  name: 'High CPU utilization (over {$CPU.UTIL.MAX.PERCENT}% for 5m)'
-                  opdata: 'Current CPU utilization: {ITEM.LASTVALUE}'
-                  priority: AVERAGE
+                - uuid: a17e14a65c53447a9ce607799a62e7dd
+                  expression: 'min(/Linux by Zabbix agent active/vfs.fs.inode[{#FSNAME},pfree],5m)<{$VFS.FS.INODE.PFREE.MIN.WARN:"{#FSNAME}"}'
+                  name: '{#FSNAME}: Running out of free inodes (free < {$VFS.FS.INODE.PFREE.MIN.WARN:"{#FSNAME}"}%)'
+                  opdata: 'Free inodes: {ITEM.LASTVALUE1}'
+                  priority: HIGH
+                  description: |
+                    It may become impossible to write to disk if there are no index nodes left.
+                    As symptoms, 'No space left on device' or 'Disk is full' errors may be seen even though free space is available.
+                  dependencies:
+                    - name: '{#FSNAME}: Running out of free inodes (free < {$VFS.FS.INODE.PFREE.MIN.CRIT:"{#FSNAME}"}%)'
+                      expression: 'min(/Linux by Zabbix agent active/vfs.fs.inode[{#FSNAME},pfree],5m)<{$VFS.FS.INODE.PFREE.MIN.CRIT:"{#FSNAME}"}'
                   tags:
                     - tag: scope
+                      value: capacity
+                    - tag: scope
                       value: performance
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: f5ee07c1638b4b57a04eaf2e41e8d0fd
-          name: HA-restart
-          type: DEPENDENT
-          key: ha.restart
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_restart$'
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: '.*_restart_required$'
-                formulaid: B
-          item_prototypes:
-            - uuid: ec5c6e0e814a4104a0ecaff0d014fdc2
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ent.restart[{#ENTITY_ID}]'
-              delay: '0'
-              valuemap:
-                name: 'restart required'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: STR_REPLACE
-                  parameters:
-                    - 'on'
-                    - '1'
-                - type: STR_REPLACE
-                  parameters:
-                    - 'off'
-                    - '0'
-                - type: STR_REPLACE
-                  parameters:
-                    - unknown
-                    - '2'
-                - type: STR_REPLACE
-                  parameters:
-                    - unavailable
-                    - '3'
-              master_item:
-                key: ha.raw
+            - uuid: c133ca586bf24dfc9cce52aecd9812f6
+              name: '{#FSNAME}: Free space'
+              type: ZABBIX_ACTIVE
+              key: 'vfs.fs.size[{#FSNAME},free]'
+              history: 7d
+              trends: 720d
+              units: B
+              description: 'Used storage in Bytes'
               tags:
-                - tag: 'Home Assistant'
-                  value: restart-required
-              trigger_prototypes:
-                - uuid: 4f0434fdb2ae45839b8077dad4211fc5
-                  expression: 'last(/Home Assistant - Zabbix/ent.restart[{#ENTITY_ID}])=1 and {$SWITCH.TRIGGER.RESTART.REQUIRED:"{#ENTITY_ID}"}=1'
-                  name: '{#FRIENDLY_NAME} needs a restart.'
-                  priority: AVERAGE
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 1f841913ee024e52a0f0b76df12dd146
-          name: HA-steps
-          type: DEPENDENT
-          key: ha.steps
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_steps$'
-                formulaid: A
-          item_prototypes:
-            - uuid: abd1084ea22c4bd5a1e522c13b4662a2
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ha.steps[{#ENTITY_ID}]'
-              delay: '0'
-              units: '{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: steps-taken
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: b2351deea12944c4ba9cbfd04baf8575
-          name: HA-storage-available
-          type: DEPENDENT
-          key: ha.storage.available
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_storage$'
-                formulaid: A
-          item_prototypes:
-            - uuid: f4f2c169eac14b8da5bce470ebc84c24
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ha.storage.available[{#ENTITY_ID}]'
-              delay: '0'
+                - tag: component
+                  value: storage
+                - tag: filesystem
+                  value: '{#FSNAME}'
+            - uuid: b33989051217493cb9124302297e409f
+              name: '{#FSNAME}: Space utilization'
+              type: ZABBIX_ACTIVE
+              key: 'vfs.fs.size[{#FSNAME},pused]'
+              history: 7d
               value_type: FLOAT
-              units: '{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
+              units: '%'
+              description: 'Space utilization in % for {#FSNAME}'
               tags:
-                - tag: 'Home Assistant'
-                  value: storage-available
-              trigger_prototypes:
-                - uuid: a13d86cbd32c48559a9682e4dc68f872
-                  expression: 'last(/Home Assistant - Zabbix/ha.storage.available[{#ENTITY_ID}])<{$STORAGE_PERCENT:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.STORAGE:"{#ENTITY_ID}"}=1'
-                  name: '{#FRIENDLY_NAME} Storage available: {ITEM.LASTVALUE}'
-                  priority: HIGH
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: a3661e09a4ed4b16b7fbf8828797453c
-          name: HA-swap-free
-          type: DEPENDENT
-          key: ha.swap.free
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_freier_swap$'
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: '.*_swap_free$'
-                formulaid: B
-          item_prototypes:
-            - uuid: acd79dce51e146f5bc3672917ead5959
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'swap.free[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              units: '!{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
+                - tag: component
+                  value: storage
+                - tag: filesystem
+                  value: '{#FSNAME}'
+            - uuid: 5cee504041e347719b35ee2c5a6056b8
+              name: '{#FSNAME}: Total space'
+              type: ZABBIX_ACTIVE
+              key: 'vfs.fs.size[{#FSNAME},total]'
+              history: 7d
+              units: B
+              description: 'Total space in Bytes'
               tags:
-                - tag: 'Home Assistant'
-                  value: swap-free
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: df9b35ac55394021953c70c72c5861f4
-          name: HA-swap-use
-          type: DEPENDENT
-          key: ha.swap.use
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_belegter_swap$'
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: '.*_swap_use$'
-                formulaid: B
-          item_prototypes:
-            - uuid: f551aaf367f04fd8aead3f5a95e0471e
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'swap.use[{#ENTITY_ID}]'
-              delay: '0'
-              units: '!{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
+                - tag: component
+                  value: storage
+                - tag: filesystem
+                  value: '{#FSNAME}'
+            - uuid: f23970d301be4085ab9038d3078b3871
+              name: '{#FSNAME}: Used space'
+              type: ZABBIX_ACTIVE
+              key: 'vfs.fs.size[{#FSNAME},used]'
+              history: 7d
+              units: B
+              description: 'Used storage in Bytes'
               tags:
-                - tag: 'Home Assistant'
-                  value: swap-used
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 83a8379722aa464ea6210156911f18b9
-          name: HA-switch
-          type: DEPENDENT
-          key: ha.switch
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '^switch\..*'
-                formulaid: A
-          item_prototypes:
-            - uuid: 0e39d21ab2674772bc59c1ecfc674804
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ent.switch[{#ENTITY_ID}]'
-              delay: '0'
-              valuemap:
-                name: switch
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: STR_REPLACE
-                  parameters:
-                    - 'on'
-                    - '1'
-                - type: STR_REPLACE
-                  parameters:
-                    - 'off'
-                    - '0'
-                - type: STR_REPLACE
-                  parameters:
-                    - unavailable
-                    - '2'
-              master_item:
-                key: ha.raw
+                - tag: component
+                  value: storage
+                - tag: filesystem
+                  value: '{#FSNAME}'
+          trigger_prototypes:
+            - uuid: eceb25e76ec24e7c93465a37297d39d0
+              expression: 'last(/Linux by Zabbix agent active/vfs.fs.size[{#FSNAME},pused])>{$VFS.FS.PUSED.MAX.WARN:"{#FSNAME}"} or last(/Linux by Zabbix agent active/vfs.fs.size[{#FSNAME},free])<{$VFS.FS.PUSED.MAX.WARNGB:"{#FSNAME}"}'
+              name: '{#FSNAME}: Disk space is low used > 80% {ITEM.LASTVALUE}'
+              opdata: 'Space used %: {ITEM.LASTVALUE1} Free: {ITEM.LASTVALUE2}'
+              priority: HIGH
+              manual_close: 'YES'
+              dependencies:
+                - name: '{#FSNAME}: Disk space is low used > 99% {ITEM.LASTVALUE}'
+                  expression: 'last(/Linux by Zabbix agent active/vfs.fs.size[{#FSNAME},pused])>{$MAXUSAGEPERCENTE:"{#FSNAME}"} or last(/Linux by Zabbix agent active/vfs.fs.size[{#FSNAME},free])<{$MINFREE:"{#FSNAME}"}'
+            - uuid: 1843a6160a484852b4dc9c81ff9fc2e5
+              expression: 'last(/Linux by Zabbix agent active/vfs.fs.size[{#FSNAME},pused])>{$MAXUSAGEPERCENTE:"{#FSNAME}"} or last(/Linux by Zabbix agent active/vfs.fs.size[{#FSNAME},free])<{$MINFREE:"{#FSNAME}"}'
+              name: '{#FSNAME}: Disk space is low used > 99% {ITEM.LASTVALUE}'
+              opdata: 'Space used %: {ITEM.LASTVALUE1} Free: {ITEM.LASTVALUE2}'
+              priority: DISASTER
+              description: |
+                Dieser Alarm wird ausgelöst, wenn über 99% Speicherkapazität des,
+                Datenträgers überschritten sind,
+                oder weniger als 5GB Platz auf dem Datenträger verfügbar sind.
+              manual_close: 'YES'
               tags:
-                - tag: 'Home Assistant'
-                  value: switch
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 53a32b87ee124a02a6893561d31b23da
-          name: HA-temperature
-          type: DEPENDENT
-          key: ha.temp
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*temperature$'
-                formulaid: A
-          item_prototypes:
-            - uuid: 3cb17f2dc8394b51b57ace27f0547c26
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ent.i.d[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              trends: 730d
-              units: '{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: temperature
-              trigger_prototypes:
-                - uuid: 6f7502c07a654f1c943520fbd24c81dc
-                  expression: 'last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) > {$TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} = 1'
-                  name: 'The temperature of {#FRIENDLY_NAME} has exceeded {$TRIGGER.TEMPERATURE}.'
-                  priority: AVERAGE
-                  manual_close: 'YES'
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 8922c14e83f04a738cddab0e484dfd49
-          name: HA-update
-          type: DEPENDENT
-          key: ha.update
-          delay: '0'
-          filter:
-            evaltype: AND
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_update$'
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: ^update.home_assistant_core_update$
-                operator: NOT_MATCHES_REGEX
-                formulaid: B
-              - macro: '{#ENTITY_ID}'
-                value: ^update.home_assistant_supervisor_update$
-                operator: NOT_MATCHES_REGEX
-                formulaid: C
-          item_prototypes:
-            - uuid: f721473c84cd46eeb204fa5e2c304e8b
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ha.update[{#ENTITY_ID}]'
-              delay: '0'
-              trends: 730d
-              valuemap:
-                name: update
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: STR_REPLACE
-                  parameters:
-                    - 'on'
-                    - '1'
-                - type: STR_REPLACE
-                  parameters:
-                    - 'off'
-                    - '0'
-                - type: STR_REPLACE
-                  parameters:
-                    - unavailable
-                    - '2'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: update-integration
-              trigger_prototypes:
-                - uuid: 9bd597210e2a4b4b9e35ada4ab0b36fa
-                  expression: 'last(/Home Assistant - Zabbix/ha.update[{#ENTITY_ID}])=1 and {$SWITCH.TRIGGER.HA_UPDATE:"{#ENTITY_ID}"} = 1'
-                  name: 'Home Assistant update for {#FRIENDLY_NAME} is available.'
-                  priority: WARNING
-                  manual_close: 'YES'
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 72328c6a1ac745ffbd3e11758cfac97d
-          name: HA-firmware-update
-          type: DEPENDENT
-          key: ha.update.firmware
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_firmware$'
-                formulaid: A
-          item_prototypes:
-            - uuid: c03379cfab1046a5bbaea1bef589a383
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ent.firmware[{#ENTITY_ID}]'
-              delay: '0'
-              trends: 730d
-              valuemap:
-                name: firmware-update
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: STR_REPLACE
-                  parameters:
-                    - 'off'
-                    - '0'
-                - type: STR_REPLACE
-                  parameters:
-                    - 'on'
-                    - '1'
-                - type: STR_REPLACE
-                  parameters:
-                    - unavailable
-                    - '2'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: update-firmware
-              trigger_prototypes:
-                - uuid: 2cec62c566f04555b8ccac1a128d1a1a
-                  expression: 'last(/Home Assistant - Zabbix/ent.firmware[{#ENTITY_ID}])=1 and {$SWITCH.TRIGGER.FIRMWARE} = 1'
-                  name: 'Firmware update for {#FRIENDLY_NAME} is available.'
-                  priority: WARNING
-                - uuid: b84255b67cc1466e8deff251c49d2f17
-                  expression: 'last(/Home Assistant - Zabbix/ent.firmware[{#ENTITY_ID}])=2 and {$SWITCH.TRIGGER.FIRMWARE:"{#ENTITY_ID}"}=1'
-                  name: 'Firmware version for {#FRIENDLY_NAME} is not available'
-                  priority: WARNING
-                  manual_close: 'YES'
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 7319aadba90c4c839c29d11b396c6300
-          name: HA-uptime
-          type: DEPENDENT
-          key: ha.uptime
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_uptime$'
-                formulaid: A
-          item_prototypes:
-            - uuid: 70c7d700e9bf4a2982ad9deb0796cafb
-              name: '{#FRIENDLY_NAME}.'
-              type: DEPENDENT
-              key: 'ha.uptime[{#ENTITY_ID}]'
-              delay: '0'
-              units: s
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: JAVASCRIPT
-                  parameters:
-                    - |
-                      // ISO8601-Zeitstempel aus dem Log extrahieren
-                      var regex = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+\d{2}:\d{2})/;
-                      var match = value.match(regex);
-                      
-                      if (match && match[1]) {
-                          var logTime = Date.parse(match[1]); // ergibt Millisekunden
-                          var now = Date.now(); // aktuelle Zeit in Millisekunden
-                          if (!isNaN(logTime)) {
-                              var diffSeconds = Math.floor((now - logTime) / 1000);
-                              return diffSeconds;
-                          }
-                      }
-                      
-                      return 0;
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: uptime
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: a0b0fff3bc1d4c269cec7f463497c718
-          name: HA-VOC
-          type: DEPENDENT
-          key: ha.voc
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*voc_index$'
-                formulaid: A
-          item_prototypes:
-            - uuid: 0fbd1d0659a349bb8a5fedfeeb4c403a
-              name: 'Pollutants indoor air {#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ent.pollutants[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              trends: 730d
-              units: '{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: pollutants-indoor-air
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: b20727113c364d5ba4a098b050fd5663
-          name: HA-watt
-          type: DEPENDENT
-          key: ha.watt
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_power$'
-                formulaid: A
-          item_prototypes:
-            - uuid: ccd1924ee7e6456fab25344d2245430c
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ent.watt[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              trends: 730d
-              units: '{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: STR_REPLACE
-                  parameters:
-                    - unavailable
-                    - '0'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: Watt
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 89976aef185a473a8fea54c3adce8aaf
-          name: HA-zone
-          type: DEPENDENT
-          key: ha.zone
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '^zone\..*'
-                formulaid: A
-          item_prototypes:
-            - uuid: 2364f352a9a74a8cae6e1c6a605c1d69
-              name: 'Latitude of {#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ha.zone.latitude[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              trends: 730d
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.latitude'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: zone-latitude
-            - uuid: 6e813687a7884d4287bccaf85a91e1f3
-              name: 'Latitude of {#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ha.zone.longitude[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              trends: 730d
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.longitude'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: zone-longitude
-            - uuid: ef844c8505b94a8392d74b474e7622a4
-              name: 'Radius of zone {#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ha.zone.radius[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              trends: 730d
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.radius'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: zone-radius
-            - uuid: fa03ef82db2a4820a87672d748be4c5f
-              name: 'People in the zone {#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'ha.zone.zone-assignment[{#ENTITY_ID}]'
-              delay: '0'
-              history: 730d
-              value_type: TEXT
-              trends: '0'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.persons'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: LTRIM
-                  parameters:
-                    - ' person.'
-                - type: STR_REPLACE
-                  parameters:
-                    - '"'
-                    - ' '
-                - type: STR_REPLACE
-                  parameters:
-                    - ' person.'
-                    - ' '
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: zone-assignment
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 730ad969aaf2416a907ac4595f152a48
-          name: HA-swap-use-percent
-          type: DEPENDENT
-          key: swap.use.percent
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_swap_auslastung$'
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: '.*_swap_use_percent$'
-                formulaid: B
-          item_prototypes:
-            - uuid: 4a2473e1efaa498bbdaa389f7b56924a
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'swap.use.percent[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              units: '{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: swap-utilization
-              trigger_prototypes:
-                - uuid: d581f6a0b2fb41fca34d6079834ee436
-                  expression: 'min(/Home Assistant - Zabbix/swap.use.percent[{#ENTITY_ID}],5m)>{$SWAP.PFREE.MIN.WARN.PERCENT}'
-                  name: 'High swap utilization (over {$SWAP.PFREE.MIN.WARN.PERCENT}% for 5m)'
-                  opdata: 'Swap utilization: {ITEM.LASTVALUE}%'
-                  priority: WARNING
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: a5440dc9e31d4179aaf03a7d6619eb61
-          name: HA-load.average.1m
-          type: DEPENDENT
-          key: systemmonitor.load.average.1m
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: ^sensor\.system_monitor_last_1_min$
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: ^sensor\.system_monitor_load_1_min$
-                formulaid: B
-          item_prototypes:
-            - uuid: 29265fa2ece1483b916e2ddce1ad6bd7
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'average.last.1.min[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: load-average-1m
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 4d53a98eb6b14383a9a860260c7e51a4
-          name: HA-load.average.5m
-          type: DEPENDENT
-          key: systemmonitor.load.average.5m
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: ^sensor\.system_monitor_last_5_min$
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: ^sensor\.system_monitor_load_5_min$
-                formulaid: B
-          item_prototypes:
-            - uuid: 2ba4657c2c6b44299f6266fba52bae7a
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'average.last.5.min[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: load-average-5m
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 0b21df9145984763a08a2f4d08e2409b
-          name: HA-load.average.15m
-          type: DEPENDENT
-          key: systemmonitor.load.average.15m
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: ^sensor\.system_monitor_last_15_min$
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: ^sensor\.system_monitor_load_15_min$
-                formulaid: B
-          item_prototypes:
-            - uuid: 908e91daf0c54830b80717bb09d21043
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'average.last.15.min[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: load-average-15m
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 9b5fa42242c24f609ba24d1e576b79ab
-          name: HA-network.in
-          type: DEPENDENT
-          key: systemmonitor.network.in
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '^sensor\.systemmonitor_network_in_.*$'
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: '^sensor\.system_monitor_eingehender_netzwerkdurchsatz_.*$'
-                formulaid: B
-          item_prototypes:
-            - uuid: ed87cc0f281f443b8dbf6a5719327d42
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'network.in[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              units: '{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: STR_REPLACE
-                  parameters:
-                    - unknown
-                    - '0'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: network-in
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 698f93784d9341af95de216ebd337fd0
-          name: HA-network.out
-          type: DEPENDENT
-          key: systemmonitor.network.out
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '^sensor\.systemmonitor_network_out_.*$'
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: '^sensor\.system_monitor_ausgehender_netzwerkdurchsatz_.*$'
-                formulaid: B
-          item_prototypes:
-            - uuid: 2167fbf4826b4fa6ab0c1f743292398e
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'network.out[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              units: '{#UNITS}'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: STR_REPLACE
-                  parameters:
-                    - unknown
-                    - '0'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: network-out
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 9968149224fd4e3fbd16fe947649507e
-          name: HA-network.packages.in
-          type: DEPENDENT
-          key: systemmonitor.network.packages.in
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '^sensor\.systemmonitor_network_in_packets_.*$'
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: '^sensor\.system_monitor_eingehende_pakete_.*$'
-                formulaid: B
-          item_prototypes:
-            - uuid: 2d1dff6062a14b779e557d6816fe2aae
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'network.packages.in[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              units: '!Pkts'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: STR_REPLACE
-                  parameters:
-                    - unknown
-                    - '0'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: network-packages-out
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
-        - uuid: 194e8282b10e4d58be65b506fe2acad5
-          name: HA-network.packages.out
-          type: DEPENDENT
-          key: systemmonitor.network.packages.out
-          delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '^sensor\.systemmonitor_network_out_packets_.*$'
-                formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: '^sensor\.system_monitor_ausgehende_pakete_.*$'
-                formulaid: B
-          item_prototypes:
-            - uuid: 689d11f00f854e9484765ee97495ce10
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'network.packages.out[{#ENTITY_ID}]'
-              delay: '0'
-              value_type: FLOAT
-              units: '!Pkts'
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: STR_REPLACE
-                  parameters:
-                    - unknown
-                    - '0'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: network-packages-in
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[*]'
+                - tag: '{$MAXUSAGEPERCENTE}'
+                  value: '99'
+                - tag: '{$MINFREE}'
+                  value: 10G
+          graph_prototypes:
+            - uuid: f8c93889cd4645efb2b51bf5d831bb3c
+              name: '{#FSNAME}: Disk space usage (Graph)'
+              width: '600'
+              height: '340'
+              show_triggers: 'NO'
+              graph_items:
+                - color: 2E7D32
+                  calc_fnc: ALL
+                  item:
+                    host: 'Linux by Zabbix agent active'
+                    key: 'vfs.fs.size[{#FSNAME},free]'
+                - sortorder: '1'
+                  color: C80000
+                  calc_fnc: ALL
+                  item:
+                    host: 'Linux by Zabbix agent active'
+                    key: 'vfs.fs.size[{#FSNAME},used]'
+                - sortorder: '2'
+                  color: FFFFFF
+                  calc_fnc: ALL
+                  item:
+                    host: 'Linux by Zabbix agent active'
+                    key: 'vfs.fs.size[{#FSNAME},total]'
+            - uuid: 9e2c288e9475446890f7c101214cca8a
+              name: '{#FSNAME}: Disk space usage (Torte)'
+              width: '600'
+              height: '340'
+              yaxismax: '0'
+              show_work_period: 'NO'
+              show_triggers: 'NO'
+              type: PIE
+              show_3d: 'YES'
+              graph_items:
+                - color: 2E7D32
+                  calc_fnc: LAST
+                  item:
+                    host: 'Linux by Zabbix agent active'
+                    key: 'vfs.fs.size[{#FSNAME},free]'
+                - sortorder: '1'
+                  color: C80000
+                  calc_fnc: LAST
+                  item:
+                    host: 'Linux by Zabbix agent active'
+                    key: 'vfs.fs.size[{#FSNAME},used]'
+      tags:
+        - tag: class
+          value: os
+        - tag: target
+          value: linux
       macros:
-        - macro: '{$API.TOKEN}'
-          type: SECRET_TEXT
-        - macro: '{$BATTERY.MINIMUM}'
-          value: '30'
-          description: 'The trigger activates when the battery drops below 30%.'
-        - macro: '{$CPU.UTIL.MAX.PERCENT}'
+        - macro: '{$AGENT.NODATA_TIMEOUT}'
+          value: 30m
+          description: 'No data timeout for active agents. Consider to keep it relatively high.'
+        - macro: '{$AVAILABLE_ENDTIME}'
+          value: '000000'
+        - macro: '{$AVAILABLE_STARTTIME}'
+          value: '000000'
+          description: '20:00 Uhr = 200000 00:00 Uhr = 000000'
+        - macro: '{$CPU.UTIL.CRIT}'
           value: '90'
-          description: 'Maximum CPU utilization'
-        - macro: '{$DISK.PFREE.MIN.WARN.GIB}'
+        - macro: '{$DISK.UTIL.90}'
+          value: 9m
+        - macro: '{$HOST.REACHABLE}'
+          value: '1'
+          description: 'The host is not reachable enable=1 disable=2'
+        - macro: '{$IF.ERRORS.WARN}'
           value: '2'
-          description: 'Minimum disk space free'
-        - macro: '{$HA.URL}'
-          value: 'http://192.168.10.121:8123'
-          description: 'The trigger activates when the Zigbee signal drops below 90 LQI.'
-        - macro: '{$MEMORY.UTIL.MAX.PERCENT}'
-          value: '95'
-          description: 'Maximum memory load'
-        - macro: '{$STORAGE_PERCENT}'
-          value: '5'
-          description: 'the threshold from which the storage trigger is activated'
-        - macro: '{$SWAP.PFREE.MIN.WARN.PERCENT}'
+        - macro: '{$IF.UTIL.MAX}'
+          value: '90'
+          description: 'This macro is used as a threshold in interface utilization trigger.'
+        - macro: '{$IFCONTROL}'
+          value: '1'
+        - macro: '{$KERNEL.MAXFILES.MIN}'
+          value: '256'
+        - macro: '{$KERNEL.MAXPROC.MIN}'
+          value: '1024'
+        - macro: '{$LOAD_AVG_PER_CPU.MAX.WARN}'
+          value: '1.5'
+          description: 'Load per CPU considered sustainable. Tune if needed.'
+        - macro: '{$MAXUSAGEPERCENTE}'
+          value: '99'
+        - macro: '{$MEMORY.AVAILABLE.MIN}'
+          value: 20M
+          description: 'This macro is used as a threshold in memory available trigger.'
+        - macro: '{$MEMORY.UTIL.MAX}'
+          value: '90'
+          description: 'This macro is used as a threshold in memory utilization trigger.'
+        - macro: '{$MINFREE}'
+          value: 5G
+        - macro: '{$NET.IF.IFNAME.MATCHES}'
+          value: '^.*$'
+        - macro: '{$NET.IF.IFNAME.NOT_MATCHES}'
+          value: '(^Software Loopback Interface|^NULL[0-9.]*$|^[Ll]o[0-9.]*$|^[Ss]ystem$|^Nu[0-9.]*$|^veth[0-9A-z]+$|docker[0-9]+|br-[a-z0-9]{12})'
+          description: 'Filter out loopbacks, nulls, docker veth links and docker0 bridge by default'
+        - macro: '{$SWAP.PFREE.MIN.WARN}'
           value: '50'
-        - macro: '{$SWITCH.TRIGGER.BATTERY}'
-          value: '1'
-          description: '1 = enable 0 = disable'
-        - macro: '{$SWITCH.TRIGGER.BATTERY.UNAVAILABLE}'
-          value: '1'
-          description: '1 = enable 0 = disable'
-        - macro: '{$SWITCH.TRIGGER.FIRMWARE}'
-          value: '1'
-          description: '1 = enable 0 = disable'
-        - macro: '{$SWITCH.TRIGGER.HA_UPDATE}'
-          value: '1'
-          description: '1 = enable 0 = disable'
-        - macro: '{$SWITCH.TRIGGER.RESTART.REQUIRED}'
-          value: '1'
-          description: '1 = enable 0 = disable'
-        - macro: '{$SWITCH.TRIGGER.STORAGE}'
-          value: '1'
-          description: '1 = enable 0 = disable'
-        - macro: '{$SWITCH.TRIGGER.TEMPERATURE}'
-          value: '0'
-          description: '1 = enable 0 = disable'
-        - macro: '{$SWITCH.TRIGGER.ZIGBEE}'
-          value: '1'
-          description: '1 = enable 0 = disable'
-        - macro: '{$TRIGGER.TEMPERATURE}'
-          value: '44'
-          description: 'The trigger activates when the temperature rises above 44 degrees Celsius, meaning it reaches 45°C.'
-        - macro: '{$ZIGBEE.SIGNAL.MINIMUM}'
+        - macro: '{$SYSTEM.FUZZYTIME.MAX}'
+          value: '60'
+        - macro: '{$VFS.DEV.DEVNAME.MATCHES}'
+          value: .+
+          description: 'This macro is used in block devices discovery. Can be overridden on the host or linked template level'
+        - macro: '{$VFS.DEV.DEVNAME.NOT_MATCHES}'
+          value: '^(loop[0-9]*|sd[a-z][0-9]+|nbd[0-9]+|sr[0-9]+|fd[0-9]+|dm-[0-9]+|ram[0-9]+|ploop[a-z0-9]+|md[0-9]*|hcp[0-9]*|zram[0-9]*)'
+          description: 'This macro is used in block devices discovery. Can be overridden on the host or linked template level'
+        - macro: '{$VFS.DEV.READ.AWAIT.WARN}'
           value: '20'
+          description: 'Disk read average response time (in ms) before the trigger would fire'
+        - macro: '{$VFS.DEV.WRITE.AWAIT.WARN}'
+          value: '20'
+          description: 'Disk write average response time (in ms) before the trigger would fire'
+        - macro: '{$VFS.FS.FSNAME.MATCHES}'
+          value: .+
+          description: 'This macro is used in filesystems discovery. Can be overridden on the host or linked template level'
+        - macro: '{$VFS.FS.FSNAME.NOT_MATCHES}'
+          value: ^(/dev|/sys|/run|/proc|.+/shm$)
+          description: 'This macro is used in filesystems discovery. Can be overridden on the host or linked template level'
+        - macro: '{$VFS.FS.FSTYPE.MATCHES}'
+          value: ^(btrfs|ext2|ext3|ext4|reiser|xfs|ffs|ufs|jfs|jfs2|vxfs|hfs|apfs|refs|ntfs|fat32|zfs)$
+          description: 'This macro is used in filesystems discovery. Can be overridden on the host or linked template level'
+        - macro: '{$VFS.FS.FSTYPE.NOT_MATCHES}'
+          value: ^\s$
+          description: 'This macro is used in filesystems discovery. Can be overridden on the host or linked template level'
+        - macro: '{$VFS.FS.INODE.PFREE.MIN.CRIT}'
+          value: '10'
+        - macro: '{$VFS.FS.INODE.PFREE.MIN.WARN}'
+          value: '20'
+        - macro: '{$VFS.FS.PUSED.MAX.CRIT}'
+          value: '90'
+        - macro: '{$VFS.FS.PUSED.MAX.WARN}'
+          value: '80'
+        - macro: '{$VFS.FS.PUSED.MAX.WARNGB}'
+          value: 12G
+      dashboards:
+        - uuid: 0501ab8f8ef4432aa1b8be4e19a11632
+          name: 'Linux-Server Systemübersicht'
+          display_period: '3600'
+          auto_start: 'NO'
+          pages:
+            - name: System
+              widgets:
+                - type: item
+                  width: '72'
+                  fields:
+                    - type: ITEM
+                      name: itemid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        key: system.hostname
+                - type: item
+                  'y': '2'
+                  width: '72'
+                  fields:
+                    - type: ITEM
+                      name: itemid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        key: agent.hostname
+                - type: item
+                  'y': '4'
+                  width: '36'
+                  fields:
+                    - type: ITEM
+                      name: itemid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        key: system.uname
+                - type: item
+                  'y': '6'
+                  width: '36'
+                  fields:
+                    - type: ITEM
+                      name: itemid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        key: system.cpu.num
+                - type: graphprototype
+                  'y': '8'
+                  width: '36'
+                  height: '8'
+                  fields:
+                    - type: ITEM_PROTOTYPE
+                      name: itemid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        key: 'system.cpu.util[{#CPU.NUMBER}]'
+                    - type: STRING
+                      name: reference
+                      value: AAAOB
+                    - type: INTEGER
+                      name: rows
+                      value: '2'
+                    - type: INTEGER
+                      name: source_type
+                      value: '3'
+                - type: graph
+                  'y': '16'
+                  width: '36'
+                  height: '7'
+                  fields:
+                    - type: GRAPH
+                      name: graphid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        name: 'Arbeitsspeicher Auslastung (Torte)'
+                    - type: STRING
+                      name: reference
+                      value: AAANW
+                - type: item
+                  'y': '23'
+                  width: '36'
+                  fields:
+                    - type: ITEM
+                      name: itemid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        key: 'vm.memory.size[cached]'
+                - type: graph
+                  'y': '25'
+                  width: '36'
+                  height: '6'
+                  fields:
+                    - type: GRAPH
+                      name: graphid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        name: 'Swap usage'
+                    - type: STRING
+                      name: reference
+                      value: AAAOZ
+                - type: graphprototype
+                  'y': '31'
+                  width: '36'
+                  height: '6'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        name: '{#FSNAME}: Disk space usage (Torte)'
+                    - type: STRING
+                      name: reference
+                      value: AAAMG
+                - type: graphprototype
+                  'y': '41'
+                  width: '72'
+                  height: '13'
+                  fields:
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        name: '{#DEVNAME}: Disk utilization and queue'
+                    - type: STRING
+                      name: reference
+                      value: AAAMH
+                    - type: INTEGER
+                      name: rows
+                      value: '2'
+                - type: graphprototype
+                  'y': '54'
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: ITEM_PROTOTYPE
+                      name: itemid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        key: 'net.if.in["{#IFNAME}"]'
+                    - type: STRING
+                      name: reference
+                      value: AAAMI
+                    - type: INTEGER
+                      name: source_type
+                      value: '3'
+                - type: graphprototype
+                  'y': '59'
+                  width: '72'
+                  height: '5'
+                  fields:
+                    - type: ITEM_PROTOTYPE
+                      name: itemid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        key: 'net.if.out["{#IFNAME}"]'
+                    - type: STRING
+                      name: reference
+                      value: AAANV
+                    - type: INTEGER
+                      name: source_type
+                      value: '3'
+                - type: item
+                  x: '36'
+                  'y': '4'
+                  width: '36'
+                  fields:
+                    - type: ITEM
+                      name: itemid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        key: system.uptime
+                - type: item
+                  x: '36'
+                  'y': '6'
+                  width: '36'
+                  fields:
+                    - type: ITEM
+                      name: itemid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        key: system.sw.arch
+                - type: item
+                  x: '36'
+                  'y': '8'
+                  width: '36'
+                  fields:
+                    - type: ITEM
+                      name: itemid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        key: proc.num
+                - type: graph
+                  x: '36'
+                  'y': '10'
+                  width: '36'
+                  height: '4'
+                  fields:
+                    - type: ITEM
+                      name: itemid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        key: 'system.cpu.load[all,avg1]'
+                    - type: STRING
+                      name: reference
+                      value: AAAMJ
+                    - type: INTEGER
+                      name: source_type
+                      value: '1'
+                - type: graph
+                  x: '36'
+                  'y': '14'
+                  width: '36'
+                  height: '8'
+                  fields:
+                    - type: GRAPH
+                      name: graphid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        name: 'CPU utilization'
+                    - type: STRING
+                      name: reference
+                      value: AAAME
+                - type: graph
+                  x: '36'
+                  'y': '22'
+                  width: '36'
+                  height: '7'
+                  fields:
+                    - type: GRAPH
+                      name: graphid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        name: 'Memory usage'
+                    - type: STRING
+                      name: reference
+                      value: AAAMF
+                - type: graph
+                  x: '36'
+                  'y': '29'
+                  width: '36'
+                  height: '6'
+                  fields:
+                    - type: GRAPH
+                      name: graphid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        name: Processes
+                    - type: STRING
+                      name: reference
+                      value: AAAPA
+                - type: graphprototype
+                  x: '36'
+                  'y': '35'
+                  width: '36'
+                  height: '6'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '1'
+                    - type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        name: '{#FSNAME}: Disk space usage (Graph)'
+                    - type: STRING
+                      name: reference
+                      value: AAAON
+            - name: CPU
+              widgets:
+                - type: graph
+                  name: 'CPU Usage – Insgesamt'
+                  width: '72'
+                  height: '8'
+                  fields:
+                    - type: GRAPH
+                      name: graphid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        name: 'CPU utilization'
+                    - type: STRING
+                      name: reference
+                      value: AAAOD
+                - type: graphprototype
+                  'y': '8'
+                  width: '72'
+                  height: '32'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '3'
+                    - type: ITEM_PROTOTYPE
+                      name: itemid
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        key: 'system.cpu.util[{#CPU.NUMBER}]'
+                    - type: STRING
+                      name: reference
+                      value: AAAOE
+                    - type: INTEGER
+                      name: rows
+                      value: '7'
+                    - type: INTEGER
+                      name: source_type
+                      value: '3'
+        - uuid: 33a6e86fa6b341b9bc5a670854675d43
+          name: 'System overview'
+          pages:
+            - widgets:
+                - type: piechart
+                  width: '29'
+                  height: '6'
+                  fields:
+                    - type: STRING
+                      name: ds.0.color
+                      value: FBC02D
+                    - type: STRING
+                      name: ds.0.items.0
+                      value: 'CPU utilization'
+                    - type: STRING
+                      name: ds.1.color
+                      value: 1976D2
+                    - type: STRING
+                      name: ds.1.items.0
+                      value: 'Used memory in %'
+                - type: graph
+                  x: '30'
+                  width: '41'
+                  height: '6'
+                  fields:
+                    - type: GRAPH
+                      name: graphid.0
+                      value:
+                        host: 'Linux by Zabbix agent active'
+                        name: 'CPU utilization'
+                    - type: STRING
+                      name: reference
+                      value: WXWMV
       valuemaps:
-        - uuid: fc783e73a76149cb9a5cfc5e056b20d9
-          name: automation
-          mappings:
-            - value: '1'
-              newvalue: enabled
-            - value: '0'
-              newvalue: disabled
-            - value: '2'
-              newvalue: unavailable
-        - uuid: 36c2adb1c59240e6bb81e13292f1c949
-          name: backup_manager
+        - uuid: 567b041f5e6444488a8a4434b7dbc847
+          name: cpu-discovery
           mappings:
             - value: '0'
-              newvalue: Idle
-            - value: '1'
-              newvalue: 'Creating a backup'
-            - value: '2'
-              newvalue: 'Receiving a backup'
-            - value: '3'
-              newvalue: 'Restoring a backup'
-            - value: '4'
-              newvalue: Blocked
-        - uuid: 6aea8103a50d4c5c8b2800a006c8e250
-          name: battery
-          mappings:
-            - value: '-1'
-              newvalue: unavailable
-        - uuid: c310d795d0974bdbb5f5f4e90d84785c
-          name: camera
-          mappings:
-            - value: '0'
-              newvalue: unavailable
-            - value: '1'
-              newvalue: available
-            - value: '2'
-              newvalue: idle
-        - uuid: 899dfe59db4d44e3b192354dbbdc8855
-          name: contact-sensot
-          mappings:
-            - value: '0'
-              newvalue: closed
-            - value: '1'
-              newvalue: open
-        - uuid: 0fdd47edf8524752bb012d303c4b3cb2
-          name: firmware-update
-          mappings:
-            - value: '0'
-              newvalue: 'no update available'
-            - value: '1'
-              newvalue: 'an update is available'
-            - value: '2'
-              newvalue: 'firmware version unavailable'
-        - uuid: adb641e8636d42c0a244f35207fe8f9e
-          name: kWh
-          mappings:
-            - value: '0'
-              newvalue: unavailable
-        - uuid: 9259c3da5a5048de9abf8632054743aa
-          name: light
-          mappings:
-            - value: '1'
-              newvalue: 'on'
-            - value: '0'
-              newvalue: 'off'
-            - value: '2'
-              newvalue: unavailable
-        - uuid: e490d69fc57440dda2ed08ce07f5040c
-          name: network
+              newvalue: 'The CPU core (VM) is not assigned by the host.'
+        - uuid: 276914b5aee2435da609d3112ecd359d
+          name: ifOperStatus
           mappings:
             - value: '0'
               newvalue: unknown
-        - uuid: 390fdda09d75489781371f2e56aff43f
-          name: occupancy
-          mappings:
             - value: '1'
-              newvalue: 'on'
-            - value: '0'
-              newvalue: 'off'
-        - uuid: 2444b31dfa28445f90ca6bb2b180ca49
-          name: 'restart required'
-          mappings:
-            - value: '1'
-              newvalue: 'restart required'
-            - value: '0'
-              newvalue: 'restart not required'
+              newvalue: notpresent
             - value: '2'
-              newvalue: 'restart status unknown'
+              newvalue: down
             - value: '3'
-              newvalue: 'not reachable'
-        - uuid: 0a0da62d6da74956a879957d7fb1fa7b
-          name: switch
-          mappings:
-            - value: '1'
-              newvalue: 'on'
-            - value: '0'
-              newvalue: 'off'
-            - value: '2'
-              newvalue: unavailable
-        - uuid: 5435403b67724914b2991f54d0d29bb8
-          name: update
-          mappings:
-            - value: '0'
-              newvalue: 'no update available'
-            - value: '1'
-              newvalue: 'an update is available'
-            - value: '2'
-              newvalue: 'update state unavailable (not HAOS)'
-        - uuid: f3273d81438646ed8ac25ecf2e609854
-          name: weather
-          mappings:
-            - value: '1'
-              newvalue: clear-night
-            - value: '2'
-              newvalue: cloudy
-            - value: '3'
-              newvalue: fog
+              newvalue: lowerlayerdown
             - value: '4'
-              newvalue: hail
+              newvalue: testing
             - value: '5'
-              newvalue: lightning
+              newvalue: dormant
             - value: '6'
-              newvalue: lightning-rainy
+              newvalue: up
+        - uuid: 79afe98a54a648bb981c29e70ba6652c
+          name: 'Linux::Interface protocol types'
+          mappings:
+            - value: '0'
+              newvalue: 'from KA9Q: NET/ROM pseudo'
+            - value: '1'
+              newvalue: Ethernet
+            - value: '2'
+              newvalue: 'Experimental Ethernet'
+            - value: '3'
+              newvalue: 'AX.25 Level 2'
+            - value: '4'
+              newvalue: 'PROnet token ring'
+            - value: '5'
+              newvalue: Chaosnet
+            - value: '6'
+              newvalue: 'IEEE 802.2 Ethernet/TR/TB'
             - value: '7'
-              newvalue: partly2
+              newvalue: ARCnet
             - value: '8'
-              newvalue: pouring
-            - value: '9'
-              newvalue: rainy
-            - value: '10'
-              newvalue: snowy
-            - value: '11'
-              newvalue: snowy-rainy
-            - value: '12'
-              newvalue: sunny
-            - value: '13'
-              newvalue: windy
-            - value: '14'
-              newvalue: windy-variant
+              newvalue: APPLEtalk
             - value: '15'
-              newvalue: exception
+              newvalue: 'Frame Relay DLCI'
+            - value: '19'
+              newvalue: ATM
+            - value: '23'
+              newvalue: 'Metricom STRIP (new IANA id)'
+            - value: '24'
+              newvalue: 'IEEE 1394 IPv4 - RFC 2734'
+            - value: '27'
+              newvalue: EUI-64
+            - value: '32'
+              newvalue: InfiniBand
+            - value: '256'
+              newvalue: ARPHRD_SLIP
+            - value: '257'
+              newvalue: ARPHRD_CSLIP
+            - value: '258'
+              newvalue: ARPHRD_SLIP6
+            - value: '259'
+              newvalue: ARPHRD_CSLIP6
+            - value: '260'
+              newvalue: 'Notional KISS type'
+            - value: '264'
+              newvalue: ARPHRD_ADAPT
+            - value: '270'
+              newvalue: ARPHRD_ROSE
+            - value: '271'
+              newvalue: 'CCITT X.25'
+            - value: '272'
+              newvalue: 'Boards with X.25 in firmware'
+            - value: '280'
+              newvalue: 'Controller Area Network'
+            - value: '512'
+              newvalue: ARPHRD_PPP
+            - value: '513'
+              newvalue: 'Cisco HDLC'
+            - value: '516'
+              newvalue: LAPB
+            - value: '517'
+              newvalue: 'Digital''s DDCMP protocol'
+            - value: '518'
+              newvalue: 'Raw HDLC'
+            - value: '519'
+              newvalue: 'Raw IP'
+            - value: '768'
+              newvalue: 'IPIP tunnel'
+            - value: '769'
+              newvalue: 'IP6IP6 tunnel'
+            - value: '770'
+              newvalue: 'Frame Relay Access Device'
+            - value: '771'
+              newvalue: 'SKIP vif'
+            - value: '772'
+              newvalue: 'Loopback device'
+            - value: '773'
+              newvalue: 'Localtalk device'
+            - value: '774'
+              newvalue: 'Fiber Distributed Data Interface'
+            - value: '775'
+              newvalue: 'AP1000 BIF'
+            - value: '776'
+              newvalue: 'sit0 device - IPv6-in-IPv4'
+            - value: '777'
+              newvalue: 'IP over DDP tunneller'
+            - value: '778'
+              newvalue: 'GRE over IP'
+            - value: '779'
+              newvalue: 'PIMSM register interface'
+            - value: '780'
+              newvalue: 'High Performance Parallel Interface'
+            - value: '781'
+              newvalue: 'Nexus 64Mbps Ash'
+            - value: '782'
+              newvalue: 'Acorn Econet'
+            - value: '783'
+              newvalue: Linux-IrDA
+            - value: '784'
+              newvalue: 'Point to point fibrechannel'
+            - value: '785'
+              newvalue: 'Fibrechannel arbitrated loop'
+            - value: '786'
+              newvalue: 'Fibrechannel public loop'
+            - value: '787'
+              newvalue: 'Fibrechannel fabric'
+            - value: '800'
+              newvalue: 'Magic type ident for TR'
+            - value: '801'
+              newvalue: 'IEEE 802.11'
+            - value: '802'
+              newvalue: 'IEEE 802.11 + Prism2 header'
+            - value: '803'
+              newvalue: 'IEEE 802.11 + radiotap header'
+            - value: '804'
+              newvalue: ARPHRD_IEEE802154
+            - value: '805'
+              newvalue: 'IEEE 802.15.4 network monitor'
+            - value: '820'
+              newvalue: 'PhoNet media type'
+            - value: '821'
+              newvalue: 'PhoNet pipe header'
+            - value: '822'
+              newvalue: 'CAIF media type'
+            - value: '823'
+              newvalue: 'GRE over IPv6'
+            - value: '824'
+              newvalue: 'Netlink header'
+            - value: '825'
+              newvalue: 'IPv6 over LoWPAN'
+            - value: '826'
+              newvalue: 'Vsock monitor header'
+        - uuid: 6a21d2d8f1f645ee8ea99f7734d6c967
+          name: zabbix.host.available
+          mappings:
+            - value: '0'
+              newvalue: 'not available'
+            - value: '1'
+              newvalue: available
+            - value: '2'
+              newvalue: unknown
+        - uuid: d63e00a243804cc2bcaaf2644db9629d
+          name: 'Zabbix agent ping status'
+          mappings:
+            - value: '1'
+              newvalue: Up
+            - type: DEFAULT
+              newvalue: Down
+  triggers:
+    - uuid: fa21b02aebe143b192a20cd9403a68d0
+      expression: 'last(/Linux by Zabbix agent active/proc.num)/last(/Linux by Zabbix agent active/kernel.maxproc)*100>80'
+      name: 'Getting closer to process limit (over 80% used)'
+      opdata: '{ITEM.LASTVALUE1} active, {ITEM.LASTVALUE2} limit.'
+      priority: WARNING
+      tags:
+        - tag: scope
+          value: performance
+    - uuid: 722692e0703e4609852439a9b751826d
+      expression: 'max(/Linux by Zabbix agent active/system.swap.size[,pfree],5m)<{$SWAP.PFREE.MIN.WARN} and last(/Linux by Zabbix agent active/system.swap.size[,total])>0'
+      name: 'High swap space usage (less than {$SWAP.PFREE.MIN.WARN}% free)'
+      opdata: 'Free: {ITEM.LASTVALUE1}, total: {ITEM.LASTVALUE2}'
+      priority: WARNING
+      description: 'This trigger is ignored, if there is no swap configured'
+      manual_close: 'YES'
+      dependencies:
+        - name: 'High memory utilization (>{$MEMORY.UTIL.MAX}% for 5m)'
+          expression: 'min(/Linux by Zabbix agent active/vm.memory.utilization,5m)>{$MEMORY.UTIL.MAX}'
+        - name: 'Lack of available memory (<{$MEMORY.AVAILABLE.MIN} of {ITEM.VALUE2})'
+          expression: 'max(/Linux by Zabbix agent active/vm.memory.size[used],5m)<{$MEMORY.AVAILABLE.MIN} and last(/Linux by Zabbix agent active/vm.memory.size[total])>0'
+      tags:
+        - tag: scope
+          value: capacity
+    - uuid: b3f51f3c63024d209fd01e17293127a6
+      expression: 'max(/Linux by Zabbix agent active/vm.memory.size[used],5m)<{$MEMORY.AVAILABLE.MIN} and last(/Linux by Zabbix agent active/vm.memory.size[total])>0'
+      name: 'Lack of available memory (<{$MEMORY.AVAILABLE.MIN} of {ITEM.VALUE2})'
+      opdata: 'Available: {ITEM.LASTVALUE1}, total: {ITEM.LASTVALUE2}'
+      priority: AVERAGE
+      tags:
+        - tag: scope
+          value: capacity
+        - tag: scope
+          value: performance
+    - uuid: 72825a0c706043429ed1ff6656763052
+      expression: 'min(/Linux by Zabbix agent active/system.cpu.load[all,avg1],5m)/last(/Linux by Zabbix agent active/system.cpu.num)>{$LOAD_AVG_PER_CPU.MAX.WARN}'
+      name: 'Load average is too high (per CPU load over {$LOAD_AVG_PER_CPU.MAX.WARN} for 5m)'
+      priority: HIGH
+      description: 'Per CPU load average is too high. Your system may be slow to respond.'
+      manual_close: 'YES'
+      tags:
+        - tag: scope
+          value: capacity
+        - tag: scope
+          value: performance
+  graphs:
+    - uuid: 05b97309a8224c51b6975f0d4063f7b2
+      name: 'Arbeitsspeicher Auslastung (Graph)'
+      show_work_period: 'NO'
+      show_triggers: 'NO'
+      graph_items:
+        - color: FF0000
+          calc_fnc: ALL
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'vm.memory.size[used]'
+        - sortorder: '1'
+          color: FFFFFF
+          calc_fnc: ALL
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'vm.memory.size[total]'
+    - uuid: 10e3f6a37002462e87a2b8b16cc2c5ad
+      name: 'Arbeitsspeicher Auslastung (Torte)'
+      yaxismax: '0'
+      show_work_period: 'NO'
+      show_triggers: 'NO'
+      type: PIE
+      graph_items:
+        - color: 199C0D
+          calc_fnc: MIN
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'vm.memory.size[free]'
+        - sortorder: '1'
+          color: F63100
+          calc_fnc: MIN
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'vm.memory.size[used]'
+    - uuid: 2e4890b0db694721b1e903ecf01c612c
+      name: 'CPU jumps'
+      graph_items:
+        - color: 1A7C11
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: system.cpu.switches
+        - sortorder: '1'
+          color: 2774A4
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: system.cpu.intr
+    - uuid: 27b4612871004ca282f7d91057150800
+      name: 'CPU usage'
+      type: STACKED
+      ymin_type_1: FIXED
+      ymax_type_1: FIXED
+      graph_items:
+        - color: 1A7C11
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'system.cpu.util[,system]'
+        - sortorder: '1'
+          color: 2774A4
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'system.cpu.util[,user]'
+        - sortorder: '2'
+          color: F63100
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'system.cpu.util[,nice]'
+        - sortorder: '3'
+          color: A54F10
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'system.cpu.util[,iowait]'
+        - sortorder: '4'
+          color: FC6EA3
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'system.cpu.util[,steal]'
+        - sortorder: '5'
+          color: 6C59DC
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'system.cpu.util[,interrupt]'
+        - sortorder: '6'
+          color: AC8C14
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'system.cpu.util[,softirq]'
+        - sortorder: '7'
+          color: 611F27
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'system.cpu.util[,guest]'
+        - sortorder: '8'
+          color: F230E0
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'system.cpu.util[,guest_nice]'
+    - uuid: 3bebe4d0071441f4b95170fd0278a4dd
+      name: 'CPU utilization'
+      ymin_type_1: FIXED
+      ymax_type_1: FIXED
+      graph_items:
+        - drawtype: GRADIENT_LINE
+          color: 1A7C11
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: system.cpu.util
+    - uuid: a4d67a1cd253431faaedf888dad90e72
+      name: 'Memory usage'
+      ymin_type_1: FIXED
+      graph_items:
+        - drawtype: BOLD_LINE
+          color: 1A7C11
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'vm.memory.size[total]'
+        - sortorder: '1'
+          drawtype: GRADIENT_LINE
+          color: 2774A4
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'vm.memory.size[used]'
+    - uuid: 4aaf22daf96b4b29ad3a2e935f4e2d4c
+      name: 'Memory utilization'
+      ymin_type_1: FIXED
+      ymax_type_1: FIXED
+      graph_items:
+        - drawtype: GRADIENT_LINE
+          color: 1A7C11
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: vm.memory.utilization
+    - uuid: 60078a7b24494a41a3595650b113ee1d
+      name: Processes
+      graph_items:
+        - color: 1A7C11
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: proc.num
+        - sortorder: '1'
+          color: 2774A4
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'proc.num[,,run]'
+        - sortorder: '2'
+          color: F63100
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: kernel.maxproc
+    - uuid: a70c0c13381a4fb68eaeb66226ffe2bb
+      name: 'Swap usage'
+      graph_items:
+        - color: 1A7C11
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'system.swap.size[,free]'
+        - sortorder: '1'
+          color: 2774A4
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'system.swap.size[,total]'
+    - uuid: d47109e977ec4362a3f3bb5e7708b48a
+      name: 'System load'
+      ymin_type_1: FIXED
+      graph_items:
+        - color: 1A7C11
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'system.cpu.load[all,avg1]'
+        - sortorder: '1'
+          color: 2774A4
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'system.cpu.load[all,avg5]'
+        - sortorder: '2'
+          color: F63100
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: 'system.cpu.load[all,avg15]'
+        - sortorder: '3'
+          color: A54F10
+          yaxisside: RIGHT
+          item:
+            host: 'Linux by Zabbix agent active'
+            key: system.cpu.num
