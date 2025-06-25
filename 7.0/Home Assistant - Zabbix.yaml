@@ -250,12 +250,9 @@ zabbix_export:
           delay: '0'
           filter:
             conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_battery$'
+              - macro: '{#DEVICE_CLASS}'
+                value: ^battery$
                 formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: '.*_battery_level$'
-                formulaid: B
           item_prototypes:
             - uuid: 175a65ef0f384596a0bc5177ea1b0458
               name: '{#FRIENDLY_NAME}'
@@ -302,6 +299,8 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
@@ -378,15 +377,9 @@ zabbix_export:
           delay: '0'
           filter:
             conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_ajto$'
+              - macro: '{#DEVICE_CLASS}'
+                value: ^door$
                 formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: '.*_contact$'
-                formulaid: B
-              - macro: '{#ENTITY_ID}'
-                value: '.*_door$'
-                formulaid: C
           item_prototypes:
             - uuid: c7d6d4e1266d4310ac88aec260d7e490
               name: '{#FRIENDLY_NAME}'
@@ -422,6 +415,62 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 06181b12e10b40bfb707dba3a9f30773
+          name: HA-dbm-linkquality
+          type: DEPENDENT
+          key: ha.dbm.linkquality
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#DEVICE_CLASS}'
+                value: ^signal_strength$
+                formulaid: A
+          item_prototypes:
+            - uuid: 76cf47a486d64d31b9fddb08b1532aad
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ent.dbm.linkquality[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              units: '!{#UNITS}'
+              valuemap:
+                name: dbm
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '0'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: dbm
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
@@ -544,16 +593,23 @@ zabbix_export:
           delay: '0'
           filter:
             conditions:
+              - macro: '{#DEVICE_CLASS}'
+                value: ^distance$
+                formulaid: A
               - macro: '{#ENTITY_ID}'
                 value: '.*_distance$'
-                formulaid: A
+                formulaid: B
           item_prototypes:
             - uuid: 657c2300e6bd4e15bb87ed4461b7f637
               name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ha.meters.walked[{#ENTITY_ID}]'
               delay: '0'
-              units: '{#UNITS}'
+              value_type: FLOAT
+              trends: '0'
+              units: '!{#UNITS}'
+              valuemap:
+                name: distance
               preprocessing:
                 - type: JSONPATH
                   parameters:
@@ -564,6 +620,14 @@ zabbix_export:
                 - type: RTRIM
                   parameters:
                     - '"]'
+                - type: STR_REPLACE
+                  parameters:
+                    - unknown
+                    - '-1'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '-2'
               master_item:
                 key: ha.raw
               tags:
@@ -572,6 +636,8 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
@@ -848,8 +914,8 @@ zabbix_export:
           delay: '0'
           filter:
             conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_illuminance$'
+              - macro: '{#DEVICE_CLASS}'
+                value: ^illuminance$
                 formulaid: A
           item_prototypes:
             - uuid: 910c678e05454c7bb80c3e1f72d33d3a
@@ -878,6 +944,8 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
@@ -895,8 +963,8 @@ zabbix_export:
           delay: '0'
           filter:
             conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_energy$'
+              - macro: '{#DEVICE_CLASS}'
+                value: ^energy$
                 formulaid: A
           item_prototypes:
             - uuid: 71d59c9f642d40b59e2d7a463cfb3dfb
@@ -930,6 +998,8 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
@@ -1057,12 +1127,9 @@ zabbix_export:
           delay: '0'
           filter:
             conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_humidity$'
+              - macro: '{#DEVICE_CLASS}'
+                value: ^humidity$
                 formulaid: A
-              - macro: '{#ENTITY_ID}'
-                value: '.*_moisture$'
-                formulaid: B
           item_prototypes:
             - uuid: d5b546cae3cb4664b5b2675002ad5111
               name: '{#FRIENDLY_NAME}'
@@ -1090,6 +1157,8 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
@@ -1321,8 +1390,8 @@ zabbix_export:
           delay: '0'
           filter:
             conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_pressure$'
+              - macro: '{#DEVICE_CLASS}'
+                value: ^atmospheric_pressure$
                 formulaid: A
           item_prototypes:
             - uuid: dcc27475843a4422be16739172c0f982
@@ -1351,6 +1420,8 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
@@ -1722,6 +1793,10 @@ zabbix_export:
                   parameters:
                     - unavailable
                     - '2'
+                - type: STR_REPLACE
+                  parameters:
+                    - unknown
+                    - '3'
               master_item:
                 key: ha.raw
               tags:
@@ -1747,8 +1822,8 @@ zabbix_export:
           delay: '0'
           filter:
             conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*temperature$'
+              - macro: '{#DEVICE_CLASS}'
+                value: ^temperature$
                 formulaid: A
           item_prototypes:
             - uuid: 3cb17f2dc8394b51b57ace27f0547c26
@@ -1759,6 +1834,8 @@ zabbix_export:
               value_type: FLOAT
               trends: 730d
               units: '{#UNITS}'
+              valuemap:
+                name: temperature
               preprocessing:
                 - type: JSONPATH
                   parameters:
@@ -1769,6 +1846,14 @@ zabbix_export:
                 - type: LTRIM
                   parameters:
                     - '["'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '0'
+                - type: REGEX
+                  parameters:
+                    - unknown
+                    - '-1'
               master_item:
                 key: ha.raw
               tags:
@@ -1783,6 +1868,8 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
@@ -1874,8 +1961,8 @@ zabbix_export:
           delay: '0'
           filter:
             conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_firmware$'
+              - macro: '{#DEVICE_CLASS}'
+                value: ^firmware$
                 formulaid: A
           item_prototypes:
             - uuid: c03379cfab1046a5bbaea1bef589a383
@@ -1926,6 +2013,8 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
@@ -2052,8 +2141,8 @@ zabbix_export:
           delay: '0'
           filter:
             conditions:
-              - macro: '{#ENTITY_ID}'
-                value: '.*_power$'
+              - macro: '{#DEVICE_CLASS}'
+                value: ^power$
                 formulaid: A
           item_prototypes:
             - uuid: ccd1924ee7e6456fab25344d2245430c
@@ -2086,6 +2175,8 @@ zabbix_export:
           master_item:
             key: ha.raw
           lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
             - lld_macro: '{#ENTITY_ID}'
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
@@ -2776,6 +2867,18 @@ zabbix_export:
               newvalue: closed
             - value: '1'
               newvalue: open
+        - uuid: 875b0a6fc10c46d5958d0a39fe632bc1
+          name: dbm
+          mappings:
+            - value: '0'
+              newvalue: unavailable
+        - uuid: 30b2a105c7674c6fb48ea42768b80494
+          name: distance
+          mappings:
+            - value: '-1'
+              newvalue: unknown
+            - value: '-2'
+              newvalue: unavailable
         - uuid: 0fdd47edf8524752bb012d303c4b3cb2
           name: firmware-update
           mappings:
@@ -2831,6 +2934,15 @@ zabbix_export:
               newvalue: 'off'
             - value: '2'
               newvalue: unavailable
+            - value: '3'
+              newvalue: unknown
+        - uuid: 5299f064ca1b4ecd8f53ce6cc09631d1
+          name: temperature
+          mappings:
+            - value: '0'
+              newvalue: unavailable
+            - value: '-1'
+              newvalue: unknown
         - uuid: 5435403b67724914b2991f54d0d29bb8
           name: update
           mappings:
