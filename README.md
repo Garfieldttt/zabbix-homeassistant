@@ -57,6 +57,7 @@ Agentless monitoring of Home Assistant entities via the REST API:
 | **Additional Humidity Sensors**                | Includes extra humidity sensor types for broader coverage.                                                           |
 | **Temperature Sensors**                        | Monitors temperature readings from Home Assistant.                                                                   |
 | **Air Pressure**                               | Tracks atmospheric pressure via HA sensors for weather trends.                                                       |
+| **Weight Sensors**                             | Monitors weight readings from Home Assistant `device_class = "weight"` sensors (e.g. smart scales).                  |
 | **Person Zone Assignment**                     | Follows which zone (Home, Work, etc.) a person entity is currently in.                                              |
 | **Zone Radius**                                | Monitors configured zone radius to ensure accurate geofencing.                                                       |
 | **Longitude**                                  | Displays longitude attribute of zone entities.                                                                      |
