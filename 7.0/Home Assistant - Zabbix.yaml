@@ -1833,7 +1833,7 @@ zabbix_export:
               delay: '0'
               value_type: FLOAT
               trends: 730d
-              units: '{#UNITS}'
+              units: '!{#UNITS}'
               valuemap:
                 name: temperature
               preprocessing:
@@ -1850,7 +1850,7 @@ zabbix_export:
                   parameters:
                     - unavailable
                     - '0'
-                - type: REGEX
+                - type: STR_REPLACE
                   parameters:
                     - unknown
                     - '-1'
