@@ -2096,6 +2096,55 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.body[*]'
+        - uuid: 604b0c06f16c4b31a34eb91bb0fb5a9d
+          name: HA-weight
+          type: DEPENDENT
+          key: ha.weight
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#DEVICE_CLASS}'
+                value: ^weight$
+                formulaid: A
+          item_prototypes:
+            - uuid: f2526e0f47e5475f95dd9300f63998d1
+              name: '{#FRIENDLY_NAME}'
+              type: DEPENDENT
+              key: 'ent.weight[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              trends: '0'
+              units: '!{#UNITS}'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id==''{#ENTITY_ID}'')].state'
+                - type: LTRIM
+                  parameters:
+                    - '["'
+                - type: RTRIM
+                  parameters:
+                    - '"]'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: weight
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#DEVICE_CLASS}'
+              path: $.attributes.device_class
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
         - uuid: 89976aef185a473a8fea54c3adce8aaf
           name: HA-zone
           type: DEPENDENT
