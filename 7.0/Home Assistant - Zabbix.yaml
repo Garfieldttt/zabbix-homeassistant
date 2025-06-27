@@ -28,6 +28,11 @@ zabbix_export:
             - name: Authorization
               value: 'Bearer {$API.TOKEN}'
           output_format: JSON
+          triggers:
+            - uuid: 624a722e6f33407aa5bf3d610bc50f2c
+              expression: 'nodata(/Home Assistant - Zabbix/ha.raw,900)=1 and {$HOST.REACHABLE}=1'
+              name: 'The host is not reachable!'
+              priority: HIGH
         - uuid: f77762bbd6df4dde9b5dbbf49160487e
           name: 'Home Assistant Core Update'
           type: DEPENDENT
@@ -466,6 +471,17 @@ zabbix_export:
               tags:
                 - tag: 'Home Assistant'
                   value: dbm
+              trigger_prototypes:
+                - uuid: dee77e6918de44ff8026959cad10edf2
+                  expression: |
+                    min(/Home Assistant - Zabbix/ent.dbm.linkquality[{#ENTITY_ID}],5m)  
+                      < {$SWITCH.TRIGGER.DBM:"{#ENTITY_ID}"}  
+                    or  
+                    last(/Home Assistant - Zabbix/ent.dbm.linkquality[{#ENTITY_ID}])  
+                      < {$DBM.SIGNAL.MINIMUM:"{#ENTITY_ID}"}  
+                      and {$SWITCH.TRIGGER.DBM:"{#ENTITY_ID}"} = 1
+                  name: 'The dBm connection of {#FRIENDLY_NAME}: {ITEM.LASTVALUE}'
+                  priority: HIGH
           master_item:
             key: ha.raw
           lld_macro_paths:
@@ -2780,12 +2796,17 @@ zabbix_export:
         - macro: '{$CPU.UTIL.MAX.PERCENT}'
           value: '90'
           description: 'Maximum CPU utilization'
+        - macro: '{$DBM.SIGNAL.MINIMUM}'
+          value: '-80'
         - macro: '{$DISK.PFREE.MIN.WARN.GIB}'
           value: '2'
           description: 'Minimum disk space free'
         - macro: '{$HA.URL}'
           value: 'http://192.168.10.121:8123'
           description: 'The trigger activates when the Zigbee signal drops below 90 LQI.'
+        - macro: '{$HOST.REACHABLE}'
+          value: '1'
+          description: '1 = enable 0 = disable'
         - macro: '{$MEMORY.UTIL.MAX.PERCENT}'
           value: '95'
           description: 'Maximum memory load'
