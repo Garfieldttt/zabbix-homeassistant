@@ -81,6 +81,7 @@ Agentless monitoring of Home Assistant entities via the REST API:
 | **Switch Status**                              | Monitors state (on/off) of switch entities.                                                                         |
 | **Device Uptime**                              | Monitors uptime of devices connected to Home Assistant.                                                             |
 | **Backup**                                     | Monitors the last backup status.                              |
+| **Host Not Reachable Trigger** | Fires when no data is received from `/Home Assistant - Zabbix/ha.raw` for 900 s while the host is still reachable  |
 
 ### 🖥️ Host System Monitoring ([System Monitor Integration](https://www.home-assistant.io/integrations/systemmonitor/) Required)
 >  This section requires the **System Monitor Integration** in Home Assistant.  
