@@ -294,7 +294,7 @@ zabbix_export:
                   value: battery-level
               trigger_prototypes:
                 - uuid: c00c1ebc288448daa088e54432c80596
-                  expression: 'last(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}])<{$BATTERY.MINIMUM:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}])>=0 and {$SWITCH.TRIGGER.BATTERY:"{#ENTITY_ID}"}=1'
+                  expression: 'last(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}])<{$BATTERY.MINIMUM:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.BATTERY:"{#ENTITY_ID}"}=1'
                   name: 'Battery replacement at {#FRIENDLY_NAME} is required.'
                   priority: AVERAGE
                 - uuid: afcc007a51cc4d12ad4300eec03ab583
@@ -1927,20 +1927,13 @@ zabbix_export:
                 - type: JSONPATH
                   parameters:
                     - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                  error_handler: DISCARD_VALUE
                 - type: RTRIM
                   parameters:
                     - '"]'
                 - type: LTRIM
                   parameters:
                     - '["'
-                - type: STR_REPLACE
-                  parameters:
-                    - unavailable
-                    - '0'
-                - type: STR_REPLACE
-                  parameters:
-                    - unknown
-                    - '-1'
               master_item:
                 key: ha.raw
               tags:
