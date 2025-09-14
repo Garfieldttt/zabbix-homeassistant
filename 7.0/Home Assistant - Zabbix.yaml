@@ -294,13 +294,14 @@ zabbix_export:
                   value: battery-level
               trigger_prototypes:
                 - uuid: c00c1ebc288448daa088e54432c80596
-                  expression: 'last(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}])<{$BATTERY.MINIMUM:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.BATTERY:"{#ENTITY_ID}"}=1'
+                  expression: 'min(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}],60)=-1 and {$SWITCH.TRIGGER.BATTERY:"{#ENTITY_ID}"}=1'
                   name: 'Battery replacement at {#FRIENDLY_NAME} is required.'
                   priority: AVERAGE
                 - uuid: afcc007a51cc4d12ad4300eec03ab583
-                  expression: 'max(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}],900)=-1 and {$SWITCH.TRIGGER.BATTERY.UNAVAILABLE:"{#ENTITY_ID}"}=1 and nodata(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}],900)=1'
+                  expression: 'min(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}],900)=-1 and {$SWITCH.TRIGGER.BATTERY.UNAVAILABLE:"{#ENTITY_ID}"}=1'
                   name: 'Battery status unavailable on {#FRIENDLY_NAME}'
-                  priority: HIGH
+                  priority: AVERAGE
+                  manual_close: 'YES'
           master_item:
             key: ha.raw
           lld_macro_paths:
