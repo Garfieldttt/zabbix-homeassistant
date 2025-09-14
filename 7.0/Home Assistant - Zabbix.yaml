@@ -1241,6 +1241,35 @@ zabbix_export:
               tags:
                 - tag: 'Home Assistant'
                   value: humidity
+              trigger_prototypes:
+                - uuid: 337ff4d635ee42cfbeb8361400a0caa7
+                  expression: 'last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) <= {$TRIGGER.HUMIDITY.WARNING.LOW:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) >= {$TRIGGER.HUMIDITY.CRITICAL.LOW:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.HUMIDITY:"{#ENTITY_ID}"} = 1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) >= {$TRIGGER.HUMIDITY.NORMAL.LOW:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) <= {$TRIGGER.HUMIDITY.NORMAL.HIGH:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.HUMIDITY:"{#ENTITY_ID}"} = 1'
+                  name: '{#FRIENDLY_NAME} is <= {$TRIGGER.HUMIDITY.WARNING.LOW}%)'
+                  priority: HIGH
+                  manual_close: 'YES'
+                - uuid: 26faa196a08347359ae4556294092ad3
+                  expression: 'last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) > {$TRIGGER.HUMIDITY.WARNING.LOW:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) <= {$TRIGGER.HUMIDITY.NORMAL.LOW:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.HUMIDITY:"{#ENTITY_ID}"} = 1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) >= {$TRIGGER.HUMIDITY.NORMAL.LOW:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) <= {$TRIGGER.HUMIDITY.NORMAL.HIGH:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.HUMIDITY:"{#ENTITY_ID}"} = 1'
+                  name: '{#FRIENDLY_NAME} is between {$TRIGGER.HUMIDITY.WARNING.LOW}-{$TRIGGER.HUMIDITY.NORMAL.LOW}%'
+                  priority: WARNING
+                  manual_close: 'YES'
+                - uuid: 040e9a724eb84a139d3f60534c7ce8be
+                  expression: 'last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) >= {$TRIGGER.HUMIDITY.NORMAL.HIGH:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) < {$TRIGGER.HUMIDITY.WARNING.HIGH:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.HUMIDITY:"{#ENTITY_ID}"} = 1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) >= {$TRIGGER.HUMIDITY.NORMAL.LOW:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) <= {$TRIGGER.HUMIDITY.NORMAL.HIGH:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.HUMIDITY:"{#ENTITY_ID}"} = 1'
+                  name: '{#FRIENDLY_NAME} is between {$TRIGGER.HUMIDITY.NORMAL.HIGH}-{$TRIGGER.HUMIDITY.WARNING.HIGH}%'
+                  priority: WARNING
+                  manual_close: 'YES'
+                - uuid: 23e83a3446994482abd7f47b9750490e
+                  expression: 'last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) >= {$TRIGGER.HUMIDITY.WARNING.HIGH:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) <= {$TRIGGER.HUMIDITY.CRITICAL.HIGH:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.HUMIDITY:"{#ENTITY_ID}"} = 1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: 'last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) >= {$TRIGGER.HUMIDITY.NORMAL.LOW:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) <= {$TRIGGER.HUMIDITY.NORMAL.HIGH:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.HUMIDITY:"{#ENTITY_ID}"} = 1'
+                  name: '{#FRIENDLY_NAME} is >= {$TRIGGER.HUMIDITY.WARNING.HIGH}%'
+                  priority: HIGH
+                  manual_close: 'YES'
           master_item:
             key: ha.raw
           lld_macro_paths:
@@ -1948,9 +1977,32 @@ zabbix_export:
                   value: temperature
               trigger_prototypes:
                 - uuid: 6f7502c07a654f1c943520fbd24c81dc
-                  expression: 'last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) > {$TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} = 1'
-                  name: 'The temperature of {#FRIENDLY_NAME} has exceeded {$TRIGGER.TEMPERATURE}.'
-                  priority: AVERAGE
+                  expression: 'last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) <= {$TRIGGER.TEMPERATURE.WARNING.LOW:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} = 1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: '(last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) < {$TRIGGER.TEMPERATURE.NORMAL.HIGH:"{#ENTITY_ID}"} and (last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) > {$TRIGGER.TEMPERATURE.NORMAL.LOW:"{#ENTITY_ID}"})) and {$SWITCH.TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} = 1'
+                  name: '{#FRIENDLY_NAME} is <= {$TRIGGER.TEMPERATURE.WARNING.LOW}°C'
+                  priority: HIGH
+                  manual_close: 'YES'
+                - uuid: 8f37bd5df398431e9d68aca98e324bff
+                  expression: 'last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) >= {$TRIGGER.TEMPERATURE.WARNING.HIGH:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} = 1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: '(last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) < {$TRIGGER.TEMPERATURE.NORMAL.HIGH:"{#ENTITY_ID}"} and (last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) > {$TRIGGER.TEMPERATURE.NORMAL.LOW:"{#ENTITY_ID}"})) and {$SWITCH.TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} = 1'
+                  name: '{#FRIENDLY_NAME} is >= {$TRIGGER.TEMPERATURE.WARNING.HIGH}°C'
+                  priority: HIGH
+                  manual_close: 'YES'
+                - uuid: 541de7b8e9bc4796bee2fa23e4d4b64d
+                  expression: '(last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) > {$TRIGGER.TEMPERATURE.WARNING.LOW:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) < {$TRIGGER.TEMPERATURE.NORMAL.LOW:"{#ENTITY_ID}"}) and {$SWITCH.TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} = 1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: '(last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) < {$TRIGGER.TEMPERATURE.NORMAL.HIGH:"{#ENTITY_ID}"} and (last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) > {$TRIGGER.TEMPERATURE.NORMAL.LOW:"{#ENTITY_ID}"})) and {$SWITCH.TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} = 1'
+                  name: '{#FRIENDLY_NAME} is between {$TRIGGER.TEMPERATURE.WARNING.LOW}-{$TRIGGER.TEMPERATURE.NORMAL.LOW}°C'
+                  priority: WARNING
+                  manual_close: 'YES'
+                - uuid: 0e024ae9a7994b04bc675c768af00c36
+                  expression: '(last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) > {$TRIGGER.TEMPERATURE.NORMAL.HIGH:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) < {$TRIGGER.TEMPERATURE.WARNING.HIGH:"{#ENTITY_ID}"}) and {$SWITCH.TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} = 1'
+                  recovery_mode: RECOVERY_EXPRESSION
+                  recovery_expression: '(last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) < {$TRIGGER.TEMPERATURE.NORMAL.HIGH:"{#ENTITY_ID}"} and (last(/Home Assistant - Zabbix/ent.i.d[{#ENTITY_ID}]) > {$TRIGGER.TEMPERATURE.NORMAL.LOW:"{#ENTITY_ID}"})) and {$SWITCH.TRIGGER.TEMPERATURE:"{#ENTITY_ID}"} = 1'
+                  name: '{#FRIENDLY_NAME} is between {$TRIGGER.TEMPERATURE.NORMAL.HIGH}-{$TRIGGER.TEMPERATURE.WARNING.HIGH}°C'
+                  priority: WARNING
                   manual_close: 'YES'
           master_item:
             key: ha.raw
@@ -2904,6 +2956,9 @@ zabbix_export:
         - macro: '{$SWITCH.TRIGGER.STORAGE}'
           value: '1'
           description: '1 = enable 0 = disable'
+        - macro: '{$SWITCH.TRIGGER.HUMIDITY}'
+          value: '0'
+          description: '1 = enable 0 = disable'
         - macro: '{$SWITCH.TRIGGER.TEMPERATURE}'
           value: '0'
           description: '1 = enable 0 = disable'
@@ -2913,6 +2968,41 @@ zabbix_export:
         - macro: '{$TRIGGER.TEMPERATURE}'
           value: '44'
           description: 'The trigger activates when the temperature rises above 44 degrees Celsius, meaning it reaches 45°C.'
+        - macro: '{$TRIGGER.HUMIDITY.CRITICAL.LOW}'
+          value: '0'
+          description: 'Critical low threshold – humidity at or below this value is considered dangerous (too dry, risk of electrostatic discharge and hardware issues).'
+        - macro: '{$TRIGGER.HUMIDITY.WARNING.LOW}'
+          value: '30'
+          description: 'Warning low threshold – humidity between Critical Low and this value is a warning zone (too dry, but not yet critical).'
+        - macro: '{$TRIGGER.HUMIDITY.NORMAL.LOW}'
+          value: '40'
+          description: 'Normal operating lower limit – humidity at or above this value up to NORMAL.HIGH is considered safe.'
+        - macro: '{$TRIGGER.HUMIDITY.NORMAL.HIGH}'
+          value: '60'
+          description: 'Normal operating upper limit – humidity at or below this value down to NORMAL.LOW is considered safe.'
+        - macro: '{$TRIGGER.HUMIDITY.WARNING.HIGH}'
+          value: '70'
+          description: 'Warning high threshold – humidity between NORMAL.HIGH and this value is a warning zone (too humid, but not yet critical).'
+        - macro: '{$TRIGGER.HUMIDITY.CRITICAL.HIGH}'
+          value: '100'
+        - macro: '{$TRIGGER.TEMPERATURE.CRITICAL.LOW}'
+          value: '12'
+          description: 'Critical low threshold – temperature below this value is considered dangerous (too cold, condensation and hardware reliability issues).'
+        - macro: '{$TRIGGER.TEMPERATURE.WARNING.LOW}'
+          value: '15'
+          description: 'Warning low threshold – temperature between Critical Low and this value is a warning zone (too cold, but not yet critical).'
+        - macro: '{$TRIGGER.TEMPERATURE.NORMAL.LOW}'
+          value: '18'
+          description: 'Normal operating lower limit – temperatures at or above this value up to NORMAL.HIGH are considered safe.'
+        - macro: '{$TRIGGER.TEMPERATURE.NORMAL.HIGH}'
+          value: '27'
+          description: 'Normal operating upper limit – temperatures at or below this value down to NORMAL.LOW are considered safe.'
+        - macro: '{$TRIGGER.TEMPERATURE.WARNING.HIGH}'
+          value: '31'
+          description: 'Warning high threshold – temperature between NORMAL.HIGH and this value is a warning zone (too hot, but not yet critical).'
+        - macro: '{$TRIGGER.TEMPERATURE.CRITICAL.HIGH}'
+          value: '35'
+          description: 'Critical high threshold – temperature at or above this value is considered dangerous (overheating, risk of hardware damage).'
         - macro: '{$ZIGBEE.SIGNAL.MINIMUM}'
           value: '20'
       valuemaps:
