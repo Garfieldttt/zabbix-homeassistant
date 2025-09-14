@@ -1257,7 +1257,8 @@ zabbix_export:
                   priority: WARNING
                   manual_close: 'YES'
                 - uuid: 040e9a724eb84a139d3f60534c7ce8be
-                  expression: 'last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) >= {$TRIGGER.HUMIDITY.NORMAL.HIGH:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) < {$TRIGGER.HUMIDITY.WARNING.HIGH:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.HUMIDITY:"{#ENTITY_ID}"} = 1'
+                  expression: 'last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]
+                  ) >= {$TRIGGER.HUMIDITY.NORMAL.HIGH:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) < {$TRIGGER.HUMIDITY.WARNING.HIGH:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.HUMIDITY:"{#ENTITY_ID}"} = 1'
                   recovery_mode: RECOVERY_EXPRESSION
                   recovery_expression: 'last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) >= {$TRIGGER.HUMIDITY.NORMAL.LOW:"{#ENTITY_ID}"} and last(/Home Assistant - Zabbix/ent.luft[{#ENTITY_ID}]) <= {$TRIGGER.HUMIDITY.NORMAL.HIGH:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.HUMIDITY:"{#ENTITY_ID}"} = 1'
                   name: '{#FRIENDLY_NAME} is between {$TRIGGER.HUMIDITY.NORMAL.HIGH}-{$TRIGGER.HUMIDITY.WARNING.HIGH}%'
@@ -2965,9 +2966,6 @@ zabbix_export:
         - macro: '{$SWITCH.TRIGGER.ZIGBEE}'
           value: '1'
           description: '1 = enable 0 = disable'
-        - macro: '{$TRIGGER.TEMPERATURE}'
-          value: '44'
-          description: 'The trigger activates when the temperature rises above 44 degrees Celsius, meaning it reaches 45°C.'
         - macro: '{$TRIGGER.HUMIDITY.CRITICAL.LOW}'
           value: '0'
           description: 'Critical low threshold – humidity at or below this value is considered dangerous (too dry, risk of electrostatic discharge and hardware issues).'
