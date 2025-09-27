@@ -52,6 +52,7 @@ Agentless monitoring of Home Assistant entities via the REST API:
    | `{$LOAD.AVG.MAX.5M}`                     | `1.5`                                | Load average (5m) threshold                    |
    | `{$LOAD.AVG.MAX.15M}`                    | `1`                                  | Load average (15m) threshold                   |
    | `{$SWITCH.TRIGGER}`                      | `1` or `0`                           | Enable/disable trigger for each feature        |
+   | `{$BATTERY_TRIGGER_TIMEOUT}`             | `900`                                | Duration the entity must stay “unavailable” before the trigger fires.    |
 
 
 ---
