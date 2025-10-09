@@ -295,11 +295,11 @@ zabbix_export:
               trigger_prototypes:
                 - uuid: c00c1ebc288448daa088e54432c80596
                   expression: 'min(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}],300)<={$BATTERY.MINIMUM:"{#ENTITY_ID}"}'
-                  name: 'Battery replacement at {#FRIENDLY_NAME} is required.'
+                  name: 'Battery of {#FRIENDLY_NAME} is low.'
                   priority: AVERAGE
                 - uuid: afcc007a51cc4d12ad4300eec03ab583
                   expression: 'max(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}],{$BATTERY_TRIGGER_TIMEOUT})=-1 and {$SWITCH.TRIGGER.BATTERY.UNAVAILABLE:"{#ENTITY_ID}"}=1'
-                  name: 'Battery status unavailable on {#FRIENDLY_NAME}'
+                  name: 'Battery status of {#FRIENDLY_NAME} unavailable'
                   priority: AVERAGE
                   manual_close: 'YES'
           master_item:
@@ -1179,6 +1179,10 @@ zabbix_export:
                 - type: JSONPATH
                   parameters:
                     - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '-1'
                 - type: LTRIM
                   parameters:
                     - '["'
@@ -1191,10 +1195,14 @@ zabbix_export:
                 - tag: 'Home Assistant'
                   value: zigbee-linkquality
               trigger_prototypes:
+                - uuid: 3ab2ee18dfd6428f8d6127a5d7dbbd56
+                  expression: 'max(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}],300)=-1'
+                  name: 'The ZigBee connection {#FRIENDLY_NAME}: unavailable'
+                  priority: AVERAGE
                 - uuid: bcd8ff30b0ec4ac2806732d3a9209c06
                   expression: 'min(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}],5m)<{$SWITCH.TRIGGER.ZIGBEE:"{#ENTITY_ID}"} or last(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}]) < {$ZIGBEE.SIGNAL.MINIMUM:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.ZIGBEE:"{#ENTITY_ID}"} = 1'
-                  name: 'The ZigBee connection of {#FRIENDLY_NAME}: {ITEM.LASTVALUE}'
-                  priority: HIGH
+                  name: 'The ZigBee connection {#FRIENDLY_NAME}: {ITEM.LASTVALUE}'
+                  priority: AVERAGE
           master_item:
             key: ha.raw
           lld_macro_paths:
