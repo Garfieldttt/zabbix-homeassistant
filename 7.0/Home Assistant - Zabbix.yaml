@@ -144,13 +144,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - idle
@@ -211,13 +205,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - 'on'
@@ -272,13 +260,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - Unavailable
@@ -339,13 +321,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - unavailable
@@ -398,13 +374,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - 'off'
@@ -456,13 +426,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - unavailable
@@ -522,13 +486,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -578,13 +536,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -630,13 +582,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - unknown
@@ -686,13 +632,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -731,13 +671,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -776,13 +710,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -839,13 +767,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - clear-night
@@ -947,15 +869,9 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.latitude'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.latitude.first()'
                   error_handler: CUSTOM_VALUE
                   error_handler_params: '0'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
               master_item:
                 key: ha.raw
               tags:
@@ -970,15 +886,9 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.longitude'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.longitude.first()'
                   error_handler: CUSTOM_VALUE
                   error_handler_params: '0'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
               master_item:
                 key: ha.raw
               tags:
@@ -1017,13 +927,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -1067,13 +971,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - unavailable
@@ -1119,13 +1017,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - 'on'
@@ -1178,17 +1070,11 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - unavailable
                     - '-1'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
               master_item:
                 key: ha.raw
               tags:
@@ -1238,13 +1124,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -1317,13 +1197,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -1366,13 +1240,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -1427,13 +1295,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -1475,13 +1337,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - 'on'
@@ -1530,13 +1386,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -1581,13 +1431,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -1639,13 +1483,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - 'on'
@@ -1705,13 +1543,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -1751,13 +1583,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -1805,13 +1631,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -1853,13 +1673,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -1899,13 +1713,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - 'on'
@@ -1964,14 +1772,8 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                   error_handler: DISCARD_VALUE
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: LTRIM
-                  parameters:
-                    - '["'
               master_item:
                 key: ha.raw
               tags:
@@ -2052,13 +1854,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - 'on'
@@ -2117,13 +1913,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - 'off'
@@ -2178,7 +1968,7 @@ zabbix_export:
                 formulaid: A
           item_prototypes:
             - uuid: 70c7d700e9bf4a2982ad9deb0796cafb
-              name: '{#FRIENDLY_NAME}.'
+              name: '{#FRIENDLY_NAME}'
               type: DEPENDENT
               key: 'ha.uptime[{#ENTITY_ID}]'
               delay: '0'
@@ -2186,13 +1976,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: JAVASCRIPT
                   parameters:
                     - |
@@ -2250,13 +2034,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -2297,13 +2075,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - unavailable
@@ -2350,13 +2122,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id==''{#ENTITY_ID}'')].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id==''{#ENTITY_ID}'')].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -2398,13 +2164,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.latitude'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.latitude.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -2420,13 +2180,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.longitude'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.longitude.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -2442,13 +2196,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.radius'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.radius.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -2465,13 +2213,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.persons'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.persons.first()'
                 - type: LTRIM
                   parameters:
                     - ' person.'
@@ -2525,13 +2267,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -2579,13 +2315,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -2627,13 +2357,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -2675,13 +2399,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
               master_item:
                 key: ha.raw
               tags:
@@ -2724,13 +2442,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - unknown
@@ -2777,13 +2489,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - unknown
@@ -2830,13 +2536,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - unknown
@@ -2883,13 +2583,7 @@ zabbix_export:
               preprocessing:
                 - type: JSONPATH
                   parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
                 - type: STR_REPLACE
                   parameters:
                     - unknown
