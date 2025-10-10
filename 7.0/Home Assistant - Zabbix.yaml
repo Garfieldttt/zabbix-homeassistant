@@ -254,7 +254,7 @@ zabbix_export:
               delay: '0'
               value_type: FLOAT
               trends: 730d
-              units: '!{#UNITS}'
+              units: '!%'
               valuemap:
                 name: battery
               preprocessing:
@@ -269,6 +269,10 @@ zabbix_export:
                   parameters:
                     - unavailable
                     - '-1'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'off'
+                    - '-1'
               master_item:
                 key: ha.raw
               tags:
@@ -279,6 +283,7 @@ zabbix_export:
                   expression: 'min(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}],300)<={$BATTERY.MINIMUM:"{#ENTITY_ID}"}'
                   name: 'Battery of {#FRIENDLY_NAME} is low.'
                   priority: AVERAGE
+                  manual_close: 'YES'
                 - uuid: afcc007a51cc4d12ad4300eec03ab583
                   expression: 'max(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}],{$BATTERY_TRIGGER_TIMEOUT})=-1 and {$SWITCH.TRIGGER.BATTERY.UNAVAILABLE:"{#ENTITY_ID}"}=1'
                   name: 'Battery status of {#FRIENDLY_NAME} unavailable'
@@ -293,8 +298,6 @@ zabbix_export:
               path: $.entity_id
             - lld_macro: '{#FRIENDLY_NAME}'
               path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -1082,11 +1085,14 @@ zabbix_export:
                   value: zigbee-linkquality
               trigger_prototypes:
                 - uuid: 3ab2ee18dfd6428f8d6127a5d7dbbd56
-                  expression: 'max(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}],300)=-1'
+                  expression: 'max(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}],{$ZIGBEE.SIGNAL.MINIMUM.TIMEOUT:"{#ENTITY_ID}"})=-1'
                   name: 'The ZigBee connection {#FRIENDLY_NAME}: unavailable'
                   priority: AVERAGE
                 - uuid: bcd8ff30b0ec4ac2806732d3a9209c06
-                  expression: 'min(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}],5m)<{$SWITCH.TRIGGER.ZIGBEE:"{#ENTITY_ID}"} or last(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}]) < {$ZIGBEE.SIGNAL.MINIMUM:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.ZIGBEE:"{#ENTITY_ID}"} = 1'
+                  expression: |
+                    min(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}],{$ZIGBEE.SIGNAL.MINIMUM.TIMEOUT:"{#ENTITY_ID}"})<{$ZIGBEE.SIGNAL.MINIMUM:"{#ENTITY_ID}"}
+                    and min(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}],{$ZIGBEE.SIGNAL.MINIMUM.TIMEOUT:"{#ENTITY_ID}"}) >= 0
+                    and {$SWITCH.TRIGGER.ZIGBEE:"{#ENTITY_ID}"} = 1
                   name: 'The ZigBee connection {#FRIENDLY_NAME}: {ITEM.LASTVALUE}'
                   priority: AVERAGE
           master_item:
@@ -2701,6 +2707,8 @@ zabbix_export:
           description: 'Warning low threshold – temperature between Critical Low and this value is a warning zone (too cold, but not yet critical).'
         - macro: '{$ZIGBEE.SIGNAL.MINIMUM}'
           value: '20'
+        - macro: '{$ZIGBEE.SIGNAL.MINIMUM.TIMEOUT}'
+          value: '300'
       valuemaps:
         - uuid: fc783e73a76149cb9a5cfc5e056b20d9
           name: automation
