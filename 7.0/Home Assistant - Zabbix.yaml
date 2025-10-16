@@ -1090,7 +1090,7 @@ zabbix_export:
                   priority: AVERAGE
                 - uuid: bcd8ff30b0ec4ac2806732d3a9209c06
                   expression: |
-                    min(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}],{$ZIGBEE.SIGNAL.MINIMUM.TIMEOUT:"{#ENTITY_ID}"})<{$ZIGBEE.SIGNAL.MINIMUM:"{#ENTITY_ID}"}
+                    min(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}],{$ZIGBEE.SIGNAL.MINIMUM.TIMEOUT:"{#ENTITY_ID}"})<={$ZIGBEE.SIGNAL.MINIMUM:"{#ENTITY_ID}"}
                     and {$SWITCH.TRIGGER.ZIGBEE:"{#ENTITY_ID}"} = 1
                   name: 'The ZigBee connection {#FRIENDLY_NAME}: {ITEM.LASTVALUE}'
                   priority: AVERAGE
