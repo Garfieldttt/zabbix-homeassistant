@@ -284,6 +284,9 @@ zabbix_export:
                   name: 'Battery of {#FRIENDLY_NAME} is low.'
                   priority: AVERAGE
                   manual_close: 'YES'
+                  dependencies:
+                    - name: 'Battery status of {#FRIENDLY_NAME} unavailable'
+                      expression: 'max(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}],{$BATTERY_TRIGGER_TIMEOUT})=-1 and {$SWITCH.TRIGGER.BATTERY.UNAVAILABLE:"{#ENTITY_ID}"}=1'
                 - uuid: afcc007a51cc4d12ad4300eec03ab583
                   expression: 'max(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}],{$BATTERY_TRIGGER_TIMEOUT})=-1 and {$SWITCH.TRIGGER.BATTERY.UNAVAILABLE:"{#ENTITY_ID}"}=1'
                   name: 'Battery status of {#FRIENDLY_NAME} unavailable'
