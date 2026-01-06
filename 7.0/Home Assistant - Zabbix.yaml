@@ -625,7 +625,7 @@ zabbix_export:
           filter:
             conditions:
               - macro: '{#ENTITY_ID}'
-                value: '.*_pm25$'
+                value: '.*_pm_(1|2_5|10)$'
                 formulaid: A
           item_prototypes:
             - uuid: 32084b6e9438468eb986038eebbf657c
@@ -1097,6 +1097,9 @@ zabbix_export:
                     and {$SWITCH.TRIGGER.ZIGBEE:"{#ENTITY_ID}"} = 1
                   name: 'The ZigBee connection {#FRIENDLY_NAME}: {ITEM.LASTVALUE}'
                   priority: AVERAGE
+                  dependencies:
+                    - name: 'The ZigBee connection {#FRIENDLY_NAME}: unavailable'
+                      expression: 'max(/Home Assistant - Zabbix/ent.linkquality[{#ENTITY_ID}],{$ZIGBEE.SIGNAL.MINIMUM.TIMEOUT:"{#ENTITY_ID}"})=-1'
           master_item:
             key: ha.raw
           lld_macro_paths:
