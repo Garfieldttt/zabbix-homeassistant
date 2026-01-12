@@ -625,7 +625,7 @@ zabbix_export:
           filter:
             conditions:
               - macro: '{#ENTITY_ID}'
-                value: '.*_pm_(?:1|2_5|10)(?:$|_.*)'
+                value: '^.*_pm_?(?:1|2_5|10)(?!.*_norm(?:$|_)).*$'
                 formulaid: A
           item_prototypes:
             - uuid: 32084b6e9438468eb986038eebbf657c
