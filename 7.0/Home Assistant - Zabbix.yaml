@@ -280,7 +280,7 @@ zabbix_export:
                   value: battery-level
               trigger_prototypes:
                 - uuid: c00c1ebc288448daa088e54432c80596
-                  expression: 'min(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}],300)<={$BATTERY.MINIMUM:"{#ENTITY_ID}"}'
+                  expression: 'min(/Home Assistant - Zabbix/ent.bat[{#ENTITY_ID}],300)<={$BATTERY.MINIMUM:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.BATTERY.MINIMUM}=1'
                   name: 'Battery of {#FRIENDLY_NAME} is low.'
                   priority: AVERAGE
                   manual_close: 'YES'
@@ -2649,6 +2649,9 @@ zabbix_export:
         - macro: '{$SWAP.PFREE.MIN.WARN.PERCENT}'
           value: '50'
         - macro: '{$SWITCH.TRIGGER.BATTERY}'
+          value: '1'
+          description: '1 = enable 0 = disable'
+        - macro: '{$SWITCH.TRIGGER.BATTERY.MINIMUM}'
           value: '1'
           description: '1 = enable 0 = disable'
         - macro: '{$SWITCH.TRIGGER.BATTERY.UNAVAILABLE}'
