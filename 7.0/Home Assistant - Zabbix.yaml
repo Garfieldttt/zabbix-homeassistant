@@ -2636,7 +2636,7 @@ zabbix_export:
           description: 'Minimum disk space free'
         - macro: '{$HA.URL}'
           value: 'http://192.168.10.121:8123'
-          description: 'The trigger activates when the Zigbee signal drops below 90 LQI.'
+          description: 'Base URL of the Home Assistant instance.'
         - macro: '{$HOST.REACHABLE}'
           value: '1'
           description: '1 = enable 0 = disable'
@@ -2712,8 +2712,10 @@ zabbix_export:
           description: 'Warning low threshold – temperature between Critical Low and this value is a warning zone (too cold, but not yet critical).'
         - macro: '{$ZIGBEE.SIGNAL.MINIMUM}'
           value: '20'
+          description: 'Minimum Zigbee signal quality (LQI) required before triggering.'
         - macro: '{$ZIGBEE.SIGNAL.MINIMUM.TIMEOUT}'
           value: '300'
+          description: 'Time in seconds the signal must stay below the threshold before triggering.'
       valuemaps:
         - uuid: fc783e73a76149cb9a5cfc5e056b20d9
           name: automation
