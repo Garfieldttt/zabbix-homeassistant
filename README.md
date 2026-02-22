@@ -53,7 +53,7 @@ Agentless monitoring of Home Assistant entities via the REST API:
 | `{$SWITCH.TRIGGER}` | `1` or `0` | Enable/disable trigger for each feature |
 | `{$BATTERY_TRIGGER_TIMEOUT}` | `900` | Seconds an entity must stay “unavailable” before the trigger fires |
 
-### Home Assistant Apps (Add-ons) Monitoring (PR #10)
+### Home Assistant Apps (Add-ons) Monitoring
 
 This template also supports monitoring Home Assistant **Apps (formerly Add-ons)** through entities exposed by the **Supervisor integration**, using the existing `/api/states` data (no extra endpoints or auth changes).  
 
