@@ -2617,7 +2617,336 @@ zabbix_export:
             - type: JSONPATH
               parameters:
                 - '$.body[*]'
+        - uuid: 3ee900c714e24affae7d8b2461ab90c5
+          name: HA-addon-update
+          type: DEPENDENT
+          key: ha.addon.update
+          delay: '0'
+          description: |
+            Discovers Home Assistant Apps (Add-ons) via their update entities.
+            Add-on update entities are identified by the entity_picture attribute
+            containing "hassio/addons". Tracks update availability, installed and
+            latest versions, and auto-update status.
+          filter:
+            evaltype: AND
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^update\..+'
+                formulaid: A
+              - macro: '{#ENTITY_PICTURE}'
+                value: 'hassio/addons'
+                formulaid: B
+          item_prototypes:
+            - uuid: 79660d88583d43fc8ea12f2783d8f408
+              name: 'App {#FRIENDLY_NAME}: State'
+              type: DEPENDENT
+              key: 'addon.update[{#ENTITY_ID}]'
+              delay: '0'
+              trends: 730d
+              valuemap:
+                name: addon-update
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'on'
+                    - '1'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'off'
+                    - '0'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '2'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: addon-update
+              trigger_prototypes:
+                - uuid: 600b569b15034579a9754be856ef3b0a
+                  expression: 'last(/Home Assistant - Zabbix/addon.update[{#ENTITY_ID}])=1 and {$SWITCH.TRIGGER.ADDON.UPDATE:"{#ENTITY_ID}"}=1'
+                  name: 'App update for {#FRIENDLY_NAME} is available.'
+                  priority: WARNING
+                  manual_close: 'YES'
+                - uuid: 8a612587d18f452788dbc35d194c49d4
+                  expression: 'last(/Home Assistant - Zabbix/addon.update[{#ENTITY_ID}])=2 and {$SWITCH.TRIGGER.ADDON.UPDATE:"{#ENTITY_ID}"}=1'
+                  name: 'App {#FRIENDLY_NAME} is unavailable.'
+                  priority: AVERAGE
+                  manual_close: 'YES'
+            - uuid: ba1d1070c60f45f89c56483ddf745dc7
+              name: 'App {#FRIENDLY_NAME}: Installed Version'
+              type: DEPENDENT
+              key: 'addon.version[{#ENTITY_ID}]'
+              delay: '0'
+              history: 90d
+              trends: '0'
+              value_type: TEXT
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.installed_version.first()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: unknown
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: addon-version
+            - uuid: f2866e31d7d646a2a25ad081a4256753
+              name: 'App {#FRIENDLY_NAME}: Latest Version'
+              type: DEPENDENT
+              key: 'addon.version.latest[{#ENTITY_ID}]'
+              delay: '0'
+              history: 90d
+              trends: '0'
+              value_type: TEXT
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.latest_version.first()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: unknown
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: addon-version-latest
+            - uuid: c71388225fbd4325820512e5f46e82b1
+              name: 'App {#FRIENDLY_NAME}: Auto-Update'
+              type: DEPENDENT
+              key: 'addon.auto.update[{#ENTITY_ID}]'
+              delay: '0'
+              trends: 730d
+              valuemap:
+                name: addon-auto-update
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].attributes.auto_update.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'true'
+                    - '1'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'True'
+                    - '1'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'false'
+                    - '0'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'False'
+                    - '0'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: addon-auto-update
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#ENTITY_PICTURE}'
+              path: $.attributes.entity_picture
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 2e646fed58a6416fb4de194ab1a5df85
+          name: HA-addon-running
+          type: DEPENDENT
+          key: ha.addon.running
+          delay: '0'
+          description: |
+            Discovers running state of Home Assistant Apps (Add-ons).
+            Requires the binary_sensor.*_running entities to be enabled in
+            HA Settings > Devices & Services > Home Assistant Supervisor.
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^binary_sensor\..+_running$'
+                formulaid: A
+          item_prototypes:
+            - uuid: b681544504344b909bf2fce0d20249a0
+              name: 'App {#FRIENDLY_NAME}: Running'
+              type: DEPENDENT
+              key: 'addon.running[{#ENTITY_ID}]'
+              delay: '0'
+              trends: 730d
+              valuemap:
+                name: addon-running
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'on'
+                    - '1'
+                - type: STR_REPLACE
+                  parameters:
+                    - 'off'
+                    - '0'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '2'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: addon-running
+              trigger_prototypes:
+                - uuid: 12d1e8f8c05b47fc9459bd73c3747c83
+                  expression: 'last(/Home Assistant - Zabbix/addon.running[{#ENTITY_ID}])=0 and {$SWITCH.TRIGGER.ADDON.RUNNING:"{#ENTITY_ID}"}=1'
+                  name: 'App {#FRIENDLY_NAME} is not running.'
+                  priority: HIGH
+                  manual_close: 'YES'
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 73f1780a16d54fbb95437f53e605bbba
+          name: HA-addon-cpu
+          type: DEPENDENT
+          key: ha.addon.cpu
+          delay: '0'
+          description: |
+            Discovers CPU usage of Home Assistant Apps (Add-ons).
+            Requires the sensor.*_cpu_percent entities to be enabled in
+            HA Settings > Devices & Services > Home Assistant Supervisor.
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\..+_cpu_percent$'
+                formulaid: A
+          item_prototypes:
+            - uuid: 6a964dc8ebad4e4eb81bf9a9eb6c1787
+              name: 'App {#FRIENDLY_NAME}: CPU'
+              type: DEPENDENT
+              key: 'addon.cpu[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              trends: 730d
+              units: '!%'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '0'
+                - type: STR_REPLACE
+                  parameters:
+                    - unknown
+                    - '0'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: addon-cpu
+              trigger_prototypes:
+                - uuid: 2c4c9e181ab1461c859d0fd8ca379f20
+                  expression: 'min(/Home Assistant - Zabbix/addon.cpu[{#ENTITY_ID}],5m)>={$ADDON.CPU.MAX.PERCENT:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.ADDON.CPU:"{#ENTITY_ID}"}=1'
+                  name: 'App {#FRIENDLY_NAME} CPU usage is high ({ITEM.LASTVALUE}%).'
+                  priority: WARNING
+                  manual_close: 'YES'
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
+        - uuid: 0d11db38379049b98346164eff8c80e8
+          name: HA-addon-memory
+          type: DEPENDENT
+          key: ha.addon.memory
+          delay: '0'
+          description: |
+            Discovers memory usage of Home Assistant Apps (Add-ons).
+            Requires the sensor.*_memory_percent entities to be enabled in
+            HA Settings > Devices & Services > Home Assistant Supervisor.
+          filter:
+            conditions:
+              - macro: '{#ENTITY_ID}'
+                value: '^sensor\..+_memory_percent$'
+                formulaid: A
+          item_prototypes:
+            - uuid: bdb8df118019479fa6ba4906a67832cc
+              name: 'App {#FRIENDLY_NAME}: Memory'
+              type: DEPENDENT
+              key: 'addon.memory[{#ENTITY_ID}]'
+              delay: '0'
+              value_type: FLOAT
+              trends: 730d
+              units: '!%'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state.first()'
+                - type: STR_REPLACE
+                  parameters:
+                    - unavailable
+                    - '0'
+                - type: STR_REPLACE
+                  parameters:
+                    - unknown
+                    - '0'
+              master_item:
+                key: ha.raw
+              tags:
+                - tag: 'Home Assistant'
+                  value: addon-memory
+              trigger_prototypes:
+                - uuid: d444b41bb2c04eb4b22ca6fe8ffd45f9
+                  expression: 'min(/Home Assistant - Zabbix/addon.memory[{#ENTITY_ID}],5m)>={$ADDON.MEMORY.MAX.PERCENT:"{#ENTITY_ID}"} and {$SWITCH.TRIGGER.ADDON.MEMORY:"{#ENTITY_ID}"}=1'
+                  name: 'App {#FRIENDLY_NAME} memory usage is high ({ITEM.LASTVALUE}%).'
+                  priority: WARNING
+                  manual_close: 'YES'
+          master_item:
+            key: ha.raw
+          lld_macro_paths:
+            - lld_macro: '{#ENTITY_ID}'
+              path: $.entity_id
+            - lld_macro: '{#FRIENDLY_NAME}'
+              path: $.attributes.friendly_name
+            - lld_macro: '{#UNITS}'
+              path: $.attributes.unit_of_measurement
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[*]'
       macros:
+        - macro: '{$ADDON.CPU.MAX.PERCENT}'
+          value: '90'
+          description: 'Maximum CPU utilization for an App (Add-on) before triggering.'
+        - macro: '{$ADDON.MEMORY.MAX.PERCENT}'
+          value: '90'
+          description: 'Maximum memory utilization for an App (Add-on) before triggering.'
         - macro: '{$API.TOKEN}'
           type: SECRET_TEXT
         - macro: '{$BATTERY.MINIMUM}'
@@ -2648,6 +2977,18 @@ zabbix_export:
           description: 'the threshold from which the storage trigger is activated'
         - macro: '{$SWAP.PFREE.MIN.WARN.PERCENT}'
           value: '50'
+        - macro: '{$SWITCH.TRIGGER.ADDON.CPU}'
+          value: '1'
+          description: '1 = enable 0 = disable App CPU usage triggers'
+        - macro: '{$SWITCH.TRIGGER.ADDON.MEMORY}'
+          value: '1'
+          description: '1 = enable 0 = disable App memory usage triggers'
+        - macro: '{$SWITCH.TRIGGER.ADDON.RUNNING}'
+          value: '1'
+          description: '1 = enable 0 = disable App running state triggers'
+        - macro: '{$SWITCH.TRIGGER.ADDON.UPDATE}'
+          value: '1'
+          description: '1 = enable 0 = disable App update availability triggers'
         - macro: '{$SWITCH.TRIGGER.BATTERY}'
           value: '1'
           description: '1 = enable 0 = disable'
@@ -2720,6 +3061,31 @@ zabbix_export:
           value: '300'
           description: 'Time in seconds the signal must stay below the threshold before triggering.'
       valuemaps:
+        - uuid: 21b32189f1824fd8828b79e01123ef9a
+          name: addon-auto-update
+          mappings:
+            - value: '1'
+              newvalue: enabled
+            - value: '0'
+              newvalue: disabled
+        - uuid: 1a4f89154bd141e781ce4d7a832610fd
+          name: addon-running
+          mappings:
+            - value: '1'
+              newvalue: running
+            - value: '0'
+              newvalue: stopped
+            - value: '2'
+              newvalue: unavailable
+        - uuid: f92ab369adaf44229af8b517bf4b7d6e
+          name: addon-update
+          mappings:
+            - value: '0'
+              newvalue: 'up to date'
+            - value: '1'
+              newvalue: 'update available'
+            - value: '2'
+              newvalue: unavailable
         - uuid: fc783e73a76149cb9a5cfc5e056b20d9
           name: automation
           mappings:
