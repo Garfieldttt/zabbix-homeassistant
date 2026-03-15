@@ -1,137 +1,292 @@
 # Zabbix Integration: Home Assistant Monitoring
 
-**Template:** `Home Assistant - Zabbix`  
+**Template:** `Home Assistant - Zabbix`
 **Zabbix Version:** 7.0+
 
 ## Overview
 
 Agentless monitoring of Home Assistant entities via the REST API:
 
-- Fetches all entity states from Home Assistant (`{$HA.URL}/api/states`)
-- Discovers entities (automations, sensors, switches, cameras, zones, etc.) via Low-Level Discovery (LLD)
-- Extracts state, values, and attributes (e.g., battery level, temperature, disk usage)
-- Applies JSON preprocessing and value mappings to normalize data
-- Generates dependent items and trigger prototypes for various entity types
+- Fetches all entity states from Home Assistant (`{$HA.URL}/api/states`) with a single HTTP request
+- Discovers entities automatically via Low-Level Discovery (LLD) — no manual configuration per sensor
+- Covers sensors, binary sensors, automations, lights, switches, covers, locks, alarms, climate, cameras, zones, persons, and more
+- Extracts state, numeric values, and attributes (battery level, unit of measurement, device class, etc.)
+- Applies JSON preprocessing, string-to-integer mappings, and value maps to normalize raw HA data
+- Includes a built-in dashboard with 7 pages, auto-populated via graph prototypes
+
+**How it works:**
+
+```
+ha.raw  (HTTP_AGENT → /api/states, Bearer {$API.TOKEN})
+  ├── Direct dependent items  (HA Core Update, Supervisor Update)
+  └── LLD Discovery Rules     (battery, temperature, switches, ...)
+        └── Item Prototypes   (one item per discovered entity)
+              └── Trigger Prototypes
+```
 
 ## Requirements
 
-- Home Assistant instance with REST API enabled/reachable
-- Long-Lived Access Token stored in macro `{$API.TOKEN}`
-- Accessible URL `{$HA.URL}` (e.g., `http://192.168.10.121:8123`)
-- Template applied to a Zabbix host with network access to Home Assistant
+- Home Assistant instance with REST API enabled and reachable from Zabbix
+- Long-Lived Access Token created in Home Assistant (`Profile → Security → Long-Lived Access Tokens`)
+- Accessible base URL (e.g., `http://192.168.10.121:8123`)
+- Template applied to a Zabbix host that has network access to Home Assistant
 
-## Macros
+## Setup
+
+1. Import `template_homeassistant_api.yaml` into Zabbix 7.0+
+2. Create a Zabbix host for your Home Assistant instance
+3. Assign this template to the host
+4. Set the required macros on the host (or globally):
 
 | Macro | Example | Description |
 |---|---:|---|
-| `{$API.TOKEN}` | _(SECRET)_ | Home Assistant Long-Lived Access Token |
-| `{$HA.URL}` | `http://192.168.1.100:8123` | Base URL of the Home Assistant API |
-| `{$BATTERY.MINIMUM}` | `30` | Battery level threshold (%) |
-| `{$ZIGBEE.SIGNAL.MINIMUM}` | `20` | Minimum Zigbee link quality (LQI) |
-| `{$DISK.PFREE.MIN.WARN.GIB}` | `2` | Minimum free disk space (GiB) |
-| `{$MEMORY.UTIL.MAX.PERCENT}` | `95` | Maximum memory utilization (%) |
-| `{$CPU.UTIL.MAX.PERCENT}` | `90` | Maximum CPU utilization (%) |
-| `{$STORAGE_PERCENT}` | `5` | Free storage percentage threshold (%) |
-| `{$SWAP.PFREE.MIN.WARN.PERCENT}` | `50` | Minimum free swap percentage (%) |
-| `{$TRIGGER.HUMIDITY.CRITICAL.LOW}` | `0` | Critically dry (danger) |
-| `{$TRIGGER.HUMIDITY.WARNING.LOW}` | `0` | Low humidity (warn) |
-| `{$TRIGGER.HUMIDITY.NORMAL.LOW}` | `0` | Min safe humidity |
-| `{$TRIGGER.HUMIDITY.NORMAL.HIGH}` | `0` | Max safe humidity |
-| `{$TRIGGER.HUMIDITY.WARNING.HIGH}` | `0` | High humidity (warn) |
-| `{$TRIGGER.HUMIDITY.CRITICAL.HIGH}` | `0` | Critically humid (danger) |
-| `{$TRIGGER.TEMPERATURE.CRITICAL.LOW}` | `0` | Critically cold (danger) |
-| `{$TRIGGER.TEMPERATURE.WARNING.LOW}` | `0` | Low temp (warn) |
-| `{$TRIGGER.TEMPERATURE.NORMAL.LOW}` | `0` | Min safe temp |
-| `{$TRIGGER.TEMPERATURE.NORMAL.HIGH}` | `0` | Max safe temp |
-| `{$TRIGGER.TEMPERATURE.WARNING.HIGH}` | `0` | High temp (warn) |
-| `{$TRIGGER.TEMPERATURE.CRITICAL.HIGH}` | `0` | Critically hot (danger) |
-| `{$BACKUP.MAX.AGE.DAYS}` | `7` | Maximum age of backup (days) |
-| `{$POWER.CONSUMPTION.MAX.WATT}` | `1000` | Maximum power consumption (Watt) |
-| `{$LOAD.AVG.MAX.1M}` | `2` | Load average (1m) threshold |
-| `{$LOAD.AVG.MAX.5M}` | `1.5` | Load average (5m) threshold |
-| `{$LOAD.AVG.MAX.15M}` | `1` | Load average (15m) threshold |
-| `{$SWITCH.TRIGGER}` | `1` or `0` | Enable/disable trigger for each feature |
-| `{$BATTERY_TRIGGER_TIMEOUT}` | `900` | Seconds an entity must stay “unavailable” before the trigger fires |
-
-### Home Assistant Apps (Add-ons) Monitoring
-
-This template also supports monitoring Home Assistant **Apps (formerly Add-ons)** through entities exposed by the **Supervisor integration**, using the existing `/api/states` data (no extra endpoints or auth changes).  
-
-**Important note:** In Home Assistant, **only the update entities are enabled by default**. Running/CPU/Memory entities must be enabled manually:
-**Settings → Devices & Services → Home Assistant Supervisor**.
-
-**Macros (Add-ons):**
-
-| Macro | Default | Description |
-|---|---:|---|
-| `{$ADDON.CPU.MAX.PERCENT}` | `90` | Max CPU utilization (%) for an add-on before triggering |
-| `{$ADDON.MEMORY.MAX.PERCENT}` | `90` | Max memory utilization (%) for an add-on before triggering |
-| `{$SWITCH.TRIGGER.ADDON.UPDATE}` | `1` | Enable/disable “update available” triggers |
-| `{$SWITCH.TRIGGER.ADDON.RUNNING}` | `1` | Enable/disable “not running” triggers |
-| `{$SWITCH.TRIGGER.ADDON.CPU}` | `1` | Enable/disable “high CPU” triggers |
-| `{$SWITCH.TRIGGER.ADDON.MEMORY}` | `1` | Enable/disable “high memory” triggers |
+| `{$HA.URL}` | `http://192.168.10.121:8123` | Base URL of the Home Assistant instance |
+| `{$API.TOKEN}` | `eyJhbGci...` | Long-Lived Access Token |
+| `{$HOST.REACHABLE}` | `1` | Set to `0` to suppress the host unreachable trigger |
 
 ## Items Included in the Template
 
-| Item | Description |
-|---|---|
-| **Automations** | Monitors active automations in Home Assistant, detecting faulty or blocked automations. |
-| **Battery Status** | Checks battery level of devices (sensors, remotes), alerts on low battery. |
-| **Cameras** | Monitors camera availability and status, including reachability and stream health. |
-| **Contact Sensors** | Tracks state of doors/windows sensors (open/closed). |
-| **Firmware Updates** | Detects available firmware updates for integrated devices. |
-| **Humidity Sensors** | Monitors humidity levels in environments. |
-| **Additional Humidity Sensors** | Includes extra humidity sensor types for broader coverage. |
-| **Temperature Sensors** | Monitors temperature readings from Home Assistant. |
-| **Air Pressure** | Tracks atmospheric pressure via HA sensors for weather trends. |
-| **Weight Sensors** | Monitors weight readings from Home Assistant `device_class = "weight"` sensors (e.g. smart scales). |
-| **Person Zone Assignment** | Follows which zone (Home, Work, etc.) a person entity is currently in. |
-| **Zone Radius** | Monitors configured zone radius to ensure accurate geofencing. |
-| **Longitude** | Displays longitude attribute of zone entities. |
-| **Latitude** | Displays latitude attribute of zone entities. |
-| **Home Assistant Updates** | Monitors HA core version and alerts when a new release is available. |
-| **Power Consumption** | Tracks instantaneous power usage (Watt) of devices like smart plugs. |
-| **Energy Monitoring** | Tracks cumulative energy usage (kWh) for devices. |
-| **Weather Forecast** | Integrates HA weather forecast data (temperature, precipitation probability, wind speed). |
-| **Zigbee Link Quality** | Monitors signal quality (LQI) of Zigbee devices and triggers on low values. |
-| **Occupancy** | Detects presence/motion sensor state to indicate room occupancy. |
-| **Illuminance** | Monitors light level (lux) for use in automations like adaptive lighting. |
-| **PM2.5** | Tracks fine particulate matter concentration for air quality monitoring. |
-| **VOC** | Monitors volatile organic compound levels for indoor air quality. |
-| **Light Status** | Tracks on/off state of Home Assistant light entities. |
-| **Step Counter (Companion App)** | Reads step count reported by the HA companion app. |
-| **Distance Traveled (Companion App)** | Measures distance covered based on companion app data. |
-| **Floors Descended (Companion App)** | Tracks floors descended from device sensor data. |
-| **Floors Ascended (Companion App)** | Tracks floors ascended from device sensor data. |
-| **Storage Available (Companion App) (%)** | Monitors free storage on HA companion devices, triggers below threshold. |
-| **Restart Required** | Alerts when a restart is required for HA or integrated devices. |
-| **Switch Status** | Monitors state (on/off) of switch entities. |
-| **Device Uptime** | Monitors uptime of devices connected to Home Assistant. |
-| **Backup** | Monitors the last backup status. |
-| **Host Not Reachable Trigger** | Fires when no data is received for 900 s while the host is still reachable. |
-
-### Apps / Add-ons (Supervisor)
+### Home Assistant Core
 
 | Item | Description |
 |---|---|
-| **Add-on Update Discovery** | Discovers add-ons via `update.*` entities (identified by `entity_picture` containing `hassio/addons`). Tracks update availability, installed/latest version, auto-update. |
-| **Add-on Running Discovery** | Discovers `binary_sensor.*_running` entities to track running/stopped/unavailable state. *(Must be enabled manually in Supervisor integration.)* |
-| **Add-on CPU Discovery** | Discovers `sensor.*_cpu_percent` entities to track CPU usage %. *(Must be enabled manually.)* |
-| **Add-on Memory Discovery** | Discovers `sensor.*_memory_percent` entities to track memory usage %. *(Must be enabled manually.)* |
+| All Entity States (Master Item) | Single HTTP request to `/api/states` — all other items depend on this |
+| HA Core Update | Whether a Home Assistant Core update is available (1=yes, 0=no, 2=unavailable) |
+| HA Supervisor Update | Whether a Supervisor update is available |
+| Backup Manager State | State of the HA backup manager (idle / creating / receiving / restoring / blocked) |
+| Integration Updates | Update availability for all installed integrations |
+| Firmware Updates | Firmware update availability for connected devices (device_class: firmware) |
+| Restart Required | Services or integrations requiring a restart |
+| Device Uptime | Uptime of devices reporting an uptime sensor (ISO8601 → elapsed seconds) |
 
-## Host System Monitoring (System Monitor Integration required)
-
-This section requires the **System Monitor Integration** in Home Assistant.  
-Note: Make sure all desired entities are enabled in Home Assistant so Zabbix can query them correctly.
+### Sensors — by Device Class
 
 | Item | Description |
 |---|---|
-| **CPU Utilization (%)** | Shows the current CPU usage as a percentage. |
-| **Load (1m/5m/15m)** | Average system load over the last 1/5/15 minutes. |
-| **Memory Utilization (%) & Trigger** | Shows memory usage %. Triggers when high. |
-| **Memory Used/Free (MiB) & Trigger** | RAM in use / available. Triggers when thresholds are hit. |
-| **Swap Free/Used (MiB)** | Swap usage metrics. |
-| **Swap Utilization (%)** | Percentage of swap usage. |
-| **Disk Used/Free (GiB) & Trigger** | Disk usage metrics with triggers. |
-| **Network In/Out (MB/s)** | Network throughput. |
-| **Network Packets In/Out** | Packet counters. |
+| Battery Level | Battery percentage for all discovered battery sensors |
+| Temperature | Temperature readings for all temperature sensors (unit from HA) |
+| Humidity | Relative humidity for all humidity sensors |
+| Atmospheric Pressure | Barometric pressure sensors |
+| Illuminance | Light level / lux sensors |
+| Power (W) | Power consumption in Watts |
+| Energy (kWh) | Energy consumption in kWh |
+| Weight | Weight sensors |
+| Signal Strength (dBm) | Wi-Fi / RF signal strength in dBm |
+| Distance | Distance sensors |
+| Particulate Matter (PM1 / PM2.5 / PM10) | Fine dust sensors (device_class: pm1, pm25, pm10) |
+| VOC / Air Pollutants | Volatile organic compounds index (device_class: volatile_organic_compounds, volatile_organic_compounds_parts, or entity_id matching `.*voc_index$`) |
+| CO2 Level | Carbon dioxide concentration (ppm) |
+| Voltage | Voltage sensors (V) |
+| Current | Current sensors (A) |
+| Wind Speed | Wind speed sensors |
+| Wind Direction | Wind direction sensors (°) |
+| Precipitation | Precipitation sensors |
+| Sound Pressure Level | Noise / dB sensors |
+| Air Quality Index (AQI) | AQI sensors |
+| Gas Consumption | Gas consumption (sensor, m³ or ft³) |
+| Water Consumption | Water consumption (m³ or gal) |
+| ZigBee Link Quality | ZigBee signal quality (LQI) for all `*_linkquality` entities |
+
+### Sensors — by Entity ID Pattern
+
+| Item | Description |
+|---|---|
+| Automation State | State of all automations (enabled / disabled / unavailable) |
+| Camera State | Camera availability and mode |
+| Light State | On / off / unavailable state for all lights |
+| Switch State | On / off / unavailable / unknown state for all switches |
+| Cover State & Position | Open / closed / opening / closing and position % for covers and blinds |
+| Climate — Current Temperature | Current temperature measured by a climate entity |
+| Climate — Target Temperature | Set point / target temperature of a climate entity |
+| Climate — HVAC Action | Active HVAC mode (heating / cooling / idle / etc.) |
+| Lock State | Locked / unlocked / jammed / locking / unlocking state |
+| Alarm Panel State | Disarmed / armed / pending / triggered state |
+| Weather Forecast | Current weather condition (15 conditions mapped to numeric values) |
+| Zone — Latitude / Longitude / Radius | Geographic data for HA zones |
+| Zone — Persons Count | Number of persons currently inside a zone |
+| Person Location | GPS coordinates of persons (Companion App) |
+| Occupancy | Occupancy binary sensor state |
+| Door / Window Contact | Open / closed state for door and window contact sensors |
+
+### Safety Binary Sensors
+
+> Safety-critical triggers. Smoke, CO, and gas sensors additionally fire a **HIGH** offline trigger when no data is received for `{$SAFETY.SENSOR.NODATA.TIMEOUT}` seconds (default 30 min). This ensures you are alerted if a sensor goes offline.
+
+| Item | Trigger |
+|---|---|
+| Smoke Sensor | DISASTER when smoke detected; HIGH when sensor offline |
+| Carbon Monoxide Sensor | DISASTER when CO detected; HIGH when sensor offline |
+| Gas Sensor (binary) | DISASTER when gas leak detected; HIGH when sensor offline |
+| Moisture / Flood Sensor | HIGH when moisture detected |
+| Motion Sensor | State monitoring (no alert by default) |
+| Window Sensor (binary) | State monitoring (no alert by default) |
+
+### Home Assistant Apps (Add-ons) Monitoring
+
+> Requires **Home Assistant Supervisor** entities to be enabled in:
+> **Settings → Devices & Services → Home Assistant Supervisor**
+>
+> By default only update entities are enabled. Running, CPU, and Memory entities must be enabled manually in Home Assistant.
+
+| Item | Description |
+|---|---|
+| Add-on Running State | Whether each add-on is running, stopped, or unavailable |
+
+**Macros for Add-on Monitoring:**
+
+| Macro | Example | Description |
+|---|---:|---|
+| `{$SWITCH.TRIGGER.ADDON.RUNNING}` | `1` | Enable (1) or disable (0) the "add-on not running" trigger |
+
+### HA Companion App (Mobile)
+
+| Item | Description |
+|---|---|
+| Step Counter | Daily steps tracked by the Companion App |
+| Distance Traveled | Distance traveled (km or mi) |
+| Floors Ascended | Floors climbed |
+| Floors Descended | Floors descended |
+| Storage Available | Free device storage (%) |
+
+## Host System Monitoring
+
+> Requires the [System Monitor Integration](https://www.home-assistant.io/integrations/systemmonitor/) to be enabled in Home Assistant.
+> Enable all desired entities in **Settings → Devices & Services → System Monitor**.
+
+| Item | Description |
+|---|---|
+| CPU Utilization | Processor utilization (%) |
+| Memory Utilization | RAM usage (%) |
+| Memory Used | RAM used (MiB) |
+| Memory Free | RAM free (MiB) |
+| Swap Used | Swap space used (MiB) |
+| Swap Free | Swap space free (MiB) |
+| Swap Utilization | Swap usage (%) |
+| Disk Free | Free disk space (GiB) |
+| Disk Used | Used disk space (GiB) |
+| Load Average (1 min) | System load average — 1 minute |
+| Load Average (5 min) | System load average — 5 minutes |
+| Load Average (15 min) | System load average — 15 minutes |
+| Network In | Incoming network throughput (MB/s) |
+| Network Out | Outgoing network throughput (MB/s) |
+| Network Packets In | Incoming packets per second |
+| Network Packets Out | Outgoing packets per second |
+
+## Macros Reference
+
+### Connection & Access
+
+| Macro | Example | Description |
+|---|---:|---|
+| `{$HA.URL}` | `http://192.168.10.121:8123` | Home Assistant base URL |
+| `{$API.TOKEN}` | `eyJhbGci...` | Long-Lived Access Token |
+| `{$HOST.REACHABLE}` | `1` | Controls the no-data / unreachable trigger (1 = active) |
+
+### Thresholds
+
+| Macro | Example | Description |
+|---|---:|---|
+| `{$BATTERY.MINIMUM}` | `30` | Low battery threshold (%) |
+| `{$BATTERY_TRIGGER_TIMEOUT}` | `900` | Seconds before "battery unavailable" trigger fires |
+| `{$ZIGBEE.SIGNAL.MINIMUM}` | `20` | Minimum ZigBee LQI before trigger |
+| `{$DBM.SIGNAL.MINIMUM}` | `-80` | Minimum dBm signal quality before trigger |
+| `{$CPU.UTIL.MAX.PERCENT}` | `90` | Maximum CPU utilization (%) |
+| `{$MEMORY.UTIL.MAX.PERCENT}` | `95` | Maximum memory utilization (%) |
+| `{$SWAP.PFREE.MIN.WARN.PERCENT}` | `50` | Maximum swap utilization (%) |
+| `{$DISK.PFREE.MIN.WARN.GIB}` | `2` | Minimum free disk space (GiB) |
+| `{$STORAGE_PERCENT}` | `5` | Minimum free storage for Companion App (%) |
+| `{$CO2.WARNING.PPM}` | `1000` | CO2 warning threshold (ppm) |
+| `{$CO2.CRITICAL.PPM}` | `2000` | CO2 critical threshold (ppm) |
+| `{$AQI.MAX}` | `100` | Air quality index warning threshold |
+| `{$SOUND.PRESSURE.MAX.DB}` | `80` | Sound pressure warning threshold (dB) |
+| `{$SAFETY.SENSOR.NODATA.TIMEOUT}` | `1800` | Seconds without data before safety sensor offline trigger fires |
+
+### Temperature Thresholds
+
+| Macro | Example | Description |
+|---|---:|---|
+| `{$TRIGGER.TEMPERATURE.CRITICAL.LOW}` | `12` | Critically cold threshold (°C) |
+| `{$TRIGGER.TEMPERATURE.WARNING.LOW}` | `15` | Warning — too cold (°C) |
+| `{$TRIGGER.TEMPERATURE.NORMAL.LOW}` | `18` | Minimum of normal range (°C) |
+| `{$TRIGGER.TEMPERATURE.NORMAL.HIGH}` | `27` | Maximum of normal range (°C) |
+| `{$TRIGGER.TEMPERATURE.WARNING.HIGH}` | `31` | Warning — too warm (°C) |
+| `{$TRIGGER.TEMPERATURE.CRITICAL.HIGH}` | `35` | Critically hot threshold (°C) |
+
+### Humidity Thresholds
+
+| Macro | Example | Description |
+|---|---:|---|
+| `{$TRIGGER.HUMIDITY.CRITICAL.LOW}` | `0` | Critically dry (%) |
+| `{$TRIGGER.HUMIDITY.WARNING.LOW}` | `30` | Warning — too dry (%) |
+| `{$TRIGGER.HUMIDITY.NORMAL.LOW}` | `40` | Minimum of normal range (%) |
+| `{$TRIGGER.HUMIDITY.NORMAL.HIGH}` | `60` | Maximum of normal range (%) |
+| `{$TRIGGER.HUMIDITY.WARNING.HIGH}` | `70` | Warning — too humid (%) |
+| `{$TRIGGER.HUMIDITY.CRITICAL.HIGH}` | `100` | Critically humid (%) |
+
+### Trigger Switches
+
+All trigger switches accept context macros — e.g. `{$SWITCH.TRIGGER.BATTERY:"{#ENTITY_ID}"}` to disable a trigger for one specific entity only.
+
+| Macro | Example | Description |
+|---|---:|---|
+| `{$SWITCH.TRIGGER.BATTERY}` | `1` | Low battery trigger (1 or 0) |
+| `{$SWITCH.TRIGGER.BATTERY.UNAVAILABLE}` | `1` | Battery unavailable trigger (1 or 0) |
+| `{$SWITCH.TRIGGER.FIRMWARE}` | `1` | Firmware update available trigger (1 or 0) |
+| `{$SWITCH.TRIGGER.HA_UPDATE}` | `1` | Integration update available trigger (1 or 0) |
+| `{$SWITCH.TRIGGER.HUMIDITY}` | `0` | Humidity out-of-range trigger (1 or 0, off by default) |
+| `{$SWITCH.TRIGGER.TEMPERATURE}` | `0` | Temperature out-of-range trigger (1 or 0, off by default) |
+| `{$SWITCH.TRIGGER.ZIGBEE}` | `1` | ZigBee signal quality trigger (1 or 0) |
+| `{$SWITCH.TRIGGER.RESTART.REQUIRED}` | `1` | Restart required trigger (1 or 0) |
+| `{$SWITCH.TRIGGER.STORAGE}` | `1` | Low storage trigger (1 or 0) |
+| `{$SWITCH.TRIGGER.CO2}` | `1` | CO2 level trigger (1 or 0) |
+| `{$SWITCH.TRIGGER.MOISTURE}` | `1` | Moisture / flood trigger (1 or 0) |
+| `{$SWITCH.TRIGGER.AQI}` | `1` | Air quality index trigger (1 or 0) |
+| `{$SWITCH.TRIGGER.SOUND.PRESSURE}` | `1` | Sound pressure trigger (1 or 0) |
+| `{$SWITCH.TRIGGER.LOCK}` | `1` | Lock jammed trigger (1 or 0) |
+| `{$SWITCH.TRIGGER.LOCK.OPEN}` | `0` | Lock unlocked trigger (1 or 0, off by default) |
+| `{$SWITCH.TRIGGER.ADDON.RUNNING}` | `1` | Add-on not running trigger (1 or 0) |
+
+## Dashboard
+
+The template includes a built-in **"Home Assistant - Zabbix"** dashboard with 7 pages. All widgets are driven by graph prototypes and data-over widgets that auto-populate as entities are discovered — no manual widget configuration needed.
+
+| Page | Content |
+|---|---|
+| **Temperature** | Temperature graphs for all discovered temperature sensors (2 per row) |
+| **Humidity** | Humidity graphs for all discovered humidity sensors (2 per row) |
+| **Air Quality** | CO2, Atmospheric Pressure, Particulate Matter (PM1/PM2.5/PM10), VOC, Air Quality Index |
+| **Energy** | Power (W), Energy (kWh), Voltage (V), Current (A), Gas (m³), Water (m³) |
+| **System Monitor** | CPU, Memory, Disk, Network, Load Average, Swap |
+| **Battery** | Battery level graphs for all discovered battery sensors (3 per row) |
+| **Devices & Signals** | ZigBee Link Quality, Wi-Fi Signal (dBm), Weather Forecast, Add-on Status, Locks & Contacts |
+
+## Value Maps
+
+| Value Map | Used by |
+|---|---|
+| `update` | HA Core, Supervisor, and integration update entities |
+| `firmware-update` | Firmware update entities |
+| `addon-running` | Add-on running state (1=running, 0=stopped, 2=unavailable) |
+| `backup_manager` | Backup manager state (0=idle … 4=blocked) |
+| `battery` | Battery sensors (-1=unavailable) |
+| `temperature` | Temperature sensors (-1=unknown, 0=unavailable) |
+| `automation` | Automation state (0=disabled, 1=enabled, 2=unavailable) |
+| `camera` | Camera state (0=unavailable, 1=available, 2=idle) |
+| `contact-sensor` | Door/window contact (0=closed, 1=open) |
+| `light` | Light state (0=off, 1=on, 2=unavailable) |
+| `switch` | Switch state (0=off, 1=on, 2=unavailable, 3=unknown) |
+| `occupancy` | Occupancy sensor (0=clear, 1=detected) |
+| `motion` | Motion sensor (0=clear, 1=detected, 2=unavailable) |
+| `window` | Window sensor (0=closed, 1=open, 2=unavailable) |
+| `smoke` | Smoke sensor (0=clear, 1=detected, 2=unavailable) |
+| `co-binary` | CO sensor (0=clear, 1=detected, 2=unavailable) |
+| `gas-binary` | Gas sensor (0=clear, 1=detected, 2=unavailable) |
+| `moisture-binary` | Moisture/flood sensor (0=dry, 1=wet, 2=unavailable) |
+| `cover-state` | Cover (0=closed, 1=open, 2=opening, 3=closing, 4=unavailable) |
+| `lock-state` | Lock (0=locked, 1=unlocked, 2=locking, 3=unlocking, 4=jammed, 5=unavailable) |
+| `alarm-state` | Alarm panel (0=disarmed … 9=triggered, 10=unavailable) |
+| `weather` | Weather forecast (15 conditions mapped to 1–15) |
+| `restart required` | Restart state (0–3) |
+| `dbm` | dBm signal (0=unavailable) |
+| `distance` | Distance sensor (-1=unknown, -2=unavailable) |
+| `kWh` | Energy sensor (0=unavailable) |
