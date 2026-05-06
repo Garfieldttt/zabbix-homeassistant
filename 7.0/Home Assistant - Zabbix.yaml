@@ -113,6 +113,115 @@ zabbix_export:
               expression: 'last(/Home Assistant - Zabbix/update.home.assistant.supervisor.update)=1'
               name: 'Home Assistant update for Home Assistant supervisor Update is available.'
               priority: AVERAGE
+        - uuid: ff897cd88d7246c998ce13682b7792f5
+          name: 'Home Assistant Backup Next Scheduled Automatic Backup'
+          type: DEPENDENT
+          key: backup.next.scheduled.automatic
+          delay: '0'
+          trends: '0'
+          units: unixtime
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''sensor.backup_next_scheduled_automatic_backup'')].state.first()'
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  if (value === '0' || value === '' || value === 'unknown' || value === 'unavailable' || value === 'none' || value === 'null') {
+                      return 0;
+                  }
+                  
+                  var timestamp = Date.parse(value);
+                  if (isNaN(timestamp)) {
+                      return 0;
+                  }
+                  
+                  return Math.floor(timestamp / 1000);
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: backup
+          triggers:
+            - uuid: 49b9c354c6904c8eb4793393232bf2a1
+              expression: 'last(/Home Assistant - Zabbix/backup.next.scheduled.automatic)=0 and {$SWITCH.TRIGGER.BACKUP}=1'
+              name: 'Home Assistant automatic backup next schedule is missing'
+              priority: WARNING
+              manual_close: 'YES'
+        - uuid: 0eb9b97e0709415a9c439c5375f9d524
+          name: 'Home Assistant Backup Last Successful Automatic Backup'
+          type: DEPENDENT
+          key: backup.last.successful.automatic
+          delay: '0'
+          trends: '0'
+          units: unixtime
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''sensor.backup_last_successful_automatic_backup'')].state.first()'
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  if (value === '0' || value === '' || value === 'unknown' || value === 'unavailable' || value === 'none' || value === 'null') {
+                      return 0;
+                  }
+                  
+                  var timestamp = Date.parse(value);
+                  if (isNaN(timestamp)) {
+                      return 0;
+                  }
+                  
+                  return Math.floor(timestamp / 1000);
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: backup
+          triggers:
+            - uuid: ce5b1a1618354859a2c6a4be02cfc9c7
+              expression: 'last(/Home Assistant - Zabbix/backup.last.successful.automatic)>0 and now()-last(/Home Assistant - Zabbix/backup.last.successful.automatic)>{$BACKUP.LAST.SUCCESS.MAX.HOURS}*3600 and {$SWITCH.TRIGGER.BACKUP}=1'
+              name: 'No successful Home Assistant automatic backup in {$BACKUP.LAST.SUCCESS.MAX.HOURS} hours'
+              priority: HIGH
+        - uuid: 05381bfc687a4e0896beb8261f27ab78
+          name: 'Home Assistant Backup Last Attempted Automatic Backup'
+          type: DEPENDENT
+          key: backup.last.attempted.automatic
+          delay: '0'
+          trends: '0'
+          units: unixtime
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''sensor.backup_last_attempted_automatic_backup'')].state.first()'
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  if (value === '0' || value === '' || value === 'unknown' || value === 'unavailable' || value === 'none' || value === 'null') {
+                      return 0;
+                  }
+                  
+                  var timestamp = Date.parse(value);
+                  if (isNaN(timestamp)) {
+                      return 0;
+                  }
+                  
+                  return Math.floor(timestamp / 1000);
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: backup
+          triggers:
+            - uuid: 09c1a17ec3f74378bf577c8abb8a32f5
+              expression: 'last(/Home Assistant - Zabbix/backup.last.attempted.automatic)>0 and last(/Home Assistant - Zabbix/backup.last.successful.automatic)>0 and last(/Home Assistant - Zabbix/backup.last.attempted.automatic)-last(/Home Assistant - Zabbix/backup.last.successful.automatic)>{$BACKUP.ATTEMPT.SUCCESS.DIFF.HOURS}*3600 and {$SWITCH.TRIGGER.BACKUP}=1'
+              name: 'Home Assistant automatic backup attempt is newer than the last successful backup by more than {$BACKUP.ATTEMPT.SUCCESS.DIFF.HOURS} hours'
+              priority: WARNING
       discovery_rules:
         - uuid: 4a40f645dc4d49218ff7460cb4704a96
           name: HA-backup.manager.state
@@ -175,7 +284,7 @@ zabbix_export:
                 key: ha.raw
               tags:
                 - tag: 'Home Assistant'
-                  value: backup-manager-state
+                  value: backup
           master_item:
             key: ha.raw
           lld_macro_paths:
@@ -4559,6 +4668,12 @@ zabbix_export:
         - macro: '{$AQI.MAX}'
           value: '100'
           description: 'AQI warning threshold.'
+        - macro: '{$BACKUP.ATTEMPT.SUCCESS.DIFF.HOURS}'
+          value: '2'
+          description: 'Maximum allowed age difference in hours between the last attempted and last successful automatic backup.'
+        - macro: '{$BACKUP.LAST.SUCCESS.MAX.HOURS}'
+          value: '48'
+          description: 'Maximum age in hours of the last successful automatic backup.'
         - macro: '{$BATTERY.MINIMUM}'
           value: '30'
           description: 'The trigger activates when the battery drops below 30%.'
@@ -4602,6 +4717,9 @@ zabbix_export:
         - macro: '{$SWITCH.TRIGGER.AQI}'
           value: '1'
           description: '1 = enable 0 = disable AQI triggers'
+        - macro: '{$SWITCH.TRIGGER.BACKUP}'
+          value: '0'
+          description: '1 = enable 0 = disable automatic backup triggers (off by default)'
         - macro: '{$SWITCH.TRIGGER.BATTERY}'
           value: '1'
           description: '1 = enable 0 = disable'
