@@ -57,6 +57,9 @@ ha.raw  (HTTP_AGENT → /api/states, Bearer {$API.TOKEN})
 | Backup Next Scheduled Automatic Backup | Next scheduled automatic backup time, stored as Unix time |
 | Backup Last Successful Automatic Backup | Last successful automatic backup time, stored as Unix time |
 | Backup Last Attempted Automatic Backup | Last attempted automatic backup time, stored as Unix time |
+| Automatic Backup Event Type | State of the last automatic backup task from `event.backup_automatic_backup` (`completed`, `in progress`, `failed`) |
+| Automatic Backup Failed Reason | Failure reason from `event.backup_automatic_backup` when the last automatic backup failed |
+| Automatic Backup Stage | Current `backup_stage` from `event.backup_automatic_backup` while the automatic backup is in progress |
 | Integration Updates | Update availability for all installed integrations |
 | Firmware Updates | Firmware update availability for connected devices (device_class: firmware) |
 | Restart Required | Services or integrations requiring a restart |
@@ -204,7 +207,6 @@ ha.raw  (HTTP_AGENT → /api/states, Bearer {$API.TOKEN})
 | `{$SOUND.PRESSURE.MAX.DB}` | `80` | Sound pressure warning threshold (dB) |
 | `{$SAFETY.SENSOR.NODATA.TIMEOUT}` | `1800` | Seconds without data before safety sensor offline trigger fires |
 | `{$BACKUP.LAST.SUCCESS.MAX.HOURS}` | `48` | Maximum age in hours of the last successful automatic backup |
-| `{$BACKUP.ATTEMPT.SUCCESS.DIFF.HOURS}` | `2` | Maximum allowed difference in hours between the last attempted and last successful automatic backup |
 
 ### Temperature Thresholds
 
@@ -250,7 +252,7 @@ All trigger switches accept context macros — e.g. `{$SWITCH.TRIGGER.BATTERY:"{
 | `{$SWITCH.TRIGGER.LOCK}` | `1` | Lock jammed trigger (1 or 0) |
 | `{$SWITCH.TRIGGER.LOCK.OPEN}` | `0` | Lock unlocked trigger (1 or 0, off by default) |
 | `{$SWITCH.TRIGGER.ADDON.RUNNING}` | `1` | Add-on not running trigger (1 or 0) |
-| `{$SWITCH.TRIGGER.BACKUP}` | `0` | Backup triggers: missing next schedule, stale successful backup, and attempted newer than successful (1 or 0, off by default) |
+| `{$SWITCH.TRIGGER.BACKUP}` | `0` | Backup triggers: missing next schedule, stale successful backup, and automatic backup failed event (1 or 0, off by default) |
 
 ## Dashboard
 
@@ -274,6 +276,7 @@ The template includes a built-in **"Home Assistant - Zabbix"** dashboard with 7 
 | `firmware-update` | Firmware update entities |
 | `addon-running` | Add-on running state (1=running, 0=stopped, 2=unavailable) |
 | `backup_manager` | Backup manager state (0=idle … 4=blocked) |
+| `backup_automatic_event` | Automatic backup event state (0=completed, 1=in progress, 2=failed, -1=unavailable) |
 | `battery` | Battery sensors (-1=unavailable) |
 | `temperature` | Temperature sensors (-1=unknown, 0=unavailable) |
 | `automation` | Automation state (0=disabled, 1=enabled, 2=unavailable) |

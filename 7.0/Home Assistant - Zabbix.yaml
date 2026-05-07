@@ -113,6 +113,53 @@ zabbix_export:
               expression: 'last(/Home Assistant - Zabbix/update.home.assistant.supervisor.update)=1'
               name: 'Home Assistant update for Home Assistant supervisor Update is available.'
               priority: AVERAGE
+        - uuid: 81e5212a0b914238b2fe98a247f1f838
+          name: 'Home Assistant Backup Manager State'
+          type: DEPENDENT
+          key: backup.manager.state
+          delay: '0'
+          trends: '0'
+          description: |
+            | Number | State Key        | Description     |
+            | ---: | :--------------- | :--------------- |
+            |    0 | `idle`           | Idle             |
+            |    1 | `create_backup`  | Creating backup  |
+            |    2 | `receive_backup` | Receiving backup |
+            |    3 | `restore_backup` | Restoring backup |
+            |    4 | `blocked`        | Backup blocked   |
+          valuemap:
+            name: backup_manager
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''sensor.backup_backup_manager_state'')].state.first()'
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '-1'
+            - type: STR_REPLACE
+              parameters:
+                - idle
+                - '0'
+            - type: STR_REPLACE
+              parameters:
+                - create_backup
+                - '1'
+            - type: STR_REPLACE
+              parameters:
+                - receive_backup
+                - '2'
+            - type: STR_REPLACE
+              parameters:
+                - restore_backup
+                - '3'
+            - type: STR_REPLACE
+              parameters:
+                - blocked
+                - '4'
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: backup
         - uuid: ff897cd88d7246c998ce13682b7792f5
           name: 'Home Assistant Backup Next Scheduled Automatic Backup'
           type: DEPENDENT
@@ -217,89 +264,82 @@ zabbix_export:
           tags:
             - tag: 'Home Assistant'
               value: backup
-          triggers:
-            - uuid: 09c1a17ec3f74378bf577c8abb8a32f5
-              expression: 'last(/Home Assistant - Zabbix/backup.last.attempted.automatic)>0 and last(/Home Assistant - Zabbix/backup.last.successful.automatic)>0 and last(/Home Assistant - Zabbix/backup.last.attempted.automatic)-last(/Home Assistant - Zabbix/backup.last.successful.automatic)>{$BACKUP.ATTEMPT.SUCCESS.DIFF.HOURS}*3600 and {$SWITCH.TRIGGER.BACKUP}=1'
-              name: 'Home Assistant automatic backup attempt is newer than the last successful backup by more than {$BACKUP.ATTEMPT.SUCCESS.DIFF.HOURS} hours'
-              priority: WARNING
-      discovery_rules:
-        - uuid: 4a40f645dc4d49218ff7460cb4704a96
-          name: HA-backup.manager.state
+        - uuid: a2994acba7904faa9642db9883964e99
+          name: 'Home Assistant Automatic Backup Event Type'
           type: DEPENDENT
-          key: backup.manager.state
+          key: backup.automatic.event.type
           delay: '0'
-          filter:
-            conditions:
-              - macro: '{#ENTITY_ID}'
-                value: ^sensor\.backup_backup_manager_.+$
-                formulaid: A
-          item_prototypes:
-            - uuid: 1ea35f8966a8415bb8838017e28c1439
-              name: '{#FRIENDLY_NAME}'
-              type: DEPENDENT
-              key: 'backup.manager.state[{#ENTITY_ID}]'
-              delay: '0'
-              trends: '0'
-              description: |
-                | Number | State Key        | Description     |
-                | ---: | :--------------- | :--------------- |
-                |    0 | `idle`           | Idle             |
-                |    1 | `create_backup`  | Creating backup  |
-                |    2 | `receive_backup` | Receiving backup |
-                |    3 | `restore_backup` | Restoring backup |
-                |    4 | `blocked`        | Backup blocked   |
-              valuemap:
-                name: backup_manager
-              preprocessing:
-                - type: JSONPATH
-                  parameters:
-                    - '$.body[?(@.entity_id == "{#ENTITY_ID}")].state'
-                - type: LTRIM
-                  parameters:
-                    - '["'
-                - type: RTRIM
-                  parameters:
-                    - '"]'
-                - type: STR_REPLACE
-                  parameters:
-                    - idle
-                    - '0'
-                - type: STR_REPLACE
-                  parameters:
-                    - create_backup
-                    - '1'
-                - type: STR_REPLACE
-                  parameters:
-                    - receive_backup
-                    - '2'
-                - type: STR_REPLACE
-                  parameters:
-                    - restore_backup
-                    - '3'
-                - type: STR_REPLACE
-                  parameters:
-                    - blocked
-                    - '4'
-              master_item:
-                key: ha.raw
-              tags:
-                - tag: 'Home Assistant'
-                  value: backup
-          master_item:
-            key: ha.raw
-          lld_macro_paths:
-            - lld_macro: '{#ENTITY_ID}'
-              path: $.entity_id
-            - lld_macro: '{#FRIENDLY_NAME}'
-              path: $.attributes.friendly_name
-            - lld_macro: '{#UNITS}'
-              path: $.attributes.unit_of_measurement
+          trends: '0'
+          valuemap:
+            name: backup_automatic_event
           preprocessing:
             - type: JSONPATH
               parameters:
-                - '$.body[*]'
+                - '$.body[?(@.entity_id==''event.backup_automatic_backup'')].attributes.event_type.first()'
               error_handler: CUSTOM_VALUE
-              error_handler_params: '[]'
+              error_handler_params: '-1'
+            - type: STR_REPLACE
+              parameters:
+                - completed
+                - '0'
+            - type: STR_REPLACE
+              parameters:
+                - in_progress
+                - '1'
+            - type: STR_REPLACE
+              parameters:
+                - failed
+                - '2'
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: backup
+          triggers:
+            - uuid: 0a06ebc542ac4d679fe65ae66d4a256e
+              expression: 'last(/Home Assistant - Zabbix/backup.automatic.event.type)=2 and {$SWITCH.TRIGGER.BACKUP}=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Home Assistant - Zabbix/backup.automatic.event.type)=0 and {$SWITCH.TRIGGER.BACKUP}=1'
+              name: 'Home Assistant automatic backup failed'
+              priority: HIGH
+              manual_close: 'YES'
+        - uuid: ee7a12e0b6604302825f605b317b6a37
+          name: 'Home Assistant Automatic Backup Failed Reason'
+          type: DEPENDENT
+          key: backup.automatic.failed.reason
+          delay: '0'
+          history: 30d
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''event.backup_automatic_backup'')].attributes.failed_reason.first()'
+              error_handler: CUSTOM_VALUE
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: backup
+        - uuid: 0b73cabcd97e403ca7cfd175476120f2
+          name: 'Home Assistant Automatic Backup Stage'
+          type: DEPENDENT
+          key: backup.automatic.stage
+          delay: '0'
+          history: 30d
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''event.backup_automatic_backup'')].attributes.backup_stage.first()'
+              error_handler: CUSTOM_VALUE
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: backup
+      discovery_rules:
         - uuid: 9191d005e6204149a071250e7f756bcd
           name: HA-addon-running
           type: DEPENDENT
@@ -4668,9 +4708,6 @@ zabbix_export:
         - macro: '{$AQI.MAX}'
           value: '100'
           description: 'AQI warning threshold.'
-        - macro: '{$BACKUP.ATTEMPT.SUCCESS.DIFF.HOURS}'
-          value: '2'
-          description: 'Maximum allowed age difference in hours between the last attempted and last successful automatic backup.'
         - macro: '{$BACKUP.LAST.SUCCESS.MAX.HOURS}'
           value: '48'
           description: 'Maximum age in hours of the last successful automatic backup.'
@@ -5303,6 +5340,17 @@ zabbix_export:
               newvalue: 'Restoring a backup'
             - value: '4'
               newvalue: Blocked
+        - uuid: 9fc3f5559fd444628d3c5564f5c3ef6b
+          name: backup_automatic_event
+          mappings:
+            - value: '0'
+              newvalue: completed
+            - value: '1'
+              newvalue: 'in progress'
+            - value: '2'
+              newvalue: failed
+            - value: '-1'
+              newvalue: unavailable
         - uuid: 6aea8103a50d4c5c8b2800a006c8e250
           name: battery
           mappings:
