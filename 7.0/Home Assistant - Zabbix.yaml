@@ -127,6 +127,7 @@ zabbix_export:
             |    2 | `receive_backup` | Receiving backup |
             |    3 | `restore_backup` | Restoring backup |
             |    4 | `blocked`        | Backup blocked   |
+            |    5 | `unavailable`    | Unavailable      |
           valuemap:
             name: backup_manager
           preprocessing:
@@ -134,7 +135,7 @@ zabbix_export:
               parameters:
                 - '$.body[?(@.entity_id==''sensor.backup_backup_manager_state'')].state.first()'
               error_handler: CUSTOM_VALUE
-              error_handler_params: '-1'
+              error_handler_params: '5'
             - type: STR_REPLACE
               parameters:
                 - idle
@@ -155,6 +156,10 @@ zabbix_export:
               parameters:
                 - blocked
                 - '4'
+            - type: STR_REPLACE
+              parameters:
+                - unavailable
+                - '5'
           master_item:
             key: ha.raw
           tags:
@@ -277,7 +282,7 @@ zabbix_export:
               parameters:
                 - '$.body[?(@.entity_id==''event.backup_automatic_backup'')].attributes.event_type.first()'
               error_handler: CUSTOM_VALUE
-              error_handler_params: '-1'
+              error_handler_params: '3'
             - type: STR_REPLACE
               parameters:
                 - completed
@@ -290,6 +295,10 @@ zabbix_export:
               parameters:
                 - failed
                 - '2'
+            - type: STR_REPLACE
+              parameters:
+                - unavailable
+                - '3'
           master_item:
             key: ha.raw
           tags:
@@ -5340,6 +5349,8 @@ zabbix_export:
               newvalue: 'Restoring a backup'
             - value: '4'
               newvalue: Blocked
+            - value: '5'
+              newvalue: unavailable
         - uuid: 9fc3f5559fd444628d3c5564f5c3ef6b
           name: backup_automatic_event
           mappings:
@@ -5349,7 +5360,7 @@ zabbix_export:
               newvalue: 'in progress'
             - value: '2'
               newvalue: failed
-            - value: '-1'
+            - value: '3'
               newvalue: unavailable
         - uuid: 6aea8103a50d4c5c8b2800a006c8e250
           name: battery

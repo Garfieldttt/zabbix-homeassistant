@@ -275,8 +275,8 @@ The template includes a built-in **"Home Assistant - Zabbix"** dashboard with 7 
 | `update` | HA Core, Supervisor, and integration update entities |
 | `firmware-update` | Firmware update entities |
 | `addon-running` | Add-on running state (1=running, 0=stopped, 2=unavailable) |
-| `backup_manager` | Backup manager state (0=idle … 4=blocked) |
-| `backup_automatic_event` | Automatic backup event state (0=completed, 1=in progress, 2=failed, -1=unavailable) |
+| `backup_manager` | Backup manager state (0=idle, 1=create backup, 2=receive backup, 3=restore backup, 4=blocked, 5=unavailable) |
+| `backup_automatic_event` | Automatic backup event state (0=completed, 1=in progress, 2=failed, 3=unavailable) |
 | `battery` | Battery sensors (-1=unavailable) |
 | `temperature` | Temperature sensors (-1=unknown, 0=unavailable) |
 | `automation` | Automation state (0=disabled, 1=enabled, 2=unavailable) |
