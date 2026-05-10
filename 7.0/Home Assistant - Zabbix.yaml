@@ -340,14 +340,58 @@ zabbix_export:
           type: DEPENDENT
           key: backup.automatic.stage
           delay: '0'
-          history: 30d
-          value_type: TEXT
           trends: '0'
+          valuemap:
+            name: backup_automatic_stage
           preprocessing:
             - type: JSONPATH
               parameters:
                 - '$.body[?(@.entity_id==''event.backup_automatic_backup'')].attributes.backup_stage.first()'
               error_handler: CUSTOM_VALUE
+              error_handler_params: '10'
+            - type: STR_REPLACE
+              parameters:
+                - addon_repositories
+                - '1'
+            - type: STR_REPLACE
+              parameters:
+                - addons
+                - '2'
+            - type: STR_REPLACE
+              parameters:
+                - await_addon_restarts
+                - '3'
+            - type: STR_REPLACE
+              parameters:
+                - docker_config
+                - '4'
+            - type: STR_REPLACE
+              parameters:
+                - cleaning_up
+                - '5'
+            - type: STR_REPLACE
+              parameters:
+                - finishing_file
+                - '6'
+            - type: STR_REPLACE
+              parameters:
+                - folders
+                - '7'
+            - type: STR_REPLACE
+              parameters:
+                - home_assistant
+                - '8'
+            - type: STR_REPLACE
+              parameters:
+                - upload_to_agents
+                - '9'
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  if (value === '' || value === 'null' || value === 'None' || value === 'none') {
+                      return '0';
+                  }
+                  return value;
           master_item:
             key: ha.raw
           tags:
@@ -5366,6 +5410,31 @@ zabbix_export:
             - value: '2'
               newvalue: failed
             - value: '3'
+              newvalue: unavailable
+        - uuid: 5e380b834c0e456b96a2140162ae92b7
+          name: backup_automatic_stage
+          mappings:
+            - value: '0'
+              newvalue: none
+            - value: '1'
+              newvalue: addon_repositories
+            - value: '2'
+              newvalue: addons
+            - value: '3'
+              newvalue: await_addon_restarts
+            - value: '4'
+              newvalue: docker_config
+            - value: '5'
+              newvalue: cleaning_up
+            - value: '6'
+              newvalue: finishing_file
+            - value: '7'
+              newvalue: folders
+            - value: '8'
+              newvalue: home_assistant
+            - value: '9'
+              newvalue: upload_to_agents
+            - value: '10'
               newvalue: unavailable
         - uuid: 6aea8103a50d4c5c8b2800a006c8e250
           name: battery

@@ -59,7 +59,7 @@ ha.raw  (HTTP_AGENT → /api/states, Bearer {$API.TOKEN})
 | Backup Last Attempted Automatic Backup | Last attempted automatic backup time, stored as Unix time |
 | Automatic Backup Event Type | State of the last automatic backup task from `event.backup_automatic_backup` (`completed`, `in progress`, `failed`) |
 | Automatic Backup Failed Reason | Failure reason from `event.backup_automatic_backup` when the last automatic backup failed |
-| Automatic Backup Stage | Current `backup_stage` from `event.backup_automatic_backup` while the automatic backup is in progress |
+| Automatic Backup Stage | Current `backup_stage` from `event.backup_automatic_backup`, mapped to a finite set of backup stages |
 | Integration Updates | Update availability for all installed integrations |
 | Firmware Updates | Firmware update availability for connected devices (device_class: firmware) |
 | Restart Required | Services or integrations requiring a restart |
@@ -277,6 +277,7 @@ The template includes a built-in **"Home Assistant - Zabbix"** dashboard with 7 
 | `addon-running` | Add-on running state (1=running, 0=stopped, 2=unavailable) |
 | `backup_manager` | Backup manager state (0=idle, 1=create backup, 2=receive backup, 3=restore backup, 4=blocked, 5=unavailable) |
 | `backup_automatic_event` | Automatic backup event state (0=completed, 1=in progress, 2=failed, 3=unavailable) |
+| `backup_automatic_stage` | Automatic backup stage (0=none, 1=addon_repositories, 2=addons, 3=await_addon_restarts, 4=docker_config, 5=cleaning_up, 6=finishing_file, 7=folders, 8=home_assistant, 9=upload_to_agents, 10=unavailable) |
 | `battery` | Battery sensors (-1=unavailable) |
 | `temperature` | Temperature sensors (-1=unknown, 0=unavailable) |
 | `automation` | Automation state (0=disabled, 1=enabled, 2=unavailable) |
