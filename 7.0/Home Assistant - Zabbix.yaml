@@ -197,8 +197,8 @@ zabbix_export:
             - tag: 'Home Assistant'
               value: backup
           triggers:
-            - uuid: 49b9c354c6904c8eb4793393232bf2a1
-              expression: 'last(/Home Assistant - Zabbix/backup.next.scheduled.automatic)=0 and {$SWITCH.TRIGGER.BACKUP}=1'
+            - uuid: 8af3baa6872b4914bf4d824f5e649455
+              expression: 'last(/Home Assistant - Zabbix/backup.next.scheduled.automatic)=0 and last(/Home Assistant - Zabbix/backup.manager.state)<>5 and last(/Home Assistant - Zabbix/backup.automatic.event.type)<>3 and {$SWITCH.TRIGGER.BACKUP}=1'
               name: 'Home Assistant automatic backup next schedule is missing'
               priority: WARNING
               manual_close: 'YES'
@@ -311,6 +311,11 @@ zabbix_export:
               recovery_expression: 'last(/Home Assistant - Zabbix/backup.automatic.event.type)=0 and {$SWITCH.TRIGGER.BACKUP}=1'
               name: 'Home Assistant automatic backup failed'
               priority: HIGH
+              manual_close: 'YES'
+            - uuid: 8cf7e5aafbf34d55aacbe2d49b64fca1
+              expression: '(last(/Home Assistant - Zabbix/backup.manager.state)=5 or last(/Home Assistant - Zabbix/backup.automatic.event.type)=3) and {$SWITCH.TRIGGER.BACKUP}=1'
+              name: 'Home Assistant backup integration is unavailable'
+              priority: WARNING
               manual_close: 'YES'
         - uuid: ee7a12e0b6604302825f605b317b6a37
           name: 'Home Assistant Automatic Backup Failed Reason'

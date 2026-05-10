@@ -252,7 +252,7 @@ All trigger switches accept context macros — e.g. `{$SWITCH.TRIGGER.BATTERY:"{
 | `{$SWITCH.TRIGGER.LOCK}` | `1` | Lock jammed trigger (1 or 0) |
 | `{$SWITCH.TRIGGER.LOCK.OPEN}` | `0` | Lock unlocked trigger (1 or 0, off by default) |
 | `{$SWITCH.TRIGGER.ADDON.RUNNING}` | `1` | Add-on not running trigger (1 or 0) |
-| `{$SWITCH.TRIGGER.BACKUP}` | `0` | Backup triggers: missing next schedule, stale successful backup, and automatic backup failed event (1 or 0, off by default) |
+| `{$SWITCH.TRIGGER.BACKUP}` | `0` | Backup triggers: integration unavailable, missing next schedule, stale successful backup, and automatic backup failed event (1 or 0, off by default) |
 
 ## Dashboard
 
