@@ -16,103 +16,196 @@ zabbix_export:
       groups:
         - name: Templates
       items:
-        - uuid: 2c4ed5c0c5be4840ac89801834efae58
-          name: HA-raw
-          type: HTTP_AGENT
-          key: ha.raw
-          history: '0'
+        - uuid: a2994acba7904faa9642db9883964e99
+          name: 'Home Assistant Automatic Backup Event Type'
+          type: DEPENDENT
+          key: backup.automatic.event.type
+          delay: '0'
+          trends: '0'
+          valuemap:
+            name: backup_automatic_event
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''event.backup_automatic_backup'')].attributes.event_type.first()'
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '3'
+            - type: STR_REPLACE
+              parameters:
+                - completed
+                - '0'
+            - type: STR_REPLACE
+              parameters:
+                - in_progress
+                - '1'
+            - type: STR_REPLACE
+              parameters:
+                - failed
+                - '2'
+            - type: STR_REPLACE
+              parameters:
+                - unavailable
+                - '3'
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: backup
+          triggers:
+            - uuid: 0a06ebc542ac4d679fe65ae66d4a256e
+              expression: 'last(/Home Assistant - Zabbix/backup.automatic.event.type)=2 and {$SWITCH.TRIGGER.BACKUP}=1'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Home Assistant - Zabbix/backup.automatic.event.type)=0 and {$SWITCH.TRIGGER.BACKUP}=1'
+              name: 'Home Assistant automatic backup failed'
+              priority: HIGH
+              manual_close: 'YES'
+        - uuid: ee7a12e0b6604302825f605b317b6a37
+          name: 'Home Assistant Automatic Backup Failed Reason'
+          type: DEPENDENT
+          key: backup.automatic.failed.reason
+          delay: '0'
+          history: 30d
           value_type: TEXT
           trends: '0'
-          url: '{$HA.URL}/api/states'
-          headers:
-            - name: Authorization
-              value: 'Bearer {$API.TOKEN}'
-          output_format: JSON
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''event.backup_automatic_backup'')].attributes.failed_reason.first()'
+              error_handler: CUSTOM_VALUE
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: backup
+        - uuid: 0b73cabcd97e403ca7cfd175476120f2
+          name: 'Home Assistant Automatic Backup Stage'
+          type: DEPENDENT
+          key: backup.automatic.stage
+          delay: '0'
+          trends: '0'
+          valuemap:
+            name: backup_automatic_stage
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''event.backup_automatic_backup'')].attributes.backup_stage.first()'
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '10'
+            - type: STR_REPLACE
+              parameters:
+                - addon_repositories
+                - '1'
+            - type: STR_REPLACE
+              parameters:
+                - addons
+                - '2'
+            - type: STR_REPLACE
+              parameters:
+                - await_addon_restarts
+                - '3'
+            - type: STR_REPLACE
+              parameters:
+                - docker_config
+                - '4'
+            - type: STR_REPLACE
+              parameters:
+                - cleaning_up
+                - '5'
+            - type: STR_REPLACE
+              parameters:
+                - finishing_file
+                - '6'
+            - type: STR_REPLACE
+              parameters:
+                - folders
+                - '7'
+            - type: STR_REPLACE
+              parameters:
+                - home_assistant
+                - '8'
+            - type: STR_REPLACE
+              parameters:
+                - upload_to_agents
+                - '9'
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  if (value === '' || value === 'null' || value === 'None' || value === 'none') {
+                      return '0';
+                  }
+                  return value;
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: backup
+        - uuid: 05381bfc687a4e0896beb8261f27ab78
+          name: 'Home Assistant Backup Last Attempted Automatic Backup'
+          type: DEPENDENT
+          key: backup.last.attempted.automatic
+          delay: '0'
+          trends: '0'
+          units: unixtime
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''sensor.backup_last_attempted_automatic_backup'')].state.first()'
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  if (value === '0' || value === '' || value === 'unknown' || value === 'unavailable' || value === 'none' || value === 'null') {
+                      return 0;
+                  }
+                  
+                  var timestamp = Date.parse(value);
+                  if (isNaN(timestamp)) {
+                      return 0;
+                  }
+                  
+                  return Math.floor(timestamp / 1000);
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: backup
+        - uuid: 0eb9b97e0709415a9c439c5375f9d524
+          name: 'Home Assistant Backup Last Successful Automatic Backup'
+          type: DEPENDENT
+          key: backup.last.successful.automatic
+          delay: '0'
+          trends: '0'
+          units: unixtime
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''sensor.backup_last_successful_automatic_backup'')].state.first()'
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  if (value === '0' || value === '' || value === 'unknown' || value === 'unavailable' || value === 'none' || value === 'null') {
+                      return 0;
+                  }
+                  
+                  var timestamp = Date.parse(value);
+                  if (isNaN(timestamp)) {
+                      return 0;
+                  }
+                  
+                  return Math.floor(timestamp / 1000);
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: backup
           triggers:
-            - uuid: 624a722e6f33407aa5bf3d610bc50f2c
-              expression: 'nodata(/Home Assistant - Zabbix/ha.raw,900)=1 and {$HOST.REACHABLE}=1'
-              name: 'The host is not reachable!'
+            - uuid: ce5b1a1618354859a2c6a4be02cfc9c7
+              expression: 'last(/Home Assistant - Zabbix/backup.last.successful.automatic)>0 and now()-last(/Home Assistant - Zabbix/backup.last.successful.automatic)>{$BACKUP.LAST.SUCCESS.MAX.HOURS}*3600 and {$SWITCH.TRIGGER.BACKUP}=1'
+              name: 'No successful Home Assistant automatic backup in {$BACKUP.LAST.SUCCESS.MAX.HOURS} hours'
               priority: HIGH
-        - uuid: f77762bbd6df4dde9b5dbbf49160487e
-          name: 'Home Assistant Core Update'
-          type: DEPENDENT
-          key: update.home.assistant.core.update
-          delay: '0'
-          trends: '0'
-          valuemap:
-            name: update
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[?(@.entity_id==''update.home_assistant_core_update'')].state'
-            - type: LTRIM
-              parameters:
-                - '["'
-            - type: RTRIM
-              parameters:
-                - '"]'
-            - type: STR_REPLACE
-              parameters:
-                - 'on'
-                - '1'
-            - type: STR_REPLACE
-              parameters:
-                - 'off'
-                - '0'
-            - type: STR_REPLACE
-              parameters:
-                - unavailable
-                - '2'
-          master_item:
-            key: ha.raw
-          tags:
-            - tag: 'Home Assistant'
-              value: update-core
-          triggers:
-            - uuid: 2ce6c84c011e49c18efe116d031c26b2
-              expression: 'last(/Home Assistant - Zabbix/update.home.assistant.core.update)=1'
-              name: 'Home Assistant update for Home Assistant Core Update is available.'
-              priority: AVERAGE
-        - uuid: 352a320642644f3d9364d3d15759d517
-          name: 'Home Assistant Supervisor Update'
-          type: DEPENDENT
-          key: update.home.assistant.supervisor.update
-          delay: '0'
-          trends: '0'
-          valuemap:
-            name: update
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[?(@.entity_id==''update.home_assistant_supervisor_update'')].state'
-            - type: LTRIM
-              parameters:
-                - '["'
-            - type: RTRIM
-              parameters:
-                - '"]'
-            - type: STR_REPLACE
-              parameters:
-                - 'on'
-                - '1'
-            - type: STR_REPLACE
-              parameters:
-                - 'off'
-                - '0'
-            - type: STR_REPLACE
-              parameters:
-                - unavailable
-                - '2'
-          master_item:
-            key: ha.raw
-          tags:
-            - tag: 'Home Assistant'
-              value: update-supervisor
-          triggers:
-            - uuid: 19e42eea3cd2478a9af66c8cfe1e427a
-              expression: 'last(/Home Assistant - Zabbix/update.home.assistant.supervisor.update)=1'
-              name: 'Home Assistant update for Home Assistant supervisor Update is available.'
-              priority: AVERAGE
         - uuid: 81e5212a0b914238b2fe98a247f1f838
           name: 'Home Assistant Backup Manager State'
           type: DEPENDENT
@@ -196,131 +289,147 @@ zabbix_export:
           tags:
             - tag: 'Home Assistant'
               value: backup
-          triggers:
-            - uuid: 8af3baa6872b4914bf4d824f5e649455
-              expression: 'last(/Home Assistant - Zabbix/backup.next.scheduled.automatic)=0 and last(/Home Assistant - Zabbix/backup.manager.state)<>5 and last(/Home Assistant - Zabbix/backup.automatic.event.type)<>3 and {$SWITCH.TRIGGER.BACKUP}=1'
-              name: 'Home Assistant automatic backup next schedule is missing'
-              priority: WARNING
-              manual_close: 'YES'
-        - uuid: 0eb9b97e0709415a9c439c5375f9d524
-          name: 'Home Assistant Backup Last Successful Automatic Backup'
-          type: DEPENDENT
-          key: backup.last.successful.automatic
-          delay: '0'
+        - uuid: 2c4ed5c0c5be4840ac89801834efae58
+          name: HA-raw
+          type: HTTP_AGENT
+          key: ha.raw
+          history: '0'
+          value_type: TEXT
           trends: '0'
-          units: unixtime
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[?(@.entity_id==''sensor.backup_last_successful_automatic_backup'')].state.first()'
-              error_handler: CUSTOM_VALUE
-              error_handler_params: '0'
-            - type: JAVASCRIPT
-              parameters:
-                - |
-                  if (value === '0' || value === '' || value === 'unknown' || value === 'unavailable' || value === 'none' || value === 'null') {
-                      return 0;
-                  }
-                  
-                  var timestamp = Date.parse(value);
-                  if (isNaN(timestamp)) {
-                      return 0;
-                  }
-                  
-                  return Math.floor(timestamp / 1000);
-          master_item:
-            key: ha.raw
-          tags:
-            - tag: 'Home Assistant'
-              value: backup
+          url: '{$HA.URL}/api/states'
+          headers:
+            - name: Authorization
+              value: 'Bearer {$API.TOKEN}'
+          output_format: JSON
           triggers:
-            - uuid: ce5b1a1618354859a2c6a4be02cfc9c7
-              expression: 'last(/Home Assistant - Zabbix/backup.last.successful.automatic)>0 and now()-last(/Home Assistant - Zabbix/backup.last.successful.automatic)>{$BACKUP.LAST.SUCCESS.MAX.HOURS}*3600 and {$SWITCH.TRIGGER.BACKUP}=1'
-              name: 'No successful Home Assistant automatic backup in {$BACKUP.LAST.SUCCESS.MAX.HOURS} hours'
+            - uuid: 624a722e6f33407aa5bf3d610bc50f2c
+              expression: 'nodata(/Home Assistant - Zabbix/ha.raw,900)=1 and {$HOST.REACHABLE}=1'
+              name: 'The host is not reachable!'
               priority: HIGH
-        - uuid: 05381bfc687a4e0896beb8261f27ab78
-          name: 'Home Assistant Backup Last Attempted Automatic Backup'
+        - uuid: f77762bbd6df4dde9b5dbbf49160487e
+          name: 'Home Assistant Core Update'
           type: DEPENDENT
-          key: backup.last.attempted.automatic
-          delay: '0'
-          trends: '0'
-          units: unixtime
-          preprocessing:
-            - type: JSONPATH
-              parameters:
-                - '$.body[?(@.entity_id==''sensor.backup_last_attempted_automatic_backup'')].state.first()'
-              error_handler: CUSTOM_VALUE
-              error_handler_params: '0'
-            - type: JAVASCRIPT
-              parameters:
-                - |
-                  if (value === '0' || value === '' || value === 'unknown' || value === 'unavailable' || value === 'none' || value === 'null') {
-                      return 0;
-                  }
-                  
-                  var timestamp = Date.parse(value);
-                  if (isNaN(timestamp)) {
-                      return 0;
-                  }
-                  
-                  return Math.floor(timestamp / 1000);
-          master_item:
-            key: ha.raw
-          tags:
-            - tag: 'Home Assistant'
-              value: backup
-        - uuid: a2994acba7904faa9642db9883964e99
-          name: 'Home Assistant Automatic Backup Event Type'
-          type: DEPENDENT
-          key: backup.automatic.event.type
+          key: update.home.assistant.core.update
           delay: '0'
           trends: '0'
           valuemap:
-            name: backup_automatic_event
+            name: update
           preprocessing:
             - type: JSONPATH
               parameters:
-                - '$.body[?(@.entity_id==''event.backup_automatic_backup'')].attributes.event_type.first()'
-              error_handler: CUSTOM_VALUE
-              error_handler_params: '3'
+                - '$.body[?(@.entity_id==''update.home_assistant_core_update'')].state'
+            - type: LTRIM
+              parameters:
+                - '["'
+            - type: RTRIM
+              parameters:
+                - '"]'
             - type: STR_REPLACE
               parameters:
-                - completed
-                - '0'
-            - type: STR_REPLACE
-              parameters:
-                - in_progress
+                - 'on'
                 - '1'
             - type: STR_REPLACE
               parameters:
-                - failed
-                - '2'
+                - 'off'
+                - '0'
             - type: STR_REPLACE
               parameters:
                 - unavailable
-                - '3'
+                - '2'
           master_item:
             key: ha.raw
           tags:
             - tag: 'Home Assistant'
-              value: backup
+              value: update-core
           triggers:
-            - uuid: 0a06ebc542ac4d679fe65ae66d4a256e
-              expression: 'last(/Home Assistant - Zabbix/backup.automatic.event.type)=2 and {$SWITCH.TRIGGER.BACKUP}=1'
-              recovery_mode: RECOVERY_EXPRESSION
-              recovery_expression: 'last(/Home Assistant - Zabbix/backup.automatic.event.type)=0 and {$SWITCH.TRIGGER.BACKUP}=1'
-              name: 'Home Assistant automatic backup failed'
-              priority: HIGH
-              manual_close: 'YES'
-            - uuid: 8cf7e5aafbf34d55aacbe2d49b64fca1
-              expression: '(last(/Home Assistant - Zabbix/backup.manager.state)=5 or last(/Home Assistant - Zabbix/backup.automatic.event.type)=3) and {$SWITCH.TRIGGER.BACKUP}=1'
-              name: 'Home Assistant backup integration is unavailable'
-              priority: WARNING
-              manual_close: 'YES'
-        - uuid: ee7a12e0b6604302825f605b317b6a37
-          name: 'Home Assistant Automatic Backup Failed Reason'
+            - uuid: 2ce6c84c011e49c18efe116d031c26b2
+              expression: 'last(/Home Assistant - Zabbix/update.home.assistant.core.update)=1'
+              name: 'Home Assistant update for Home Assistant Core Update is available.'
+              priority: AVERAGE
+        - uuid: b2c8e4f1a3d5402e9e6b7c8d9f0a1b2c
+          name: 'Home Assistant Operating System Update'
           type: DEPENDENT
-          key: backup.automatic.failed.reason
+          key: update.home.assistant.os.update
+          delay: '0'
+          trends: '0'
+          valuemap:
+            name: update
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''update.home_assistant_operating_system_update'')].state'
+            - type: LTRIM
+              parameters:
+                - '["'
+            - type: RTRIM
+              parameters:
+                - '"]'
+            - type: STR_REPLACE
+              parameters:
+                - 'on'
+                - '1'
+            - type: STR_REPLACE
+              parameters:
+                - 'off'
+                - '0'
+            - type: STR_REPLACE
+              parameters:
+                - unavailable
+                - '2'
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: update-os
+          triggers:
+            - uuid: 661b85b8cb7a48ba849ed02e2522d87c
+              expression: 'last(/Home Assistant - Zabbix/update.home.assistant.os.update)=1'
+              name: 'Home Assistant update for Home Assistant Operating System Update is available.'
+              priority: AVERAGE
+        - uuid: 352a320642644f3d9364d3d15759d517
+          name: 'Home Assistant Supervisor Update'
+          type: DEPENDENT
+          key: update.home.assistant.supervisor.update
+          delay: '0'
+          trends: '0'
+          valuemap:
+            name: update
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''update.home_assistant_supervisor_update'')].state'
+            - type: LTRIM
+              parameters:
+                - '["'
+            - type: RTRIM
+              parameters:
+                - '"]'
+            - type: STR_REPLACE
+              parameters:
+                - 'on'
+                - '1'
+            - type: STR_REPLACE
+              parameters:
+                - 'off'
+                - '0'
+            - type: STR_REPLACE
+              parameters:
+                - unavailable
+                - '2'
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: update-supervisor
+          triggers:
+            - uuid: 19e42eea3cd2478a9af66c8cfe1e427a
+              expression: 'last(/Home Assistant - Zabbix/update.home.assistant.supervisor.update)=1'
+              name: 'Home Assistant update for Home Assistant supervisor Update is available.'
+              priority: AVERAGE
+        - uuid: f91453b76b8c49c7b8805d94c07bc4f2
+          name: 'Home Assistant Core Installed Version'
+          type: DEPENDENT
+          key: version.home.assistant.core.installed
           delay: '0'
           history: 30d
           value_type: TEXT
@@ -328,75 +437,133 @@ zabbix_export:
           preprocessing:
             - type: JSONPATH
               parameters:
-                - '$.body[?(@.entity_id==''event.backup_automatic_backup'')].attributes.failed_reason.first()'
-              error_handler: CUSTOM_VALUE
+                - '$.body[?(@.entity_id==''update.home_assistant_core_update'')].attributes.installed_version'
+            - type: LTRIM
+              parameters:
+                - '["'
+            - type: RTRIM
+              parameters:
+                - '"]'
           master_item:
             key: ha.raw
           tags:
             - tag: 'Home Assistant'
-              value: backup
-        - uuid: 0b73cabcd97e403ca7cfd175476120f2
-          name: 'Home Assistant Automatic Backup Stage'
+              value: version-core-installed
+        - uuid: 119ff57d122248c79b7abff5cba79982
+          name: 'Home Assistant Core Latest Version'
           type: DEPENDENT
-          key: backup.automatic.stage
+          key: version.home.assistant.core.latest
           delay: '0'
+          history: 30d
+          value_type: TEXT
           trends: '0'
-          valuemap:
-            name: backup_automatic_stage
           preprocessing:
             - type: JSONPATH
               parameters:
-                - '$.body[?(@.entity_id==''event.backup_automatic_backup'')].attributes.backup_stage.first()'
-              error_handler: CUSTOM_VALUE
-              error_handler_params: '10'
-            - type: STR_REPLACE
+                - '$.body[?(@.entity_id==''update.home_assistant_core_update'')].attributes.latest_version'
+            - type: LTRIM
               parameters:
-                - addon_repositories
-                - '1'
-            - type: STR_REPLACE
+                - '["'
+            - type: RTRIM
               parameters:
-                - addons
-                - '2'
-            - type: STR_REPLACE
-              parameters:
-                - await_addon_restarts
-                - '3'
-            - type: STR_REPLACE
-              parameters:
-                - docker_config
-                - '4'
-            - type: STR_REPLACE
-              parameters:
-                - cleaning_up
-                - '5'
-            - type: STR_REPLACE
-              parameters:
-                - finishing_file
-                - '6'
-            - type: STR_REPLACE
-              parameters:
-                - folders
-                - '7'
-            - type: STR_REPLACE
-              parameters:
-                - home_assistant
-                - '8'
-            - type: STR_REPLACE
-              parameters:
-                - upload_to_agents
-                - '9'
-            - type: JAVASCRIPT
-              parameters:
-                - |
-                  if (value === '' || value === 'null' || value === 'None' || value === 'none') {
-                      return '0';
-                  }
-                  return value;
+                - '"]'
           master_item:
             key: ha.raw
           tags:
             - tag: 'Home Assistant'
-              value: backup
+              value: version-core-latest
+        - uuid: e6928eca63924827a51450303e324ebe
+          name: 'Home Assistant OS Installed Version'
+          type: DEPENDENT
+          key: version.home.assistant.os.installed
+          delay: '0'
+          history: 30d
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''update.home_assistant_operating_system_update'')].attributes.installed_version'
+            - type: LTRIM
+              parameters:
+                - '["'
+            - type: RTRIM
+              parameters:
+                - '"]'
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: version-os-installed
+        - uuid: 3f3f78a3a5ad41dbbe03ccc5b6d5041d
+          name: 'Home Assistant OS Latest Version'
+          type: DEPENDENT
+          key: version.home.assistant.os.latest
+          delay: '0'
+          history: 30d
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''update.home_assistant_operating_system_update'')].attributes.latest_version'
+            - type: LTRIM
+              parameters:
+                - '["'
+            - type: RTRIM
+              parameters:
+                - '"]'
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: version-os-latest
+        - uuid: 52cfcd4883fb414391aa0baf55392939
+          name: 'Home Assistant Supervisor Installed Version'
+          type: DEPENDENT
+          key: version.home.assistant.supervisor.installed
+          delay: '0'
+          history: 30d
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''update.home_assistant_supervisor_update'')].attributes.installed_version'
+            - type: LTRIM
+              parameters:
+                - '["'
+            - type: RTRIM
+              parameters:
+                - '"]'
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: version-supervisor-installed
+        - uuid: c5ae020d6a2648d4a721420d787ea464
+          name: 'Home Assistant Supervisor Latest Version'
+          type: DEPENDENT
+          key: version.home.assistant.supervisor.latest
+          delay: '0'
+          history: 30d
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.body[?(@.entity_id==''update.home_assistant_supervisor_update'')].attributes.latest_version'
+            - type: LTRIM
+              parameters:
+                - '["'
+            - type: RTRIM
+              parameters:
+                - '"]'
+          master_item:
+            key: ha.raw
+          tags:
+            - tag: 'Home Assistant'
+              value: version-supervisor-latest
       discovery_rules:
         - uuid: 9191d005e6204149a071250e7f756bcd
           name: HA-addon-running
@@ -5385,21 +5552,6 @@ zabbix_export:
               newvalue: disabled
             - value: '2'
               newvalue: unavailable
-        - uuid: 36c2adb1c59240e6bb81e13292f1c949
-          name: backup_manager
-          mappings:
-            - value: '0'
-              newvalue: Idle
-            - value: '1'
-              newvalue: 'Creating a backup'
-            - value: '2'
-              newvalue: 'Receiving a backup'
-            - value: '3'
-              newvalue: 'Restoring a backup'
-            - value: '4'
-              newvalue: Blocked
-            - value: '5'
-              newvalue: unavailable
         - uuid: 9fc3f5559fd444628d3c5564f5c3ef6b
           name: backup_automatic_event
           mappings:
@@ -5435,6 +5587,21 @@ zabbix_export:
             - value: '9'
               newvalue: upload_to_agents
             - value: '10'
+              newvalue: unavailable
+        - uuid: 36c2adb1c59240e6bb81e13292f1c949
+          name: backup_manager
+          mappings:
+            - value: '0'
+              newvalue: Idle
+            - value: '1'
+              newvalue: 'Creating a backup'
+            - value: '2'
+              newvalue: 'Receiving a backup'
+            - value: '3'
+              newvalue: 'Restoring a backup'
+            - value: '4'
+              newvalue: Blocked
+            - value: '5'
               newvalue: unavailable
         - uuid: 6aea8103a50d4c5c8b2800a006c8e250
           name: battery
@@ -5657,3 +5824,14 @@ zabbix_export:
               newvalue: closed
             - value: '2'
               newvalue: unavailable
+  triggers:
+    - uuid: 8af3baa6872b4914bf4d824f5e649455
+      expression: 'last(/Home Assistant - Zabbix/backup.next.scheduled.automatic)=0 and last(/Home Assistant - Zabbix/backup.manager.state)<>5 and last(/Home Assistant - Zabbix/backup.automatic.event.type)<>3 and {$SWITCH.TRIGGER.BACKUP}=1'
+      name: 'Home Assistant automatic backup next schedule is missing'
+      priority: WARNING
+      manual_close: 'YES'
+    - uuid: 8cf7e5aafbf34d55aacbe2d49b64fca1
+      expression: '(last(/Home Assistant - Zabbix/backup.manager.state)=5 or last(/Home Assistant - Zabbix/backup.automatic.event.type)=3) and {$SWITCH.TRIGGER.BACKUP}=1'
+      name: 'Home Assistant backup integration is unavailable'
+      priority: WARNING
+      manual_close: 'YES'
